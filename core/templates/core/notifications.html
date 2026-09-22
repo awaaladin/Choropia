@@ -17,12 +17,17 @@
 
   const TYPE_ICONS = {
     follow: "person_add",
-    like: "favorite",
-    comment: "chat_bubble",
-    order: "handshake",
-    dispute: "gavel",
     message: "mail",
+    order_status: "handshake",
+    dispute: "gavel",
   };
+
+  function targetHref(n) {
+    if (n.target_type === "conversation" && n.target_object_id) return `/messages/${n.target_object_id}/`;
+    if (n.target_type === "order" && n.target_object_id) return `/orders/${n.target_object_id}/`;
+    if (n.target_type === "merchant" && n.target_object_id) return `/merchants/${n.target_object_id}/`;
+    return null;
+  }
 
   function render(notifications) {
     if (!notifications.length) {
@@ -30,9 +35,11 @@
       return;
     }
     list.innerHTML = notifications
-      .map(
-        (n) => `
-      <div class="p-4 flex items-start gap-3 ${n.is_read ? "" : "bg-secondary-container/30"}" data-id="${n.id}">
+      .map((n) => {
+        const href = targetHref(n);
+        const Tag = href ? "a" : "div";
+        return `
+      <${Tag} ${href ? `href="${href}"` : ""} class="p-4 flex items-start gap-3 ${n.is_read ? "" : "bg-secondary-container/30"} ${href ? "hover:bg-surface-container-low transition-colors" : ""}" data-id="${n.id}">
         <span class="material-symbols-outlined !text-[20px] ${n.is_read ? "text-on-surface-variant" : "text-secondary"} shrink-0 mt-0.5">
           ${TYPE_ICONS[n.notification_type] || "notifications"}
         </span>
@@ -41,12 +48,23 @@
           <p class="text-xs text-outline mt-1">${new Date(n.created_at).toLocaleString()}</p>
         </div>
         ${!n.is_read ? `<button class="text-xs text-secondary font-medium mark-read-btn shrink-0">Mark read</button>` : ""}
-      </div>`
-      )
+      </${Tag}>`;
+      })
       .join("");
+
+    // Clicking through to the target also marks it read — fire-and-forget so the navigation
+    // (a plain <a> click) isn't held up waiting on the request.
+    list.querySelectorAll("a[data-id]").forEach((el) => {
+      const notification = notifications.find((n) => String(n.id) === el.dataset.id);
+      if (notification && !notification.is_read) {
+        el.addEventListener("click", () => Choropia.markNotificationRead(el.dataset.id).catch(() => {}));
+      }
+    });
 
     list.querySelectorAll(".mark-read-btn").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const id = e.target.closest("[data-id]").dataset.id;
         await Choropia.markNotificationRead(id);
         load();

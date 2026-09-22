@@ -11,7 +11,7 @@ class NotificationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(recipient=self.request.user)
+        return Notification.objects.filter(recipient=self.request.user).select_related("target_content_type")
 
     @action(detail=True, methods=["post"])
     def mark_read(self, request, pk=None):
