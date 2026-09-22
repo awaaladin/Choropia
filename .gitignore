@@ -9,5 +9,4 @@ mediafiles/
 .pytest_cache/
 .coverage
 node_modules/
-core/static/core/dist/
 .claude/

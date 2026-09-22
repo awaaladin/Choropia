@@ -14,4 +14,8 @@ app.conf.beat_schedule = {
         "task": "payments.tasks.auto_release_escrow_task",
         "schedule": crontab(minute=0),
     },
+    "poll-gaxtron-payments-every-2-minutes": {
+        "task": "payments.tasks.poll_gaxtron_payments_task",
+        "schedule": 120.0,
+    },
 }

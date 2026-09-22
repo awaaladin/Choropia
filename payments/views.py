@@ -1,9 +1,7 @@
-import json
-
 from django.conf import settings
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -11,7 +9,7 @@ from rest_framework.views import APIView
 
 from orders.models import Order
 
-from .paystack import PaystackClient
+from .gaxtron import GaxtronClient
 from .services import confirm_payment, initialize_payment
 
 
@@ -37,31 +35,32 @@ class InitializePaymentView(APIView):
                 "reference": payment.reference,
                 "authorization_url": payment.authorization_url,
                 "amount": str(payment.amount),
+                "crypto_amount": str(payment.crypto_amount) if payment.crypto_amount is not None else None,
+                "crypto_currency": payment.crypto_currency,
             }
         )
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class PaystackWebhookView(APIView):
-    """Paystack posts events here (e.g. charge.success). Token auth doesn't apply to webhooks —
-    the request is authenticated by verifying the Paystack HMAC signature header instead."""
+class GaxtronWebhookView(APIView):
+    """Gaxtron posts here once a payment's on-chain tx is confirmed. In practice this can only
+    fire in production — gaxtron refuses to register a callback_url that resolves to
+    localhost/a private IP, so a local/dev Choropia relies entirely on
+    payments.tasks.poll_gaxtron_payments_task instead. Kept for when Choropia is deployed
+    behind a real public domain."""
 
     authentication_classes = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        signature = request.headers.get("x-paystack-signature", "")
-        client = PaystackClient()
+        signature = request.headers.get("x-gaxtron-signature", "")
+        client = GaxtronClient()
+        payload = request.data
 
-        if settings.PAYSTACK_SECRET_KEY and not client.verify_webhook_signature(request.body, signature):
+        if settings.GAXTRON_WEBHOOK_SECRET and not client.verify_webhook_signature(payload, signature):
             return JsonResponse({"detail": "invalid signature"}, status=400)
 
-        payload = json.loads(request.body or "{}")
-        event = payload.get("event")
-
-        if event == "charge.success":
-            reference = payload.get("data", {}).get("reference")
-            if reference:
-                confirm_payment(reference, raw_payload=payload)
+        if payload.get("status") == "confirmed" and payload.get("payment_id"):
+            confirm_payment(payload["payment_id"], tx_hash=payload.get("tx_hash"), raw_payload=payload)
 
         return JsonResponse({"received": True})

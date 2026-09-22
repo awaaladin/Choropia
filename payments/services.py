@@ -5,12 +5,12 @@ from django.utils import timezone
 
 from orders.state_machine import OrderStatus
 
+from .gaxtron import GaxtronClient
 from .models import Payment
-from .paystack import PaystackClient
 
 
 def _client():
-    return PaystackClient()
+    return GaxtronClient()
 
 
 def generate_reference(order):
@@ -25,41 +25,61 @@ def initialize_payment(order, callback_url=None):
     if payment.status != Payment.Status.INITIALIZED:
         return payment
 
-    amount_kobo = int(payment.amount * 100)
-    data = _client().initialize_transaction(
-        email=order.buyer.email,
-        amount_kobo=amount_kobo,
-        reference=payment.reference,
-        callback_url=callback_url,
+    client = _client()
+    eth_amount = client.ngn_to_eth(payment.amount)
+    data = client.create_payment(
+        eth_amount=eth_amount,
+        callback_url=settings.GAXTRON_CALLBACK_URL,
+        idempotency_key=payment.reference,
     )
-    payment.authorization_url = data.get("authorization_url", "")
-    payment.save(update_fields=["authorization_url"])
+    payment.authorization_url = data.get("checkout_url", "")
+    payment.gaxtron_payment_id = data.get("payment_id")
+    payment.crypto_amount = eth_amount
+    payment.crypto_currency = data.get("currency", "ETH")
+    payment.wallet_address = data.get("wallet_address", "")
+    payment.save(
+        update_fields=[
+            "authorization_url",
+            "gaxtron_payment_id",
+            "crypto_amount",
+            "crypto_currency",
+            "wallet_address",
+        ]
+    )
     return payment
 
 
-def confirm_payment(reference, raw_payload=None):
-    """Called from the Paystack webhook once a charge succeeds. Marks the payment as held in
-    escrow and advances the order from PENDING_PAYMENT -> PAID_ESCROW."""
+def confirm_payment(gaxtron_payment_id, tx_hash=None, raw_payload=None):
+    """Called once gaxtron reports a payment as confirmed — either via its webhook, or via
+    payments.tasks.poll_gaxtron_payments_task (see gaxtron.py for why the latter is what dev
+    actually relies on). Marks the payment as held in escrow and advances the order from
+    PENDING_PAYMENT -> PAID_ESCROW."""
     try:
-        payment = Payment.objects.select_related("order").get(reference=reference)
+        payment = Payment.objects.select_related("order").get(gaxtron_payment_id=gaxtron_payment_id)
     except Payment.DoesNotExist:
         return None
 
     if payment.status != Payment.Status.INITIALIZED:
-        return payment  # already processed - webhooks can be delivered more than once
+        return payment  # already processed - webhook + poller can both fire for the same payment
 
     payment.status = Payment.Status.PAID_HELD
     payment.paid_at = timezone.now()
+    if tx_hash:
+        payment.tx_hash = tx_hash
     payment.raw_webhook_payload = raw_payload
-    payment.save(update_fields=["status", "paid_at", "raw_webhook_payload"])
+    payment.save(update_fields=["status", "paid_at", "tx_hash", "raw_webhook_payload"])
 
-    payment.order.transition_to(OrderStatus.PAID_ESCROW, note="Payment confirmed via Paystack webhook")
+    payment.order.transition_to(OrderStatus.PAID_ESCROW, note="Payment confirmed via Gaxtron")
     return payment
 
 
 def release_escrow(order, auto=False):
     """Releases held funds to the seller. Only valid once the order itself has reached a
-    completed state — this function does not change order status, it only settles the money."""
+    completed state — this function does not change order status, it only settles the money.
+
+    Gaxtron has no payout/transfer endpoint (it only collects into per-payment wallets it
+    custodies) — same gap that existed under Paystack, which needed a transfer-recipient
+    onboarding flow that was never built — so this records the release without a live payout."""
     try:
         payment = order.payment
     except Payment.DoesNotExist:
@@ -70,12 +90,6 @@ def release_escrow(order, auto=False):
     if payment.status != Payment.Status.PAID_HELD:
         raise ValueError(f"Cannot release a payment in status '{payment.status}'.")
 
-    if settings.PAYSTACK_SECRET_KEY:
-        # Real payout requires the seller to have a linked transfer recipient; until that
-        # onboarding flow exists we record the release without a live transfer rather than
-        # failing the whole order-completion flow.
-        pass
-
     payment.status = Payment.Status.RELEASED
     payment.released_at = timezone.now()
     payment.auto_released = auto
@@ -84,6 +98,8 @@ def release_escrow(order, auto=False):
 
 
 def refund_escrow(order):
+    """Gaxtron has no refund endpoint either — same as release_escrow, this records the refund
+    without moving crypto back to the buyer."""
     try:
         payment = order.payment
     except Payment.DoesNotExist:
@@ -93,9 +109,6 @@ def refund_escrow(order):
         return payment
     if payment.status != Payment.Status.PAID_HELD:
         raise ValueError(f"Cannot refund a payment in status '{payment.status}'.")
-
-    if settings.PAYSTACK_SECRET_KEY:
-        _client().refund(payment.reference)
 
     payment.status = Payment.Status.REFUNDED
     payment.refunded_at = timezone.now()

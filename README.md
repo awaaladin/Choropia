@@ -41,7 +41,8 @@ login.
 - SimpleJWT for auth (access + refresh tokens, no sessions/cookies)
 - django-storages (S3-compatible) for listing photos / avatars
 - drf-spectacular for OpenAPI schema + Swagger UI
-- Paystack for payment collection, with an escrow-style hold-then-release pattern
+- Gaxtron for payment collection (crypto/ETH, Sepolia testnet), with an escrow-style
+  hold-then-release pattern
 
 ## Local setup (Docker)
 
@@ -125,7 +126,7 @@ Each business area is its own Django app rather than one big app:
 | `merchants` | Merchant applications and approved storefronts |
 | `chat` | Per-listing buyer/seller conversations, over REST and WebSocket |
 | `orders` | The Order state machine — the core of the escrow flow |
-| `payments` | Paystack integration, escrow hold/release/refund, the auto-release Celery task |
+| `payments` | Gaxtron integration, escrow hold/release/refund, the auto-release + payment-polling Celery tasks |
 | `delivery` | Abstract `DeliveryProvider` interface + mock courier implementation |
 | `reviews` | Post-completion buyer/seller ratings |
 | `notifications` | In-app notifications, delivered live over WebSocket |
@@ -145,10 +146,35 @@ implementation right now. To go live with a real courier, implement the same int
 
 ## Escrow model
 
-Paystack has no native "hold funds" primitive, so escrow is emulated: the buyer's payment is a
-normal Paystack charge into the platform's own balance (see `payments/paystack.py` and
-`payments/services.py`), and the "hold" is simply that MarketSquare/Choropia doesn't move money
-to the seller until the order reaches `confirmed`/`completed` — Choropia itself is the hold.
-`payments/tasks.py` runs on Celery
-Beat and auto-releases escrow `ESCROW_AUTO_RELEASE_DAYS` (default 3) after delivery if the buyer
-neither confirms nor disputes.
+Gaxtron has no native "hold funds" primitive, so escrow is emulated: the buyer's payment is
+collected into a wallet gaxtron custodies for that payment (see `payments/gaxtron.py` and
+`payments/services.py`), and the "hold" is simply that Choropia doesn't move money to the
+seller until the order reaches `confirmed`/`completed` — Choropia itself is the hold. Gaxtron
+also has no payout/transfer endpoint, so — same as it was under Paystack, which needed a
+transfer-recipient onboarding flow that was never built — `release_escrow`/`refund_escrow`
+record the status change without moving crypto. `payments/tasks.py` runs on Celery Beat and
+auto-releases escrow `ESCROW_AUTO_RELEASE_DAYS` (default 3) after delivery if the buyer
+neither confirms nor disputes; it also polls gaxtron for payment confirmation
+(`poll_gaxtron_payments_task`), since gaxtron's webhook can't reach a localhost/private-IP
+deployment (see `payments/gaxtron.py` for why).
+
+Choropia lists prices in NGN; gaxtron settles in ETH only. `GAXTRON_NGN_PER_USD` plus gaxtron's
+own `/markets/prices` (ETH/USD) convert an order's price at checkout time — there's no live
+forex feed wired in, so treat that rate as an approximation to update by hand.
+
+## Deploying
+
+- **Docker** (full stack — web + API + WebSockets + Celery worker/beat): `Dockerfile` /
+  `docker-compose.yml`, served over ASGI via daphne so chat/notification WebSockets work.
+- **Vercel** (`vercel.json` / `api/index.py`): serverless HTTP only — Vercel's Python runtime
+  can't host Channels' WebSocket consumers or Celery workers/beat, so chat/notification
+  WebSockets and background jobs (escrow auto-release, gaxtron payment polling) don't run
+  there. It's the web frontend + non-realtime API only; the Docker stack is what should be
+  running the WebSocket/Celery pieces in production regardless of where else this is deployed.
+  Vercel needs its own root-level `requirements.txt` (flattened, no `-r` includes — its
+  parser doesn't support them) kept in sync by hand with `requirements/base.txt`, and static
+  files are served by whitenoise directly from each app's `static/` dir
+  (`WHITENOISE_USE_FINDERS`) since there's no `npm run build` + `collectstatic` step in a
+  serverless build. That does mean `core/static/core/dist/output.css` has to be committed
+  (it's no longer gitignored) — rebuild and commit it (`npm run build`) whenever
+  `core/static/core/src/input.css` or `tailwind.config.js` change.

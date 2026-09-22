@@ -3,6 +3,7 @@ Base settings shared by every environment. Nothing environment-specific
 (debug flags, allowed hosts, secret values) lives here — see dev.py / prod.py.
 """
 from datetime import timedelta
+from decimal import Decimal
 from pathlib import Path
 
 import dj_database_url
@@ -74,6 +75,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -130,6 +132,10 @@ USE_TZ = True
 # --- Static / media -------------------------------------------------------
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# Serves static files straight from each app's static/ dir (no collectstatic build step
+# required) — needed because Vercel's Python builder only runs `pip install`, not `npm run
+# build` + `collectstatic` the way the Dockerfile does.
+WHITENOISE_USE_FINDERS = True
 
 USE_S3 = env_bool("USE_S3", False)
 
@@ -235,10 +241,21 @@ CACHES = {
     }
 }
 
-# --- Paystack -------------------------------------------------------------
-PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY", "")
-PAYSTACK_PUBLIC_KEY = env("PAYSTACK_PUBLIC_KEY", "")
-PAYSTACK_BASE_URL = env("PAYSTACK_BASE_URL", "https://api.paystack.co")
+# --- Gaxtron (crypto escrow payments, replaces Paystack) -------------------
+# See payments/gaxtron.py for the full integration notes (currency conversion, the SSRF
+# constraint on webhook callbacks, and the escrow/payout gap this inherits from Paystack).
+GAXTRON_API_KEY = env("GAXTRON_API_KEY", "")
+GAXTRON_BASE_URL = env("GAXTRON_BASE_URL", "http://127.0.0.1:9000")
+GAXTRON_WEBHOOK_SECRET = env("GAXTRON_WEBHOOK_SECRET", "")
+# Gaxtron settles in ETH only; Choropia lists prices in NGN. There's no live forex feed wired
+# in, so this hand-set NGN-per-USD rate combines with gaxtron's own /markets/prices (ETH/USD)
+# to convert an order's price at checkout time — treat it as an approximation.
+GAXTRON_NGN_PER_USD = Decimal(env("GAXTRON_NGN_PER_USD", "1600"))
+# Where gaxtron POSTs payment-confirmed events. Gaxtron's own SSRF guard rejects
+# localhost/private hosts, so this must resolve publicly even in dev — Choropia doesn't
+# depend on it arriving either way (payments.tasks.poll_gaxtron_payments_task polls gaxtron
+# directly), so the dev default is a harmless public echo endpoint, not a real receiver.
+GAXTRON_CALLBACK_URL = env("GAXTRON_CALLBACK_URL", "https://httpbin.org/post")
 
 # --- Choropia business rules ------------------------------------------
 ESCROW_AUTO_RELEASE_DAYS = int(env("ESCROW_AUTO_RELEASE_DAYS", 3))

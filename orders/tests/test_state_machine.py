@@ -77,7 +77,7 @@ class OrderTransitionToTests(TestCase):
         self.order = Order.objects.create(listing=listing, buyer=self.buyer, seller=self.seller, price=listing.price)
 
     def test_transition_to_updates_status_and_records_history(self):
-        self.order.transition_to(OrderStatus.PAID_ESCROW, actor=self.buyer, note="paystack webhook")
+        self.order.transition_to(OrderStatus.PAID_ESCROW, actor=self.buyer, note="gaxtron webhook")
 
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, OrderStatus.PAID_ESCROW)

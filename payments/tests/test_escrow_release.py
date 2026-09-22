@@ -29,7 +29,7 @@ def make_order(status=OrderStatus.PENDING_PAYMENT, delivered_at=None):
     return order
 
 
-@override_settings(ESCROW_AUTO_RELEASE_DAYS=3, PAYSTACK_SECRET_KEY="")
+@override_settings(ESCROW_AUTO_RELEASE_DAYS=3)
 class ReleaseEscrowServiceTests(TestCase):
     def test_release_marks_payment_released_and_not_auto(self):
         order = make_order(status=OrderStatus.CONFIRMED)
@@ -56,7 +56,7 @@ class ReleaseEscrowServiceTests(TestCase):
             release_escrow(order)
 
 
-@override_settings(ESCROW_AUTO_RELEASE_DAYS=3, PAYSTACK_SECRET_KEY="")
+@override_settings(ESCROW_AUTO_RELEASE_DAYS=3)
 class AutoReleaseEscrowTaskTests(TestCase):
     def test_order_delivered_past_window_is_auto_completed_and_released(self):
         order = make_order(

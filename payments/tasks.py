@@ -8,9 +8,39 @@ from django.utils import timezone
 from orders.models import Order
 from orders.state_machine import InvalidOrderTransition, OrderStatus
 
-from .services import release_escrow
+from .gaxtron import GaxtronClient, GaxtronError
+from .models import Payment
+from .services import confirm_payment, release_escrow
 
 logger = logging.getLogger(__name__)
+
+
+@shared_task
+def poll_gaxtron_payments_task():
+    """Gaxtron's SSRF guard blocks webhook callbacks to localhost/private hosts, so a
+    locally-hosted Choropia can never receive them, and a production one can't rely on a single
+    delivery attempt either. This polls gaxtron directly (see gaxtron.py) for every payment
+    still waiting on-chain confirmation, and is the only confirmation path dev actually uses."""
+    client = GaxtronClient()
+    pending = Payment.objects.filter(status=Payment.Status.INITIALIZED).exclude(gaxtron_payment_id__isnull=True)
+
+    confirmed, failed = [], []
+    for payment in pending:
+        try:
+            data = client.get_payment_status(str(payment.gaxtron_payment_id))
+        except GaxtronError:
+            logger.warning("Gaxtron status check failed for payment %s", payment.id)
+            continue
+
+        if data.get("status") == "confirmed":
+            confirm_payment(payment.gaxtron_payment_id, tx_hash=data.get("tx_hash"), raw_payload=data)
+            confirmed.append(payment.id)
+        elif data.get("status") == "failed":
+            payment.status = Payment.Status.FAILED
+            payment.save(update_fields=["status"])
+            failed.append(payment.id)
+
+    return {"confirmed": confirmed, "failed": failed}
 
 
 @shared_task
