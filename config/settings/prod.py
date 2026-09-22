@@ -21,7 +21,7 @@ SECURE_BROWSER_XSS_FILTER = True
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "")
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.SMTPBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env_int("EMAIL_PORT", 587)
 EMAIL_USE_TLS = True
