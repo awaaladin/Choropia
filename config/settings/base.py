@@ -26,6 +26,12 @@ def env_bool(key, default=False):
     return val.lower() in ("1", "true", "yes", "on")
 
 
+def env_int(key, default):
+    """Read an integer setting, treating an empty deployment variable as unset."""
+    value = os.environ.get(key)
+    return default if value is None or not value.strip() else int(value)
+
+
 def env_list(key, default=""):
     val = os.environ.get(key, default)
     return [item.strip() for item in val.split(",") if item.strip()]
@@ -192,8 +198,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(env("JWT_ACCESS_MINUTES", 30))),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(env("JWT_REFRESH_DAYS", 14))),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env_int("JWT_ACCESS_MINUTES", 30)),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=env_int("JWT_REFRESH_DAYS", 14)),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
@@ -258,7 +264,7 @@ GAXTRON_NGN_PER_USD = Decimal(env("GAXTRON_NGN_PER_USD", "1600"))
 GAXTRON_CALLBACK_URL = env("GAXTRON_CALLBACK_URL", "https://httpbin.org/post")
 
 # --- Choropia business rules ------------------------------------------
-ESCROW_AUTO_RELEASE_DAYS = int(env("ESCROW_AUTO_RELEASE_DAYS", 3))
+ESCROW_AUTO_RELEASE_DAYS = env_int("ESCROW_AUTO_RELEASE_DAYS", 3)
 PLATFORM_PILOT_CITY = env("PLATFORM_PILOT_CITY", "Uyo")
 
 DELIVERY_PROVIDER = env("DELIVERY_PROVIDER", "delivery.providers.mock.MockDeliveryProvider")
@@ -267,7 +273,7 @@ DELIVERY_PROVIDER = env("DELIVERY_PROVIDER", "delivery.providers.mock.MockDelive
 # Dev and test override the backend (console / locmem); production sets real SMTP via env.
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = env("EMAIL_HOST", "localhost")
-EMAIL_PORT = int(env("EMAIL_PORT", 587))
+EMAIL_PORT = env_int("EMAIL_PORT", 587)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)

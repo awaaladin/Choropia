@@ -1,5 +1,5 @@
 from .base import *  # noqa: F401,F403
-from .base import env, env_bool, env_list
+from .base import env, env_bool, env_int, env_list
 
 DEBUG = False
 
@@ -23,7 +23,7 @@ CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "")
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.SMTPBackend"
 EMAIL_HOST = env("EMAIL_HOST")
-EMAIL_PORT = int(env("EMAIL_PORT", 587))
+EMAIL_PORT = env_int("EMAIL_PORT", 587)
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
