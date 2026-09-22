@@ -16,11 +16,13 @@ load_dotenv(BASE_DIR / ".env")
 
 
 def env(key, default=None):
-    return os.environ.get(key, default)
+    """Return an environment setting, treating blank deployment values as unset."""
+    value = os.environ.get(key)
+    return default if value is None or not value.strip() else value
 
 
 def env_bool(key, default=False):
-    val = os.environ.get(key)
+    val = env(key)
     if val is None:
         return default
     return val.lower() in ("1", "true", "yes", "on")
@@ -28,12 +30,12 @@ def env_bool(key, default=False):
 
 def env_int(key, default):
     """Read an integer setting, treating an empty deployment variable as unset."""
-    value = os.environ.get(key)
-    return default if value is None or not value.strip() else int(value)
+    value = env(key)
+    return default if value is None else int(value)
 
 
 def env_list(key, default=""):
-    val = os.environ.get(key, default)
+    val = env(key, default)
     return [item.strip() for item in val.split(",") if item.strip()]
 
 
