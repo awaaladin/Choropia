@@ -1,0 +1,27 @@
+# Vercel-only: its Python builder needs a flat requirements.txt at the repo root and doesn't
+# support pip's `-r` include syntax (that's what requirements/prod.txt uses for Docker). This
+# is requirements/base.txt inlined — keep the two in sync by hand when dependencies change.
+# The Docker build (Dockerfile / docker-compose.yml) still uses requirements/{base,dev,prod}.txt.
+Django==5.0.14
+djangorestframework==3.17.2
+djangorestframework_simplejwt==5.5.1
+drf-spectacular==0.30.0
+django-cors-headers==4.9.0
+django-filter==25.1
+django-storages==1.14.6
+boto3==1.43.89
+whitenoise==6.11.0
+
+channels==4.3.2
+channels_redis==4.3.0
+daphne==4.2.3
+
+celery==5.6.3
+redis==8.1.0
+
+psycopg2-binary==2.9.12
+dj-database-url==3.1.2
+python-dotenv==1.2.3
+
+requests==2.34.2
+Pillow==12.3.0
