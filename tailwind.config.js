@@ -40,13 +40,15 @@ module.exports = {
         sans: ["Inter", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        DEFAULT: "0.25rem",
-        card: "0.5rem",
-        sheet: "0.75rem",
-        badge: "0.125rem",
+        // Softer than the source "Midnight Ledger" spec on purpose — rounder, more social-app
+        // (Facebook/Instagram-shaped) feel rather than the sharp institutional-fintech corners.
+        DEFAULT: "0.75rem",
+        card: "1.25rem",
+        sheet: "1.5rem",
+        badge: "9999px",
       },
       boxShadow: {
-        elevated: "0px 4px 16px -2px rgba(11, 25, 44, 0.06), 0px 1px 3px 0px rgba(11, 25, 44, 0.04)",
+        elevated: "0px 8px 24px -4px rgba(11, 25, 44, 0.10), 0px 2px 6px 0px rgba(11, 25, 44, 0.05)",
       },
     },
   },

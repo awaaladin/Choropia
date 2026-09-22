@@ -10,8 +10,7 @@
     <textarea name="business_description" placeholder="What do you sell?" rows="3" class="input-field"></textarea>
     <input type="text" name="business_phone" placeholder="Business phone" required class="input-field" />
     <input type="text" name="business_address" placeholder="Business address" required class="input-field" />
-    <p id="apply-error" class="text-sm text-red-500 hidden"></p>
-    <p id="apply-success" class="text-sm text-green-600 hidden">Application submitted — you'll be notified once it's reviewed.</p>
+    <p id="apply-success" class="text-sm text-secondary hidden">Application submitted — you'll be notified once it's reviewed.</p>
     <button type="submit" class="btn-primary w-full">Submit application</button>
   </form>
 </div>
@@ -23,9 +22,7 @@
 
   document.getElementById("apply-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const errorEl = document.getElementById("apply-error");
     const successEl = document.getElementById("apply-success");
-    errorEl.classList.add("hidden");
     successEl.classList.add("hidden");
 
     const form = new FormData(e.target);
@@ -35,8 +32,7 @@
       successEl.classList.remove("hidden");
       e.target.reset();
     } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.classList.remove("hidden");
+      flash(err.message, "error");
     }
   });
 </script>

@@ -70,7 +70,6 @@
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 !text-[18px] text-on-surface-variant">lock</span>
         <input type="password" name="password" placeholder="Password" required class="input-field !pl-10" />
       </div>
-      <p id="register-error" class="text-sm text-red-500 hidden"></p>
       <button type="submit" class="btn-primary w-full flex items-center justify-center gap-1">
         <span class="material-symbols-outlined !text-base">person_add</span>
         <span>Create account</span>
@@ -87,9 +86,6 @@
 <script>
   document.getElementById("register-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const errorEl = document.getElementById("register-error");
-    errorEl.classList.add("hidden");
-
     const form = new FormData(e.target);
     const payload = Object.fromEntries(form.entries());
     if (!payload.phone_number) delete payload.phone_number;
@@ -98,8 +94,7 @@
       await Choropia.register(payload);
       window.location.href = "{% url 'feed' %}";
     } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.classList.remove("hidden");
+      flash(err.message, "error");
     }
   });
 </script>

@@ -68,10 +68,33 @@ const Choropia = (() => {
 
     const data = await response.json().catch(() => null);
     if (!response.ok) {
-      const message = data && (data.detail || JSON.stringify(data));
-      throw new Error(message || `Request to ${path} failed (${response.status})`);
+      throw new Error(extractErrorMessage(data) || `Request to ${path} failed (${response.status})`);
     }
     return data;
+  }
+
+  /**
+   * DRF errors show up in several shapes depending on what failed:
+   *   {"detail": "..."}                        — permission/auth errors, custom views
+   *   {"non_field_errors": ["..."]}             — serializer-level validation
+   *   {"email": ["...","..."], "password": [..]} — per-field validation
+   * This picks the first human-readable string out of any of those instead of dumping the
+   * raw JSON on screen.
+   */
+  function extractErrorMessage(data) {
+    if (!data) return null;
+    if (typeof data === "string") return data;
+    if (data.detail) return data.detail;
+    if (Array.isArray(data)) return data[0];
+
+    for (const key of Object.keys(data)) {
+      const value = data[key];
+      const text = Array.isArray(value) ? value[0] : value;
+      if (typeof text === "string") {
+        return key === "non_field_errors" ? text : `${key}: ${text}`;
+      }
+    }
+    return null;
   }
 
   return {

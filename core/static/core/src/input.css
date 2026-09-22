@@ -9,41 +9,45 @@
 }
 
 @layer components {
-  /* Ported from the Stitch "Midnight Ledger" design system (see
-     android/stitch_choropia_marketplace_android_app/midnight_ledger/DESIGN.md):
-     flat surfaces, zero drop-shadow by default, 4px radius on controls, 8px on cards. */
+  /* Rounder, more tactile than the source "Midnight Ledger" spec on purpose — closer to a
+     Facebook/Instagram feel (soft corners, hover lift, a bit of press-feedback on tap) than
+     the sharp institutional-fintech original. Colors/tokens are unchanged. */
   .btn-primary {
-    @apply bg-primary text-on-primary px-4 py-2.5 rounded font-medium text-sm tracking-wide hover:bg-secondary transition-colors;
+    @apply bg-primary text-on-primary px-5 py-2.5 rounded-full font-medium text-sm tracking-wide
+           hover:bg-secondary active:scale-[0.97] transition-all duration-150;
   }
   .btn-secondary {
-    @apply bg-transparent text-primary border border-secondary px-4 py-2.5 rounded font-medium text-sm tracking-wide hover:bg-primary/5 transition-colors;
+    @apply bg-transparent text-primary border border-secondary px-5 py-2.5 rounded-full font-medium text-sm tracking-wide
+           hover:bg-primary/5 active:scale-[0.97] transition-all duration-150;
   }
   .btn-text {
     @apply text-secondary font-medium text-sm px-2 hover:underline;
   }
   .input-field {
-    @apply w-full border border-outline-variant rounded px-3 py-2 bg-surface-container-lowest text-on-surface
+    @apply w-full border border-outline-variant rounded-2xl px-4 py-2.5 bg-surface-container-lowest text-on-surface
            placeholder:text-outline focus:outline-none focus:ring-0 focus:border-primary focus:border-2 transition-colors;
   }
   .card {
-    @apply bg-surface-container-lowest rounded-card border border-outline-variant overflow-hidden;
+    @apply bg-surface-container-lowest rounded-card border border-outline-variant overflow-hidden
+           transition-shadow duration-200 hover:shadow-elevated;
   }
   .chip {
-    @apply inline-flex items-center gap-1 h-8 px-3 rounded text-sm border border-outline-variant text-on-surface-variant;
+    @apply inline-flex items-center gap-1 h-8 px-3.5 rounded-full text-sm border border-outline-variant text-on-surface-variant
+           transition-colors cursor-pointer hover:bg-surface-container-low;
   }
   .chip-selected {
-    @apply bg-primary text-on-primary border-primary;
+    @apply bg-primary text-on-primary border-primary hover:bg-primary;
   }
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-badge text-xs font-semibold tracking-wide bg-secondary-container text-on-secondary-container;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-badge text-xs font-semibold tracking-wide bg-secondary-container text-on-secondary-container;
   }
   .pill-count {
     @apply inline-flex items-center justify-center px-1.5 h-4 min-w-4 rounded-full text-[10px] font-bold bg-secondary-container text-on-secondary-container;
   }
   .nav-link {
-    @apply px-3 py-2 rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors;
+    @apply px-3.5 py-2 rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors;
   }
   .nav-link-active {
-    @apply px-3 py-2 rounded bg-secondary-container text-on-secondary-container font-semibold;
+    @apply px-3.5 py-2 rounded-full bg-secondary-container text-on-secondary-container font-semibold;
   }
 }

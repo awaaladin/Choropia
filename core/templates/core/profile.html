@@ -36,8 +36,7 @@
               <option value="dark" ${profile.theme_preference === "dark" ? "selected" : ""}>Dark</option>
             </select>
           </div>
-          <p id="profile-error" class="text-sm text-red-500 hidden"></p>
-          <p id="profile-success" class="text-sm text-green-600 hidden">Saved.</p>
+          <p id="profile-success" class="text-sm text-secondary hidden">Saved.</p>
           <button type="submit" class="btn-primary w-full">Save changes</button>
         </form>
         <p class="text-sm text-outline mt-4">${user.email}</p>
@@ -46,9 +45,7 @@
 
       document.getElementById("profile-form").addEventListener("submit", async (e) => {
         e.preventDefault();
-        const errorEl = document.getElementById("profile-error");
         const successEl = document.getElementById("profile-success");
-        errorEl.classList.add("hidden");
         successEl.classList.add("hidden");
 
         const form = new FormData(e.target);
@@ -73,8 +70,7 @@
           } catch (e) {}
           if (typeof refreshThemeIcon === "function") refreshThemeIcon();
         } catch (err) {
-          errorEl.textContent = err.message;
-          errorEl.classList.remove("hidden");
+          flash(err.message, "error");
         }
       });
     } catch (err) {

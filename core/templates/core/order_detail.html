@@ -157,16 +157,11 @@
           Escrow timeline
         </h2>
         ${renderTimeline(order.history)}
-        <p id="order-action-error" class="text-sm text-red-500 mt-3 hidden"></p>
         ${actions}
         ${reviewSection}
       `;
 
-      const errorEl = document.getElementById("order-action-error");
-      const showError = (err) => {
-        errorEl.textContent = err.message;
-        errorEl.classList.remove("hidden");
-      };
+      const showError = (err) => flash(err.message, "error");
 
       document.getElementById("pay-btn")?.addEventListener("click", async () => {
         try {

@@ -38,7 +38,6 @@
       <label class="block text-sm font-medium mb-1">Photos</label>
       <input type="file" name="uploaded_photos" accept="image/*" multiple class="input-field" />
     </div>
-    <p id="create-listing-error" class="text-sm text-red-500 hidden"></p>
     <button type="submit" class="btn-primary w-full">Post listing</button>
   </form>
 </div>
@@ -49,7 +48,6 @@
   if (!Choropia.isAuthenticated()) window.location.href = "{% url 'login' %}";
 
   const form = document.getElementById("create-listing-form");
-  const errorEl = document.getElementById("create-listing-error");
 
   async function loadCategories() {
     const select = form.querySelector("select[name=category]");
@@ -62,21 +60,18 @@
         select.appendChild(opt);
       });
     } catch (err) {
-      errorEl.textContent = "Could not load categories: " + err.message;
-      errorEl.classList.remove("hidden");
+      flash("Could not load categories: " + err.message, "error");
     }
   }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    errorEl.classList.add("hidden");
     const formData = new FormData(form);
     try {
       const listing = await Choropia.createListing(formData);
       window.location.href = `/listings/${listing.id}/`;
     } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.classList.remove("hidden");
+      flash(err.message, "error");
     }
   });
 

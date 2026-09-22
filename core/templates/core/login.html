@@ -68,7 +68,6 @@
           <input type="password" name="password" required class="input-field !pl-10" />
         </div>
       </div>
-      <p id="login-error" class="text-sm text-red-500 hidden"></p>
       <button type="submit" class="btn-primary w-full flex items-center justify-center gap-1">
         <span class="material-symbols-outlined !text-base">login</span>
         <span>Log in</span>
@@ -85,16 +84,12 @@
 <script>
   document.getElementById("login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const errorEl = document.getElementById("login-error");
-    errorEl.classList.add("hidden");
-
     const form = new FormData(e.target);
     try {
       await Choropia.login(form.get("identifier"), form.get("password"));
       window.location.href = "{% url 'feed' %}";
     } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.classList.remove("hidden");
+      flash(err.message, "error");
     }
   });
 </script>

@@ -78,8 +78,6 @@
               </button>
               <button id="message-seller-btn" class="btn-secondary">Message seller</button>
             </div>
-            <p id="listing-action-error" class="text-sm text-red-500 mt-2 hidden"></p>
-
             <div class="flex items-center gap-4 mt-4 text-sm text-on-surface-variant">
               <button id="like-btn" class="flex items-center gap-1 ${listing.is_liked ? "text-error" : ""} font-medium">
                 <span class="material-symbols-outlined !text-[18px]">favorite</span>
@@ -100,11 +98,7 @@
           </form>
         </div>`;
 
-      const errorEl = document.getElementById("listing-action-error");
-      const showError = (err) => {
-        errorEl.textContent = err.message;
-        errorEl.classList.remove("hidden");
-      };
+      const showError = (err) => flash(err.message, "error");
 
       document.getElementById("message-seller-btn").addEventListener("click", async () => {
         if (!Choropia.isAuthenticated()) {
