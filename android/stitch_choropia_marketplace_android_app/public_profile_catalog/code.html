@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><title>Choropia Marketplace</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-tertiary-container": "#76859b", "tertiary-container": "#0d1c2f", "primary-fixed-dim": "#bac7e1", "on-primary": "#ffffff", "on-error-container": "#93000a", "on-error": "#ffffff", "error-container": "#ffdad6", "on-primary-container": "#77849c", "surface-tint": "#525f75", "inverse-on-surface": "#eff1f4", "secondary-fixed": "#d3e4ff", "on-primary-fixed-variant": "#3a475c", "inverse-surface": "#2d3133", "surface-container": "#eceef1", "surface-bright": "#f7f9fc", "background": "#f7f9fc", "on-tertiary-fixed-variant": "#3a485c", "surface-container-lowest": "#ffffff", "on-secondary-fixed-variant": "#29486d", "outline": "#75777d", "on-surface": "#191c1e", "surface-container-low": "#f2f4f7", "primary-fixed": "#d6e3fe", "on-surface-variant": "#44474c", "surface-variant": "#e0e3e6", "on-secondary-container": "#3b5a7f", "on-primary-fixed": "#0e1c2f", "primary-container": "#0e1c2f", "primary": "#000000", "tertiary-fixed-dim": "#b9c7e0", "on-background": "#191c1e", "on-tertiary": "#ffffff", "surface-container-high": "#e6e8eb", "tertiary": "#000000", "inverse-primary": "#bac7e1", "on-secondary": "#ffffff", "on-tertiary-fixed": "#0d1c2f", "tertiary-fixed": "#d5e3fd", "surface-container-highest": "#e0e3e6", "surface-dim": "#d8dadd", "secondary-fixed-dim": "#aac9f4", "error": "#ba1a1a", "on-secondary-fixed": "#001c38", "surface": "#f7f9fc", "secondary": "#426086", "outline-variant": "#c5c6cd", "secondary-container": "#b3d1fd" }, borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, spacing: { "space-2xl": "3rem", "space-xl": "2rem", "gutter-compact": "0.75rem", "space-xs": "0.25rem", "space-xxs": "0.125rem", "margin-medium": "1.5rem", "margin-expanded": "2rem", "margin-compact": "1rem", "space-3xl": "4rem", "space-md": "0.75rem", "space-base": "1rem", "space-sm": "0.5rem", "gutter-expanded": "1.5rem", "gutter-medium": "1rem", "space-lg": "1.5rem" }, fontFamily: { "headline-sm": ["Inter"], "title-lg": ["Inter"], "headline-lg": ["Inter"], "title-sm": ["Inter"], "label-sm": ["Inter"], "body-sm": ["Inter"], "display-lg": ["Inter"], "title-md": ["Inter"], "numeric-metric": ["Inter"], "body-md": ["Inter"], "headline-md": ["Inter"], "label-md": ["Inter"], "display-lg-mobile": ["Inter"], "body-lg": ["Inter"], "label-lg": ["Inter"] }, fontSize: { "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "title-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "title-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.005em", "fontWeight": "500" }], "numeric-metric": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.03em", "fontWeight": "500" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen antialiased selection:bg-secondary-container selection:text-on-secondary-container"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin-compact flex items-center justify-between gap-gutter-compact"><div class="flex items-center gap-space-xs"><button aria-label="Go Back" class="w-11 h-11 flex items-center justify-center text-on-surface hover:text-secondary transition-colors -ml-space-xs" onclick="history.back()" type="button"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="Choropia Marketplace clean minimalist fintech wordmark and interlocking geometric 'C' monogram, deep navy #0b192c and crisp white, refined Material 3 style. Design context: - Primary color: #0b192c
+- Font: inter
+- Mode: light
+- Roundness: rounded-sm
+. The logo should be visually consistent with these brand tokens." class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XfxUbEV_h5NJpw_F43JPFeYa1-fBbcsFwmIs3SiLtHpw9ua09HJRCm3mqZTvdvDm3Tvp7sn-Ay8CYaMBVYTjuIFdzgZdpUKQyv7JiSJOfLvF2SEiqDEK6t8GbEdfWHoh4LSQje4vIYJaMj8C4AcBIzg2Ahwqgqe_t2CT1RaVmdZ_pP2eGJT1A704cJX-YPg6GIEGb_E89bHBTLmfh2LgxShHnEtnCR5w_knyEVCRN9HcGP4Be6Ah_y5SM"/><h1 class="font-title-lg text-title-lg text-on-surface tracking-tight pl-space-xs">Create Account</h1></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen"><div class="flex flex-col w-full pb-24">
+<!-- Top Utility Contextual Bar (Action items complementing the fixed shell header) -->
+<div class="px-margin-compact py-space-sm flex items-center justify-between bg-surface">
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span class="font-label-md text-label-md tracking-wider uppercase">Institutional Counterparty</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button aria-label="Search Merchant Listings" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface" type="button">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+<button aria-label="Share Merchant Profile" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface" id="shareProfileBtn" type="button">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+<button aria-label="More Options" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-on-surface" type="button">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Profile Hero Section -->
+<div class="px-margin-compact pt-space-sm pb-space-lg flex flex-col gap-space-base">
+<div class="flex items-start gap-space-base">
+<!-- High-Resolution Avatar Container -->
+<div class="relative shrink-0">
+<div class="w-20 h-20 rounded-xl overflow-hidden bg-surface-container shadow-sm">
+<img class="w-full h-full object-cover" data-alt="Sophisticated editorial studio portrait of Sarah Jenkins, a high-ranking institutional horology curator in her late thirties, serene confidence, subtle charcoal Italian tailoring, crisp directional gallery lighting with deep navy and slate undertones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7Y6n_FC9N9y_gVdBmDbNSFWr6t1H4miz-lGU-ORycfJ3kOimzGIlqYnzXBqGNKyuGPI88BL_Vk-H2fieFnsM7_SUl9-_emIt92YZ0BvOgUzuNx3l4lhYqR-FsstMSLaFO4uaBS6wRSTik4R7W9Tm3q1_ai5e998NC2j3iZuAVuX9ii_11FoGEpMMPVzFxOZSDVCGPoVgvfKzQN6lIYbIghHmkABgHVq6Hf639EwTPNxJQwcNeCObI"/>
+</div>
+<!-- Sovereign Verified Seal -->
+<div class="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-primary-container flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-on-primary text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<!-- Identity & Authority Meta -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-space-xs">
+<h2 class="font-title-lg text-title-lg text-on-surface truncate">Sarah Jenkins</h2>
+</div>
+<p class="font-label-lg text-label-lg text-secondary">@sarah_jenkins</p>
+<div class="flex items-center gap-space-xxs text-on-surface-variant mt-space-xxs">
+<span class="material-symbols-outlined text-[15px]">pin_drop</span>
+<span class="font-body-sm text-body-sm truncate">Geneva / Zurich, Switzerland</span>
+</div>
+</div>
+</div>
+<!-- Institutional Tier Tags -->
+<div class="flex flex-wrap gap-space-xs">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-lg bg-surface-container-high text-on-surface font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+<span>Tier 1 Merchant</span>
+</div>
+<div class="inline-flex items-center gap-space-xs px-space-sm py-1 rounded-lg bg-secondary-container text-on-secondary-container font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px]">key</span>
+<span>Sovereign Vault Signer</span>
+</div>
+</div>
+<!-- Bio Card -->
+<div class="p-space-base rounded-xl bg-surface-container-low shadow-sm">
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Certified horology &amp; enterprise hardware curator. All lots authenticated by Geneva Assay Office and backed by Choropia 48-Hour Escrow Guarantee.
+      </p>
+<div class="mt-space-sm flex items-center gap-space-xs text-secondary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Underwritten by Choropia Custody Vault AG</span>
+</div>
+</div>
+<!-- Metric Grid / Settlement Statistics -->
+<div class="grid grid-cols-2 gap-space-xs p-space-sm rounded-xl bg-surface-container">
+<div class="p-space-sm rounded-lg bg-surface-container-lowest">
+<div class="flex items-center gap-space-xxs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">star</span>
+<span class="font-label-md text-label-md">Reputation</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1">
+<span class="font-title-lg text-title-lg text-on-surface font-semibold">4.9</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">(128 reviews)</span>
+</div>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-lowest">
+<div class="flex items-center gap-space-xxs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span class="font-label-md text-label-md">Dispatch</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1">
+<span class="font-title-lg text-title-lg text-on-surface font-semibold">100%</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">On-Time</span>
+</div>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-lowest">
+<div class="flex items-center gap-space-xxs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">payments</span>
+<span class="font-label-md text-label-md">Settled Volume</span>
+</div>
+<div class="mt-1 flex items-baseline">
+<span class="font-title-lg text-title-lg text-on-surface font-semibold">$1.4M</span>
+</div>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-lowest">
+<div class="flex items-center gap-space-xxs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">history_edu</span>
+<span class="font-label-md text-label-md">Tenure</span>
+</div>
+<div class="mt-1 flex items-baseline">
+<span class="font-title-lg text-title-lg text-on-surface font-semibold">2022</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant ml-1">Member</span>
+</div>
+</div>
+</div>
+<!-- Primary Interaction CTAs -->
+<div class="grid grid-cols-2 gap-space-sm">
+<button class="h-12 px-space-base rounded-lg bg-primary-container text-on-primary font-title-sm text-title-sm flex items-center justify-center gap-space-xs active:opacity-90 shadow-sm transition-transform active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+<span>Message Merchant</span>
+</button>
+<button class="h-12 px-space-base rounded-lg bg-surface-container-high text-on-surface font-title-sm text-title-sm flex items-center justify-center gap-space-xs active:bg-surface-container-highest transition-colors" id="followBtn" type="button">
+<span class="material-symbols-outlined text-[18px]" id="followIcon">add</span>
+<span id="followText">Follow Feed</span>
+</button>
+</div>
+</div>
+<!-- Segmented Catalog Tabs (Jetpack Compose / Material 3 Style) -->
+<div class="sticky top-16 z-30 bg-surface/95 backdrop-blur-md px-margin-compact border-b border-surface-container-high">
+<div class="flex items-center space-x-space-lg overflow-x-auto no-scrollbar">
+<button class="tab-btn active relative py-space-md flex items-center gap-space-xs text-on-surface font-title-sm text-title-sm border-b-2 border-primary-container" data-tab="active-listings" type="button">
+<span>Active Listings</span>
+<span class="px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm">12</span>
+</button>
+<button class="tab-btn relative py-space-md flex items-center gap-space-xs text-on-surface-variant font-title-sm text-title-sm border-b-2 border-transparent" data-tab="recent-escrows" type="button">
+<span>Recent Escrows</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">34</span>
+</button>
+<button class="tab-btn relative py-space-md flex items-center gap-space-xs text-on-surface-variant font-title-sm text-title-sm border-b-2 border-transparent" data-tab="dossiers-reviews" type="button">
+<span>Dossiers &amp; Reviews</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">128</span>
+</button>
+</div>
+</div>
+<!-- Tab Content: Active Listings Section -->
+<div class="px-margin-compact py-space-base flex flex-col gap-space-base" id="active-listings-content">
+<!-- Filter & Sort Strip -->
+<div class="flex items-center justify-between">
+<p class="font-label-lg text-label-lg text-on-surface-variant">Showing 12 authenticated lots</p>
+<div class="flex items-center gap-space-xxs text-secondary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">swap_vert</span>
+<span>Highest Value</span>
+</div>
+</div>
+<!-- Curated Asset Cards (2-Column Dense Grid) -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Lot Card 1 -->
+<div class="flex flex-col rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="High-end studio macro photograph of a rare vintage luxury chronometer wristwatch, obsidian black enamel dial, unpolished surgical stainless steel bezel, set on pristine grey chamois leather background with cold institutional lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUnkOC6VrdlFvDnsAs3tdsDhl2kys0-sWiskbuRJKM5gJArME836pJ4x-hq6SV-HMWsP77zVdO6A13m3tzBCCeSVzb4PcRr3W5nNNzAKN1QidZYNfx8iaVDkTWzXfqDhLyUw6phqBSM7bsUmoJDFyjGz-JB8uBH3-5cTIQx1LuJphFjw3dMWSFb-vuxmd7OmK4s2PNIorRTt6m4kaehrPHovMkJU5nMBgKyE63BcA4xRFiuG3CgiAv"/>
+<div class="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm uppercase tracking-wider">
+            Pristine
+          </div>
+<button aria-label="Add to Watchlist" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/80 backdrop-blur-sm flex items-center justify-center text-on-surface hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">bookmark</span>
+</button>
+</div>
+<div class="p-space-sm flex flex-col flex-1 justify-between gap-space-xs">
+<div>
+<span class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">Lot #0842</span>
+<h3 class="font-title-sm text-title-sm text-on-surface line-clamp-1">Audemars Piguet 15202ST Ultra-Thin</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Assay Validated • 2021</p>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-1">$8,950.00</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Escrow Fee Included</p>
+<button class="mt-space-xs w-full h-9 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-1 active:opacity-90" type="button">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>Instant Buy</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Lot Card 2 -->
+<div class="flex flex-col rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="High-resolution commercial product shot of an enterprise military-grade cold hardware security key and cryptographic vault module, matte titanium finish, precision milled edges, crisp studio light with subtle navy reflection." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLv-zVIOqxA5di8Hyr8Zw2E90WhZfiX6Gyc1pAVyo8-_zOrKB0w-kV0hmOjYqYmVWZdp_jNWz4YTZ-nJfn_dGkn0gylA-ihGZWJ_TZVI3oBwWM4IuJ2_FUchmH20tASWr_fupP39L2sHLjGYcFLO-3ZpC7pLqyzD9FiagYNyRR7DAsBPcWNGOlNUwG6hll7cub8Bz9Ka9gPpSEJScu6LuJhEsp7WMiLnlfg-OrjgVTUD30vEwdTuPw"/>
+<div class="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm uppercase tracking-wider">
+            NIB Sealed
+          </div>
+<button aria-label="Add to Watchlist" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/80 backdrop-blur-sm flex items-center justify-center text-on-surface hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">bookmark</span>
+</button>
+</div>
+<div class="p-space-sm flex flex-col flex-1 justify-between gap-space-xs">
+<div>
+<span class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">Lot #1091</span>
+<h3 class="font-title-sm text-title-sm text-on-surface line-clamp-1">HSM Sovereign Vault Keygen Gen-4</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">FIPS 140-3 Level 4 Cert</p>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-1">$2,450.00</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Escrow Fee Included</p>
+<button class="mt-space-xs w-full h-9 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-1 active:opacity-90" type="button">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>Instant Buy</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Lot Card 3 -->
+<div class="flex flex-col rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Detailed macro capture of a certified 100g 999.9 pure cast bullion ingot bar with stamped hallmarks from Swiss refinery Valcambi Suisse, soft metallic glow on a dark midnight slate platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5ksiRsG1gFmD07aj-fitf6muWlu4-ecWrZUoLFfvJx2f-xHKtd2QuPf62tcMz61IQ5Vk_xlJIO80WY_k2Tnho7tqIo_QXeOxq4MDblM-J4da26Y4_TqnDrAFP2HdhdifCJvW4T88DhJEhK8Fu_nrKC8IZHfx2xaHepjPORflexdgvTvrGHAgD5pWrQUBbXMOQ4X5VFUVoy153TKJjLcfOhtluIMtL45Ayw7B9HqLn8xaob0yejLuN"/>
+<div class="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm uppercase tracking-wider">
+            Pristine
+          </div>
+<button aria-label="Add to Watchlist" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/80 backdrop-blur-sm flex items-center justify-center text-on-surface hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">bookmark</span>
+</button>
+</div>
+<div class="p-space-sm flex flex-col flex-1 justify-between gap-space-xs">
+<div>
+<span class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">Lot #0722</span>
+<h3 class="font-title-sm text-title-sm text-on-surface line-clamp-1">100g Fine Gold 999.9 Ingot</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Zurich Vault Bonded</p>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-1">$7,820.00</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Spot Linked Rate</p>
+<button class="mt-space-xs w-full h-9 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-1 active:opacity-90" type="button">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>Instant Buy</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Lot Card 4 -->
+<div class="flex flex-col rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Frontal studio capture of a bespoke mechanical marine chronometer clock housed in a polished dark mahogany box with brass gimbaled mountings, timeless nautical engineering, cinematic softbox illumination." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAN9No-SzmA0XAmsP6XJcshhDBQ3sYDlRNp1xCaDZ59sdqXwXWdubarCa4RV1lQjsLHTGwZQpaU3XutcEde1BfH4YBSrQpUjc6TEdIrb6TKpSDOoYt5MwYiMTDtwq43c1tvwO_3YninT0zHdZ9vFZKasr5z1q17dAWn3e7Z1dJKCL50D8_ITdaM6vFAYdkQZ7yCogavbPUTHyF26fZ6R4sWZZcNOPBtMteBQ4xmigd3ku2rmOvI6vLe"/>
+<div class="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm uppercase tracking-wider">
+            Grade A+
+          </div>
+<button aria-label="Add to Watchlist" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/80 backdrop-blur-sm flex items-center justify-center text-on-surface hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">bookmark</span>
+</button>
+</div>
+<div class="p-space-sm flex flex-col flex-1 justify-between gap-space-xs">
+<div>
+<span class="font-label-sm text-label-sm text-on-tertiary-container uppercase tracking-widest">Lot #0654</span>
+<h3 class="font-title-sm text-title-sm text-on-surface line-clamp-1">Ulysse Nardin Deck Marine Instrument</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Complete Archive Dossier</p>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-1">$5,150.00</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Escrow Fee Included</p>
+<button class="mt-space-xs w-full h-9 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-1 active:opacity-90" type="button">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+<span>Instant Buy</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Assurance Banner -->
+<div class="p-space-base rounded-xl bg-surface-container-low flex items-center gap-space-base mt-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-secondary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">gavel</span>
+</div>
+<div class="min-w-0">
+<p class="font-title-sm text-title-sm text-on-surface font-medium">Bespoke Consignment Available</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">Direct bilateral settlement with this merchant supported via multi-sig escrow.</p>
+</div>
+</div>
+</div>
+<!-- Persistent Jetpack Compose Styled Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl border-t border-surface-container-high pb-safe">
+<div class="h-16 px-margin-compact flex items-center justify-around">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[22px]">storefront</span>
+<span class="font-label-sm text-label-sm mt-0.5">Explore</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface font-semibold" type="button">
+<div class="w-12 h-7 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center mb-0.5">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">badge</span>
+</div>
+<span class="font-label-sm text-label-sm">Merchants</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[22px]">shield_with_heart</span>
+<span class="font-label-sm text-label-sm mt-0.5">Escrows</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm mt-0.5">Vault</span>
+</button>
+</div>
+</nav>
+<!-- Interactive Client Script for Follow State & Share Micro-interaction -->
+<script>
+    (function() {
+      const followBtn = document.getElementById('followBtn');
+      const followIcon = document.getElementById('followIcon');
+      const followText = document.getElementById('followText');
+      let isFollowing = false;
+
+      if (followBtn) {
+        followBtn.addEventListener('click', function() {
+          isFollowing = !isFollowing;
+          if (isFollowing) {
+            followBtn.classList.remove('bg-surface-container-high', 'text-on-surface');
+            followBtn.classList.add('bg-secondary-container', 'text-on-secondary-container');
+            followIcon.textContent = 'check';
+            followText.textContent = 'Following';
+          } else {
+            followBtn.classList.add('bg-surface-container-high', 'text-on-surface');
+            followBtn.classList.remove('bg-secondary-container', 'text-on-secondary-container');
+            followIcon.textContent = 'add';
+            followText.textContent = 'Follow Feed';
+          }
+        });
+      }
+
+      const shareBtn = document.getElementById('shareProfileBtn');
+      if (shareBtn && navigator.share) {
+        shareBtn.addEventListener('click', function() {
+          navigator.share({
+            title: 'Sarah Jenkins - Choropia Institutional Merchant',
+            url: window.location.href
+          }).catch(function() {});
+        });
+      }
+    })();
+  </script>
+</div></main></body></html>

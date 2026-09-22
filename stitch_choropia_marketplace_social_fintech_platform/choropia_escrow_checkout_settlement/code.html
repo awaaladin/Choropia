@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-bright": "#f8f9ff",
+          "primary-fixed-dim": "#bac7e1",
+          "inverse-primary": "#bac7e1",
+          "on-surface": "#0b1c30",
+          "surface-variant": "#d3e4fe",
+          "tertiary-container": "#00174b",
+          "background": "#f8f9ff",
+          "surface-container-high": "#dce9ff",
+          "primary-fixed": "#d6e3fe",
+          "surface-container-highest": "#d3e4fe",
+          "tertiary": "#000000",
+          "on-error-container": "#93000a",
+          "surface-container-low": "#eff4ff",
+          "tertiary-fixed": "#dbe1ff",
+          "on-primary-fixed": "#0e1c2f",
+          "error-container": "#ffdad6",
+          "on-primary": "#ffffff",
+          "inverse-surface": "#213145",
+          "error": "#ba1a1a",
+          "tertiary-fixed-dim": "#b4c5ff",
+          "outline": "#75777d",
+          "on-background": "#0b1c30",
+          "surface": "#f8f9ff",
+          "primary": "#000000",
+          "on-error": "#ffffff",
+          "on-surface-variant": "#44474c",
+          "on-secondary-container": "#3b5a7f",
+          "surface-tint": "#525f75",
+          "secondary": "#426086",
+          "on-primary-fixed-variant": "#3a475c",
+          "on-secondary": "#ffffff",
+          "secondary-fixed": "#d3e4ff",
+          "on-secondary-fixed": "#001c38",
+          "on-tertiary": "#ffffff",
+          "primary-container": "#0e1c2f",
+          "on-primary-container": "#77849c",
+          "secondary-fixed-dim": "#aac9f4",
+          "surface-dim": "#cbdbf5",
+          "outline-variant": "#c5c6cd",
+          "inverse-on-surface": "#eaf1ff",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-container": "#497cff",
+          "secondary-container": "#b3d1fd",
+          "on-tertiary-fixed": "#00174b",
+          "on-tertiary-fixed-variant": "#003ea8",
+          "surface-container": "#e5eeff",
+          "on-secondary-fixed-variant": "#29486d"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "margin-mobile": "1rem",
+          "space-3xl": "4rem",
+          "space-xl": "2rem",
+          "space-md": "0.75rem",
+          "space-2xl": "3rem",
+          "gutter-mobile": "1rem",
+          "gutter-desktop": "1.5rem",
+          "space-base": "1rem",
+          "space-xs": "0.25rem",
+          "margin-desktop": "3rem",
+          "margin-tablet": "2rem",
+          "space-xxs": "0.125rem"
+        },
+        "fontFamily": {
+          "label-md": ["Inter"],
+          "body-sm": ["Inter"],
+          "display": ["Inter"],
+          "headline-lg": ["Inter"],
+          "headline-md": ["Inter"],
+          "mono-financial": ["Inter"],
+          "label-sm": ["Inter"],
+          "body-md": ["Inter"],
+          "headline-lg-mobile": ["Inter"],
+          "headline-sm": ["Inter"],
+          "body-lg": ["Inter"]
+        },
+        "fontSize": {
+          "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}],
+          "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+          "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "mono-financial": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "headline-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "headline-sm": ["18px", {"lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full max-w-[1440px] mx-auto px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg shrink-0"><div class="flex items-center gap-space-xs"><img alt="Choropia Marketplace Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UmRW9huFY4OWAO5ag9uVrwcIRRsjKrb8qJvg97xAfUXnBb3meL2yneKiJQACe-W_GohlJgEH2yheZTctACfY9pv0MD9TvrDdgs1FIcmbLVVcX2NVOkeV_s_gLabhz_c5Qz6HiRdG9ZylnCHkxTD70Dt7bpNQN7Fdc_zCZbSwanD2uYLq2-yM0HQhnpMpVukcKR3EO-qpl_MydE111aU3DY_OUOeMz85-FRXJ9hJI2waMF7hYaf-UKkoUM"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">Choropia</span></div><div class="relative hidden lg:flex items-center"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">search</span><input class="w-72 xl:w-80 h-9 pl-9 pr-14 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-secondary transition-all" placeholder="Search posts, goods, services, or verified users..." type="text"/><kbd class="absolute right-2 px-1.5 py-0.5 bg-surface-container-lowest rounded text-[10px] font-mono-financial text-on-surface-variant shadow-[0_1px_2px_rgba(11,25,44,0.06)]">⌘K</kbd></div></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container text-on-surface font-semibold rounded-lg"><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="feed" href="#">Feed</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="reels" href="#">Reels</a><a aria-current="page" class="px-space-md py-space-xs transition-all bg-surface-container text-on-surface font-semibold rounded-lg" data-path="marketplace" href="#">Marketplace</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="banking-wallet" href="#">Banking & Wallet</a><a class="relative px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all flex items-center gap-space-xs" data-path="messages" href="#"><span>Messages</span><span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded-full">3</span></a></nav><div class="flex items-center gap-space-sm shrink-0"><button class="inline-flex items-center gap-space-xs h-9 px-space-md bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span class="hidden sm:inline">Create Post</span></button><button class="relative w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-on-error font-label-sm text-[10px] rounded-full flex items-center justify-center font-bold ring-2 ring-surface-container-lowest">4</span></button><button class="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">dark_mode</span></button><div class="relative flex items-center gap-space-xs pl-space-xs cursor-pointer"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3XdH6sHHTR0I01DogpSNWPAqCPl6alpW9NqwLayaoB4LeG4WOL-jEwM_b-G3mfS1NYbFCRUdhPBYW-11t_Y-sw-TpTOluQY_RMLz377laXdYasuCSNTdvLtXcy3J1R3EAotz_L20ONAHoLOTlh5NQ3E8i-ZE0avaDZA5dGp9hzKEGDE9qcBxy0x2z-nzxVohw7Gi2OXcx-hJWqoQV7P1pCU8WIwkqka7dHWFN1sCWmu6Hh9GXpWZw"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary rounded-full ring-2 ring-surface-container-lowest"></span></div><span class="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span></div></div></div></header><main class="w-full max-w-[1440px] mx-auto px-gutter-desktop pt-16 bg-surface"><div class="flex flex-col w-full py-space-md pb-space-3xl">
+<!-- Micro Progress & Escrow Protocol Beacon -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md text-on-surface-variant">
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm">
+<a class="hover:text-on-surface transition-colors" href="#">Marketplace</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<a class="hover:text-on-surface transition-colors truncate max-w-[200px] sm:max-w-none" href="#">Handcrafted Walnut Standing Desk (#8821)</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface font-semibold">Escrow Settlement Protocol</span>
+</div>
+<div class="flex items-center gap-space-xs px-space-sm py-space-xxs bg-surface-container-low rounded-lg shadow-sm">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-mono-financial text-[11px] text-on-surface-variant font-medium tracking-tight">VAULT STATUS: AUDITED & ACTIVE (CH-9941-X)</span>
+</div>
+</div>
+<!-- Primary 12-Column Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-start">
+<!-- LEFT / MAIN FLOW (7 cols desktop) -->
+<div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-space-lg">
+<!-- Step Indicator Bar -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-mono-financial text-label-md font-bold">
+            03
+          </div>
+<div>
+<div class="font-headline-sm text-headline-sm text-on-surface">Escrow Fund Allocation & Lock</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Institutional transaction clearing via Choropia Clearing Vault</div>
+</div>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-mono-financial text-[11px] bg-surface-container px-space-sm py-space-xs rounded-lg self-start sm:self-center">
+<span class="material-symbols-outlined text-[16px] text-secondary">encrypted</span>
+          Multi-Party Smart Escrow
+        </div>
+</div>
+<!-- Item Specification & Merchant Credentials -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-lg">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Consignment Asset Details</span>
+<span class="font-mono-financial text-body-sm text-on-surface-variant">Lot Ref #WD-8821</span>
+</div>
+<div class="flex flex-col sm:flex-row gap-space-base items-start">
+<div class="relative w-full sm:w-40 h-36 shrink-0 rounded-lg overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="High-end bespoke artisanal walnut executive standing desk in a bright architectural minimalist studio. Natural edge timber grain, brushed matte dark anodized aluminum dual-motor telescoping legs, refined studio lighting with soft specular highlights on oiled timber, luxury craftsmanship." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6Zb-jNGAZE30akVWwbrREXCAujhCu-uB4MydK5OtSkpNNHLRInd2rm2WDitN1eMqzfvXe6t1PaRz_1xJ9DhbnZ5m0N9VJ9V1zNU46vuDJ6PPKARK3r947ZOZzzaecV9kM2nlhNjRgOfJHRQrS49p5nyvuSFe9Ne0nbN4EaiPDbbedAPaOfVX_QqIjBt6RDvjbbOwvEaBkc_NAIF4jGe-dke9zHaEVn21cTSJ0RG1VMFlinbXwTQkD"/>
+<div class="absolute bottom-2 left-2 bg-primary-container/90 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono-financial text-on-primary uppercase font-bold tracking-wider">
+              Asset #8821
+            </div>
+</div>
+<div class="flex flex-col justify-between w-full h-full min-w-0">
+<div>
+<div class="flex items-start justify-between gap-space-sm">
+<h1 class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-tight">
+                  Handcrafted Walnut Motorized Executive Standing Desk
+                </h1>
+<span class="font-mono-financial text-headline-sm text-on-surface font-semibold shrink-0">$850.00</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">
+                Solid American Black Walnut top with dual-stage linear actuators, integrated bevel edge, tactile touch control pad, and recessed hidden cable tray.
+              </p>
+</div>
+<!-- Merchant Trust Profile Box -->
+<div class="mt-space-md pt-space-md bg-surface-container-low p-space-md rounded-lg flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<img class="w-9 h-9 rounded-full object-cover" data-alt="Verified master wood artisan portrait in clean minimalist workshop, professional craftsman wearing apron smiling, soft natural morning window lighting, photorealistic high fidelity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbyb46Iq6gD0laFIRsu4QhJDwVJrKAWMkdOS9iMt5_-rFE_hgbdbKNb4MgScjHjCz-J7XN8_0kOkCeTOsxMp79E_FpVnb5VWys78aaDlYaPu21_ifvwzTbe9sBf_3LqD0iWmZvSeSdlSUMpslUOsb2U3Qx6xJL2Jtui-peUVe98DK2PF_l6bw3pQBLg4pOvsVC9rd2QKv_KB2UOXMsMgQdCZpdGZqi821FktyplCfH6W45yBx2oL3c"/>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary rounded-full"></span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-md text-label-md text-on-surface font-semibold">@artisan_wood</span>
+<span class="material-symbols-outlined text-[16px] text-secondary" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="px-1.5 py-0.5 bg-surface-container text-on-surface font-label-sm text-[10px] rounded uppercase font-bold">Tier 1 Merchant</span>
+</div>
+<div class="font-body-sm text-[11px] text-on-surface-variant">1,490 Verified Escrows • 99.8% Dispute-Free Rating</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-sm text-[11px] text-on-surface-variant uppercase">Settlement Term</div>
+<div class="font-label-md text-label-md text-secondary font-semibold">48h Inspection Window</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Shipping & Delivery Courier Tier Selection -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<label class="font-label-md text-label-md text-on-surface font-semibold flex items-center justify-between">
+<span>Select Secure Logistics Protocol</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-normal">Tracked & Telemetry Insured</span>
+</label>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<!-- Option 1 (Selected) -->
+<label class="shipping-radio-card cursor-pointer p-space-md rounded-xl bg-surface-container transition-all flex flex-col justify-between gap-space-sm" id="shipping-opt-1">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-xs">
+<input checked="" class="accent-on-surface w-4 h-4 cursor-pointer" name="shipping_courier" onchange="updateShipping(45, 'DHL Express Insured Freight')" type="radio" value="45"/>
+<span class="font-label-md text-label-md text-on-surface font-semibold">DHL Express Insured Freight</span>
+</div>
+<span class="font-mono-financial text-label-md text-on-surface font-semibold">+$45.00</span>
+</div>
+<div class="pl-6 text-on-surface-variant font-body-sm text-[12px] flex flex-col gap-0.5">
+<span>Dispatch: 24h from Escrow Lock</span>
+<span class="text-secondary font-medium">Est. Arrival: Oct 28 - Oct 30 • Full Coverage</span>
+</div>
+</label>
+<!-- Option 2 -->
+<label class="shipping-radio-card cursor-pointer p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col justify-between gap-space-sm" id="shipping-opt-2">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-xs">
+<input class="accent-on-surface w-4 h-4 cursor-pointer" name="shipping_courier" onchange="updateShipping(120, 'White Glove Freight & Assembly')" type="radio" value="120"/>
+<span class="font-label-md text-label-md text-on-surface font-semibold">White Glove Delivery</span>
+</div>
+<span class="font-mono-financial text-label-md text-on-surface font-semibold">+$120.00</span>
+</div>
+<div class="pl-6 text-on-surface-variant font-body-sm text-[12px] flex flex-col gap-0.5">
+<span>Room of choice + Assembly included</span>
+<span class="text-on-surface-variant font-medium">Est. Arrival: Oct 30 - Nov 02</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+<!-- Smart Vault Escrow Custody Disclosure Banner -->
+<div class="relative overflow-hidden bg-primary-container text-on-primary p-space-lg rounded-xl shadow-md">
+<div class="absolute -right-12 -bottom-12 w-48 h-48 rounded-full bg-secondary/15 blur-2xl pointer-events-none"></div>
+<div class="flex items-start gap-space-md relative z-10">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest/10 backdrop-blur-sm flex items-center justify-center shrink-0 text-primary-fixed">
+<span class="material-symbols-outlined text-[24px]">gavel</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<h3 class="font-headline-sm text-headline-sm text-on-primary">Choropia Smart Vault Custody Protocol</h3>
+<span class="px-2 py-0.5 bg-surface-container-lowest/20 rounded font-mono-financial text-[10px] text-primary-fixed tracking-wider uppercase">Zero Counterparty Risk</span>
+</div>
+<p class="font-body-md text-body-md text-on-primary-container leading-relaxed">
+              Your capital of <strong class="text-on-primary font-mono-financial" id="escrow-locked-highlight">$895.00 USD</strong> is locked into an immutable segregated smart vault. The seller cannot withdraw these funds until courier tracking confirms physical delivery <span class="text-on-primary underline font-medium">and your 48-hour inspection timer elapses</span> without a filed dispute.
+            </p>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm pt-space-xs text-[11px] font-mono-financial text-on-primary-container">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">check_circle</span>
+                Proof-of-Receipt Required
+              </div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">check_circle</span>
+                Arbitration Rights Reserved
+              </div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">check_circle</span>
+                Instant 100% Reverse on Non-Ship
+              </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment Source Selector -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Funding Mechanism</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+            Encrypted Source
+          </span>
+</div>
+<div class="space-y-space-sm">
+<!-- Option A: Choropia Balance (Default) -->
+<label class="block p-space-md rounded-xl bg-surface-container-low transition-all cursor-pointer">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<input checked="" class="accent-on-surface w-4 h-4 cursor-pointer" name="funding_source" type="radio" value="wallet"/>
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Choropia Master Vault Balance</span>
+<span class="px-1.5 py-0.5 bg-secondary text-on-secondary font-label-sm text-[10px] rounded uppercase font-bold">Recommended</span>
+</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Instant settlement • 0.00% clearance surcharge</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-mono-financial text-body-lg text-on-surface font-semibold">$28,450.00</div>
+<div class="font-label-sm text-[11px] text-on-surface-variant uppercase">Available Balance</div>
+</div>
+</div>
+</label>
+<!-- Option B: Virtual Debit -->
+<label class="block p-space-md rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-all cursor-pointer">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<input class="accent-on-surface w-4 h-4 cursor-pointer" name="funding_source" type="radio" value="card"/>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[22px]">credit_card</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Choropia Commercial Virtual Debit</div>
+<div class="font-mono-financial text-body-sm text-on-surface-variant">•••• •••• •••• 8832 (Exp 09/28)</div>
+</div>
+</div>
+<div class="text-right">
+<span class="font-mono-financial text-body-sm text-on-surface-variant">$100,000.00 Limit</span>
+</div>
+</div>
+</label>
+<!-- Option C: External Fedwire / ACH -->
+<label class="block p-space-md rounded-xl bg-surface-container-lowest hover:bg-surface-container-low transition-all cursor-pointer">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<input class="accent-on-surface w-4 h-4 cursor-pointer" name="funding_source" type="radio" value="wire"/>
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[22px]">account_balance</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Institutional Linked Wire / FedNow (JPMorgan Chase)</div>
+<div class="font-mono-financial text-body-sm text-on-surface-variant">Routing *******441 • Acct *******9102</div>
+</div>
+</div>
+<div class="text-right">
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant rounded font-label-sm text-[10px]">T+0 Real-Time</span>
+</div>
+</div>
+</label>
+</div>
+</div>
+<!-- Legal Escrow Signature & Multi-sig Protocol Check -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Multi-Signature Escrow Authorization</span>
+<div class="p-space-md bg-surface-container-low rounded-lg space-y-space-sm">
+<label class="flex items-start gap-space-sm cursor-pointer select-none">
+<input checked="" class="mt-1 accent-on-surface w-4 h-4 cursor-pointer" id="terms-toggle" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface leading-normal">
+              I authorize the locking of purchase funds under <strong>Choropia Escrow Protocol Spec v4.2</strong>. I acknowledge that funds will automatically clear to merchant <strong>@artisan_wood</strong> after 48 hours post-confirmed courier delivery unless an official inspection claim is submitted via the transaction console.
+            </span>
+</label>
+<label class="flex items-start gap-space-sm cursor-pointer select-none">
+<input checked="" class="mt-1 accent-on-surface w-4 h-4 cursor-pointer" id="telemetry-toggle" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface leading-normal">
+              Enable automated IoT cargo temperature/shock insurance verification during transit.
+            </span>
+</label>
+</div>
+<!-- Digital Signature Representation -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md pt-space-xs">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Signatory Identity</span>
+<div class="h-10 px-space-md bg-surface-container-low rounded-lg flex items-center justify-between font-mono-financial text-body-sm text-on-surface">
+<span>Alexander Vance (CH-USR-0199)</span>
+<span class="material-symbols-outlined text-secondary text-[16px]">fingerprint</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Cryptographic Stamp</span>
+<div class="h-10 px-space-md bg-surface-container-low rounded-lg flex items-center justify-between font-mono-financial text-[11px] text-on-surface-variant truncate">
+<span class="truncate">SHA256: 9f8a83c704...d88a1b04</span>
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT SIDEBAR (5 cols desktop, sticky summary & confirmation action) -->
+<div class="lg:col-span-5 xl:col-span-4 flex flex-col gap-space-lg lg:sticky lg:top-20">
+<!-- Settlement Breakdown Card -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col gap-space-base">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Settlement Ledger</h2>
+<span class="px-2 py-0.5 bg-surface-container text-on-surface-variant rounded font-mono-financial text-[11px] font-medium">USD</span>
+</div>
+<div class="space-y-space-sm pt-space-xs">
+<div class="flex justify-between items-center text-body-md">
+<span class="text-on-surface-variant font-body-md">Desk Item Escrow Subtotal</span>
+<span class="font-mono-financial text-on-surface font-medium">$850.00</span>
+</div>
+<div class="flex justify-between items-center text-body-md">
+<div class="flex items-center gap-1">
+<span class="text-on-surface-variant font-body-md" id="selected-courier-label">DHL Express Freight</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" title="Insured against transit damage">info</span>
+</div>
+<span class="font-mono-financial text-on-surface font-medium" id="shipping-fee-display">+$45.00</span>
+</div>
+<div class="flex justify-between items-center text-body-md">
+<div class="flex items-center gap-1">
+<span class="text-on-surface-variant font-body-md">Choropia Smart Escrow Fee</span>
+<span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container rounded font-label-sm text-[9px] uppercase font-bold">Waived</span>
+</div>
+<div class="flex items-center gap-1 font-mono-financial">
+<span class="line-through text-on-surface-variant text-[12px]">$17.90</span>
+<span class="text-secondary font-medium">$0.00</span>
+</div>
+</div>
+<div class="flex justify-between items-center text-body-md">
+<span class="text-on-surface-variant font-body-md">Settlement Gas & Clearing</span>
+<span class="font-mono-financial text-secondary font-medium">$0.00</span>
+</div>
+</div>
+<!-- Total Figure Bar -->
+<div class="pt-space-md bg-surface-container-low -mx-space-lg px-space-lg py-space-md flex items-baseline justify-between">
+<div>
+<div class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Total Custody Amount</div>
+<div class="font-body-sm text-[11px] text-on-surface-variant">Subject to 48h Inspection Lock</div>
+</div>
+<div class="text-right">
+<div class="font-mono-financial text-display text-on-surface font-semibold tracking-tight" id="total-price-display">$895.00</div>
+<div class="font-mono-financial text-[11px] text-on-surface-variant">0.00 USD Taxes on Consignment</div>
+</div>
+</div>
+<!-- Master Confirmation CTA -->
+<div class="pt-space-xs flex flex-col gap-space-sm">
+<button class="w-full h-12 bg-primary-container hover:bg-on-surface text-on-primary rounded-lg font-label-md text-[14px] font-semibold flex items-center justify-center gap-space-sm shadow-sm transition-all transform active:scale-[0.99]" id="authorize-button" onclick="handleEscrowAuthorization()" type="button">
+<span class="material-symbols-outlined text-[20px]">lock</span>
+<span id="button-label">Authorize & Lock Funds in Escrow ($895.00 USD)</span>
+</button>
+<div class="flex items-center justify-center gap-space-xs text-[11px] text-on-surface-variant font-body-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">verified_user</span>
+            Guaranteed protection under Choropia Institutional Escrow Charter
+          </div>
+</div>
+<!-- Security Specifications Checklist -->
+<div class="pt-space-sm space-y-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex items-center justify-between py-1">
+<span class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-on-surface">shield</span>
+              FDIC Pass-Through Custody
+            </span>
+<span class="font-mono-financial text-on-surface">Up to $250k</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<span class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-on-surface">lock_clock</span>
+              256-Bit TLS 1.3 Hardware Vault
+            </span>
+<span class="font-mono-financial text-on-surface">FIPS 140-3</span>
+</div>
+<div class="flex items-center justify-between py-1">
+<span class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-on-surface">account_tree</span>
+              ISO-20022 Financial Messaging
+            </span>
+<span class="font-mono-financial text-secondary">Compliant</span>
+</div>
+</div>
+</div>
+<!-- Escrow Release Milestone Tracker -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<h3 class="font-label-md text-label-md text-on-surface font-semibold uppercase tracking-wider">Release Milestones</h3>
+<span class="font-mono-financial text-[11px] text-secondary font-medium">4 Stage Audit</span>
+</div>
+<div class="relative flex flex-col gap-space-md pt-space-xs">
+<!-- Continuous Hairline Line Indicator -->
+<div class="absolute top-3 bottom-3 left-3 w-0.5 bg-surface-container-high pointer-events-none"></div>
+<!-- Stage 1 (Current Active) -->
+<div class="relative flex items-start gap-space-md z-10">
+<div class="w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-mono-financial text-[10px] font-bold ring-4 ring-surface-container-lowest">
+              1
+            </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Deposit Locked into Vault</span>
+<span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-[9px] rounded font-semibold uppercase">Executing Now</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Buyer funds debited into smart vault and held in sovereign custody.</p>
+</div>
+</div>
+<!-- Stage 2 -->
+<div class="relative flex items-start gap-space-md z-10">
+<div class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-mono-financial text-[10px] font-bold ring-4 ring-surface-container-lowest">
+              2
+            </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Courier Transit & Dispatch</span>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Merchant ships with verified tracking telemetry attached.</p>
+</div>
+</div>
+<!-- Stage 3 -->
+<div class="relative flex items-start gap-space-md z-10">
+<div class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-mono-financial text-[10px] font-bold ring-4 ring-surface-container-lowest">
+              3
+            </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">48-Hour Physical Inspection</span>
+<p class="font-body-sm text-[12px] text-on-surface-variant">You receive the desk and inspect quality, dimensions, and motor gears.</p>
+</div>
+</div>
+<!-- Stage 4 -->
+<div class="relative flex items-start gap-space-md z-10">
+<div class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-mono-financial text-[10px] font-bold ring-4 ring-surface-container-lowest">
+              4
+            </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Merchant Settlement Payout</span>
+<p class="font-body-sm text-[12px] text-on-surface-variant">Automated irrevocable disbursement to merchant @artisan_wood.</p>
+</div>
+</div>
+</div>
+<div class="pt-space-xs">
+<!-- Visual Sparkline / Vault Telemetry Chart -->
+<div class="p-space-md bg-surface-container-low rounded-lg flex flex-col gap-space-xs">
+<div class="flex justify-between items-center text-[11px] font-mono-financial text-on-surface-variant">
+<span>VAULT RESERVE INTEGRITY</span>
+<span class="text-secondary font-semibold">100.0% FULLY COLLATERALIZED</span>
+</div>
+<svg class="w-full h-8 overflow-visible text-secondary" preserveaspectratio="none" viewbox="0 0 200 32">
+<path d="M0,28 L30,22 L60,24 L90,16 L120,18 L150,8 L180,12 L200,4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path>
+<circle class="fill-current" cx="200" cy="4" r="3"></circle>
+</svg>
+</div>
+</div>
+</div>
+<!-- Help / Mediation Contact -->
+<div class="flex items-center justify-between p-space-md bg-surface-container-lowest rounded-xl shadow-sm text-body-sm">
+<div class="flex items-center gap-space-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px] text-secondary">support_agent</span>
+<span>Need custom escrow terms or legal escrow escrow agent?</span>
+</div>
+<a class="font-label-md text-label-md text-on-surface font-semibold hover:underline shrink-0 ml-2" href="#">Contact Clearing</a>
+</div>
+</div>
+</div>
+<!-- Success Notification Toast Dialog (Client-side interactive toggle) -->
+<div class="hidden fixed inset-0 z-50 flex items-center justify-center p-space-md bg-inverse-surface/40 backdrop-blur-sm" id="escrow-modal">
+<div class="bg-surface-container-lowest max-w-md w-full p-space-xl rounded-xl shadow-2xl flex flex-col gap-space-base animate-in fade-in zoom-in-95 duration-150">
+<div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface mx-auto">
+<span class="material-symbols-outlined text-[32px] text-secondary">verified</span>
+</div>
+<div class="text-center space-y-1">
+<h3 class="font-headline-md text-headline-md text-on-surface">Funds Locked in Escrow</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Vault Reference <strong class="font-mono-financial text-on-surface">#ESC-8821-VLT</strong> confirmed. <span id="modal-sum-display">$895.00 USD</span> has been safely allocated.
+        </p>
+</div>
+<div class="p-space-md bg-surface-container-low rounded-lg font-mono-financial text-body-sm space-y-1 text-on-surface">
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Merchant Notified:</span>
+<span>@artisan_wood</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Inspection Lock:</span>
+<span>48h post-courier delivery</span>
+</div>
+<div class="flex justify-between">
+<span class="text-on-surface-variant">Custody Hash:</span>
+<span>0x7E12...B409</span>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row gap-space-sm pt-space-xs">
+<button class="flex-1 h-10 bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-on-surface transition-all" onclick="closeEscrowModal()" type="button">
+          View Live Vault Tracker
+        </button>
+<button class="h-10 px-space-md bg-surface-container-low text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container transition-all" onclick="closeEscrowModal()" type="button">
+          Dismiss
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  let currentShipping = 45;
+  const itemBasePrice = 850;
+
+  function updateShipping(cost, courierName) {
+    currentShipping = cost;
+    const total = itemBasePrice + currentShipping;
+    
+    // Update labels and displays
+    document.getElementById('shipping-fee-display').innerText = '+$' + cost.toFixed(2);
+    document.getElementById('total-price-display').innerText = '$' + total.toFixed(2);
+    document.getElementById('button-label').innerText = 'Authorize & Lock Funds in Escrow ($' + total.toFixed(2) + ' USD)';
+    document.getElementById('escrow-locked-highlight').innerText = '$' + total.toFixed(2) + ' USD';
+    document.getElementById('selected-courier-label').innerText = courierName;
+
+    // Visual card style toggle
+    const opt1 = document.getElementById('shipping-opt-1');
+    const opt2 = document.getElementById('shipping-opt-2');
+    if (cost === 45) {
+      opt1.classList.remove('bg-surface-container-low');
+      opt1.classList.add('bg-surface-container');
+      opt2.classList.remove('bg-surface-container');
+      opt2.classList.add('bg-surface-container-low');
+    } else {
+      opt2.classList.remove('bg-surface-container-low');
+      opt2.classList.add('bg-surface-container');
+      opt1.classList.remove('bg-surface-container');
+      opt1.classList.add('bg-surface-container-low');
+    }
+  }
+
+  function handleEscrowAuthorization() {
+    const total = itemBasePrice + currentShipping;
+    document.getElementById('modal-sum-display').innerText = '$' + total.toFixed(2) + ' USD';
+    const modal = document.getElementById('escrow-modal');
+    modal.classList.remove('hidden');
+  }
+
+  function closeEscrowModal() {
+    const modal = document.getElementById('escrow-modal');
+    modal.classList.add('hidden');
+  }
+</script></main><footer class="w-full bg-surface-container-lowest mt-space-3xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-[1440px] mx-auto px-gutter-desktop py-space-xl flex flex-col md:flex-row items-center justify-between gap-space-base"><div class="flex items-center gap-space-sm"><img alt="Choropia Marketplace Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UmRW9huFY4OWAO5ag9uVrwcIRRsjKrb8qJvg97xAfUXnBb3meL2yneKiJQACe-W_GohlJgEH2yheZTctACfY9pv0MD9TvrDdgs1FIcmbLVVcX2NVOkeV_s_gLabhz_c5Qz6HiRdG9ZylnCHkxTD70Dt7bpNQN7Fdc_zCZbSwanD2uYLq2-yM0HQhnpMpVukcKR3EO-qpl_MydE111aU3DY_OUOeMz85-FRXJ9hJI2waMF7hYaf-UKkoUM"/><span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 Choropia Marketplace, Inc. Institutional Social Commerce & Escrow Clearing.</span></div><div class="flex items-center gap-space-lg"><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms of Service</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Escrow Protocol</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Security Standards</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Compliance</a></div></div></footer></body></html>

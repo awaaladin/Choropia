@@ -1,0 +1,231 @@
+{% extends "core/base.html" %}
+{% block title %}Feed — Choropia{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- LEFT NAVIGATION RAIL -->
+  <aside class="hidden lg:flex lg:col-span-3 flex-col gap-4 sticky top-20 self-start">
+    <nav class="card p-2 flex flex-col gap-0.5">
+      <a href="{% url 'feed' %}" class="flex items-center gap-2 p-2 rounded bg-secondary-container text-on-secondary-container font-semibold text-sm">
+        <span class="material-symbols-outlined !text-[20px]">feed</span>
+        <span>Home Feed</span>
+      </a>
+      <a href="{% url 'marketplace' %}" class="flex items-center gap-2 p-2 rounded text-on-surface-variant hover:bg-surface-container-low text-sm transition-colors">
+        <span class="material-symbols-outlined !text-[20px]">storefront</span>
+        <span>Marketplace</span>
+      </a>
+      <a href="{% url 'orders' %}" class="flex items-center gap-2 p-2 rounded text-on-surface-variant hover:bg-surface-container-low text-sm transition-colors">
+        <span class="material-symbols-outlined !text-[20px]">handshake</span>
+        <span>My Orders</span>
+      </a>
+      <a href="{% url 'conversations' %}" class="flex items-center gap-2 p-2 rounded text-on-surface-variant hover:bg-surface-container-low text-sm transition-colors">
+        <span class="material-symbols-outlined !text-[20px]">chat_bubble</span>
+        <span>Messages</span>
+      </a>
+    </nav>
+    <div class="card p-4 bg-surface-container-low flex flex-col gap-2">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold uppercase tracking-wider text-secondary">Escrow Protection</span>
+        <span class="material-symbols-outlined !text-[18px] text-secondary">verified_user</span>
+      </div>
+      <p class="text-sm text-on-surface-variant">
+        Every purchase is held in escrow until you confirm delivery — sellers only get paid once you're satisfied.
+      </p>
+    </div>
+  </aside>
+
+  <!-- CENTER FEED -->
+  <section class="col-span-1 lg:col-span-6 flex flex-col gap-4">
+    <a href="{% url 'create-listing' %}" class="card p-4 flex items-center gap-3 hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined text-on-surface-variant">add_circle</span>
+      <span class="text-on-surface-variant text-sm">Post something for sale or a service you offer&hellip;</span>
+    </a>
+
+    <div id="feed-list" class="flex flex-col gap-4">
+      <p class="text-outline text-sm">Loading&hellip;</p>
+    </div>
+  </section>
+
+  <!-- RIGHT DISCOVERY SIDEBAR -->
+  <aside class="hidden lg:flex lg:col-span-3 flex-col gap-4 sticky top-20 self-start">
+    <div class="card p-4">
+      <h2 class="text-sm font-semibold mb-3">Trending listings</h2>
+      <div id="trending-list" class="flex flex-col gap-3">
+        <p class="text-xs text-outline">Loading&hellip;</p>
+      </div>
+    </div>
+    <div class="card p-4">
+      <h2 class="text-sm font-semibold mb-3">Storefronts to follow</h2>
+      <div id="suggested-merchants" class="flex flex-col gap-3">
+        <p class="text-xs text-outline">Loading&hellip;</p>
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let categoryNames = {};
+
+  function postCard(listing) {
+    const avatar = listing.seller_avatar
+      ? `<img src="${listing.seller_avatar}" class="w-10 h-10 rounded-full object-cover" />`
+      : `<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined !text-[20px] text-on-surface-variant">person</span></div>`;
+
+    return `
+    <article class="card p-4 flex flex-col gap-3">
+      <div class="flex items-center justify-between">
+        <a href="${listing.merchant_id ? `/merchants/${listing.merchant_id}/` : '#'}" class="flex items-center gap-2">
+          ${avatar}
+          <div class="flex flex-col leading-tight">
+            <span class="text-sm font-semibold text-on-surface">${listing.seller_name}</span>
+            <span class="text-xs text-on-surface-variant">${new Date(listing.created_at).toLocaleDateString()}</span>
+          </div>
+        </a>
+        <span class="badge">${categoryNames[listing.category] || ''}</span>
+      </div>
+
+      <a href="/listings/${listing.id}/">
+        <h3 class="font-semibold text-on-surface">${listing.title}</h3>
+      </a>
+
+      <a href="/listings/${listing.id}/" class="block relative aspect-[16/10] rounded bg-surface-container overflow-hidden">
+        ${
+          listing.cover_photo
+            ? `<img src="${listing.cover_photo}" class="w-full h-full object-cover" />`
+            : `<div class="w-full h-full flex items-center justify-center text-outline text-sm">No photo</div>`
+        }
+      </a>
+
+      <div class="p-3 rounded bg-surface-container flex items-center justify-between gap-3">
+        <div class="flex flex-col">
+          <span class="text-xs text-on-surface-variant">${listing.condition}</span>
+          <span class="font-mono text-lg font-semibold text-on-surface">&#8358;${Number(listing.price).toLocaleString()}</span>
+        </div>
+        <button class="btn-primary buy-now-btn !py-2 flex items-center gap-1" data-listing-id="${listing.id}">
+          <span class="material-symbols-outlined !text-[16px]">shopping_bag</span>
+          <span>Buy now (Escrow)</span>
+        </button>
+      </div>
+
+      <div class="flex items-center justify-between pt-1 text-on-surface-variant">
+        <div class="flex items-center gap-4">
+          <button class="like-btn flex items-center gap-1 hover:text-error transition-colors ${listing.is_liked ? 'text-error' : ''}" data-listing-id="${listing.id}" data-liked="${listing.is_liked}">
+            <span class="material-symbols-outlined !text-[18px]">favorite</span>
+            <span class="text-sm like-count">${listing.likes_count}</span>
+          </button>
+          <a href="/listings/${listing.id}/" class="flex items-center gap-1 hover:text-on-surface transition-colors">
+            <span class="material-symbols-outlined !text-[18px]">chat_bubble</span>
+            <span class="text-sm">${listing.comments_count}</span>
+          </a>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  async function loadFeed() {
+    const list = document.getElementById("feed-list");
+    try {
+      const categories = await Choropia.listCategories().catch(() => []);
+      categoryNames = Object.fromEntries(categories.map((c) => [c.id, c.name]));
+
+      const useFeed = Choropia.isAuthenticated();
+      const data = useFeed ? await Choropia.getFeed() : await Choropia.listListings();
+      const results = data.results || data;
+
+      if (!results.length) {
+        list.innerHTML = '<p class="text-outline text-sm">No listings yet — be the first to post one.</p>';
+      } else {
+        list.innerHTML = results.map(postCard).join("");
+      }
+
+      list.querySelectorAll(".buy-now-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!Choropia.isAuthenticated()) {
+            window.location.href = "{% url 'login' %}";
+            return;
+          }
+          try {
+            const order = await Choropia.createOrder(Number(btn.dataset.listingId));
+            window.location.href = `/orders/${order.id}/`;
+          } catch (err) {
+            window.alert(err.message);
+          }
+        });
+      });
+
+      list.querySelectorAll(".like-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!Choropia.isAuthenticated()) {
+            window.location.href = "{% url 'login' %}";
+            return;
+          }
+          const listingId = Number(btn.dataset.listingId);
+          const isLiked = btn.dataset.liked === "true";
+          try {
+            if (isLiked) {
+              const mine = await Choropia.listMyLikes();
+              const mineResults = mine.results || mine;
+              const existing = mineResults.find((l) => l.listing === listingId);
+              if (existing) await Choropia.unlikeListing(existing.id);
+            } else {
+              await Choropia.likeListing(listingId);
+            }
+            loadFeed();
+          } catch (err) {
+            window.alert(err.message);
+          }
+        });
+      });
+
+      const trending = [...results].sort((a, b) => b.likes_count - a.likes_count).slice(0, 4);
+      const trendingEl = document.getElementById("trending-list");
+      trendingEl.innerHTML = trending.length
+        ? trending
+            .map(
+              (listing) => `
+        <a href="/listings/${listing.id}/" class="flex items-center justify-between gap-2 group">
+          <div class="flex flex-col min-w-0">
+            <span class="text-sm font-medium text-on-surface truncate group-hover:text-secondary">${listing.title}</span>
+            <span class="text-xs text-on-surface-variant">${listing.likes_count} like${listing.likes_count === 1 ? "" : "s"}</span>
+          </div>
+          <span class="font-mono text-sm font-semibold shrink-0">&#8358;${Number(listing.price).toLocaleString()}</span>
+        </a>`
+            )
+            .join("")
+        : '<p class="text-xs text-outline">Nothing trending yet.</p>';
+    } catch (err) {
+      list.innerHTML = `<p class="text-red-500 text-sm">Could not load the feed: ${err.message}</p>`;
+    }
+  }
+
+  async function loadSuggestedMerchants() {
+    const el = document.getElementById("suggested-merchants");
+    try {
+      const data = await Choropia.listMerchants();
+      const results = (data.results || data).slice(0, 4);
+      if (!results.length) {
+        el.innerHTML = '<p class="text-xs text-outline">No storefronts yet.</p>';
+        return;
+      }
+      el.innerHTML = results
+        .map(
+          (m) => `
+        <div class="flex items-center justify-between gap-2">
+          <a href="/merchants/${m.id}/" class="flex items-center gap-2 min-w-0">
+            ${m.logo ? `<img src="${m.logo}" class="w-8 h-8 rounded-full object-cover shrink-0" />` : `<div class="w-8 h-8 rounded-full bg-surface-container shrink-0"></div>`}
+            <span class="text-sm font-medium truncate">${m.business_name}</span>
+          </a>
+        </div>`
+        )
+        .join("");
+    } catch (err) {
+      el.innerHTML = "";
+    }
+  }
+
+  loadFeed();
+  loadSuggestedMerchants();
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+{% block title %}Messages — Choropia{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4 text-on-surface">Messages</h1>
+<div id="conversations-list" class="card divide-y divide-outline-variant">
+  <p class="p-4 text-outline">Loading&hellip;</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  async function loadConversations() {
+    const list = document.getElementById("conversations-list");
+    if (!Choropia.isAuthenticated()) {
+      window.location.href = "{% url 'login' %}";
+      return;
+    }
+    try {
+      const data = await Choropia.listConversations();
+      const results = data.results || data;
+      if (!results.length) {
+        list.innerHTML = '<p class="p-4 text-outline">No conversations yet — message a seller from a listing to start one.</p>';
+        return;
+      }
+      list.innerHTML = results
+        .map(
+          (c) => `
+        <a href="/messages/${c.id}/" class="flex items-center gap-3 p-4 hover:bg-surface-container-low transition-colors">
+          ${
+            c.other_party_avatar
+              ? `<img src="${c.other_party_avatar}" class="w-11 h-11 rounded-full object-cover shrink-0" />`
+              : `<div class="w-11 h-11 rounded-full bg-surface-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-surface-variant">person</span></div>`
+          }
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-semibold text-on-surface truncate">${c.other_party_name || "Choropia user"}</span>
+              ${c.last_message ? `<span class="text-xs text-outline shrink-0">${new Date(c.last_message.created_at).toLocaleDateString()}</span>` : ""}
+            </div>
+            <p class="text-xs text-secondary font-medium truncate">${c.listing_title || `Listing #${c.listing}`}</p>
+            <p class="text-sm text-on-surface-variant truncate">${c.last_message ? c.last_message.body : "No messages yet"}</p>
+          </div>
+        </a>`
+        )
+        .join("");
+    } catch (err) {
+      list.innerHTML = `<p class="p-4 text-red-500">${err.message}</p>`;
+    }
+  }
+  loadConversations();
+</script>
+{% endblock %}

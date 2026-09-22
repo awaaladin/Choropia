@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary-container": "#0e1c2f", "on-background": "#191c1e", "on-primary": "#ffffff", "on-tertiary-container": "#76859b", "surface-dim": "#d8dadd", "secondary-container": "#b3d1fd", "on-primary-fixed-variant": "#3a475c", "surface-container-highest": "#e0e3e6", "inverse-on-surface": "#eff1f4", "secondary-fixed": "#d3e4ff", "inverse-primary": "#bac7e1", "primary-fixed-dim": "#bac7e1", "on-tertiary": "#ffffff", "secondary": "#426086", "primary-fixed": "#d6e3fe", "surface-bright": "#f7f9fc", "on-surface": "#191c1e", "on-secondary-fixed": "#001c38", "on-secondary-fixed-variant": "#29486d", "on-error-container": "#93000a", "on-secondary-container": "#3b5a7f", "error-container": "#ffdad6", "inverse-surface": "#2d3133", "surface-container-lowest": "#ffffff", "tertiary": "#000000", "surface-variant": "#e0e3e6", "on-primary-container": "#77849c", "on-error": "#ffffff", "on-secondary": "#ffffff", "on-primary-fixed": "#0e1c2f", "error": "#ba1a1a", "background": "#f7f9fc", "secondary-fixed-dim": "#aac9f4", "on-surface-variant": "#44474c", "surface-container-high": "#e6e8eb", "surface-container": "#eceef1", "surface": "#f7f9fc", "on-tertiary-fixed": "#0d1c2f", "on-tertiary-fixed-variant": "#3a485c", "surface-tint": "#525f75", "tertiary-fixed-dim": "#b9c7e0", "primary": "#000000", "outline": "#75777d", "tertiary-container": "#0d1c2f", "surface-container-low": "#f2f4f7", "tertiary-fixed": "#d5e3fd", "outline-variant": "#c5c6cd" }, borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, spacing: { "space-3xl": "4rem", "space-sm": "0.5rem", "margin-expanded": "2rem", "gutter-medium": "1rem", "space-xl": "2rem", "space-xxs": "0.125rem", "margin-compact": "1rem", "space-base": "1rem", "space-lg": "1.5rem", "gutter-expanded": "1.5rem", "space-2xl": "3rem", "gutter-compact": "0.75rem", "margin-medium": "1.5rem", "space-xs": "0.25rem", "space-md": "0.75rem" }, fontFamily: { "body-lg": ["Inter"], "headline-lg": ["Inter"], "display-lg-mobile": ["Inter"], "label-lg": ["Inter"], "title-sm": ["Inter"], "body-sm": ["Inter"], "label-sm": ["Inter"], "title-md": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"], "display-lg": ["Inter"], "label-md": ["Inter"], "body-md": ["Inter"], "numeric-metric": ["Inter"], "title-lg": ["Inter"] }, fontSize: { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }], "title-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.005em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "numeric-metric": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.03em", "fontWeight": "500" }], "title-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100vh;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-margin-compact flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmKHLGmJpbvEwAzO60uOyvmnrzbOndYDruJ1Qxu7G60P2IPpk5ZFVzqM6kcn8q1JzG2gdVdx54X4N7VTcKzBs8UM2HMOW06F3zS0cx5nMGdIGAqT6mxorkYGw8cofqf0G2RGfDqHLV22zrqpytKBR2Hmb6O9Nas3m8qYUW88SDNxxvhmA2I17nC-gFxqMlNPtYwBhq8GMNI4pcFFz-QE7EDzR4OjyrUQNWyio0GVe4y6IGVZKA9bpD"/><div class="flex flex-col"><span class="font-title-lg text-title-lg text-on-surface tracking-tight leading-none">Choropia</span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Marketplace</span></div></div><div class="flex items-center gap-space-xs"><a aria-label="Create Post" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="create-post"><span class="material-symbols-outlined text-[24px]">add_circle</span></a><button class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[24px]">notifications</span><span class="absolute top-2.5 right-2.5 w-4 h-4 bg-error text-on-error rounded-full flex items-center justify-center font-label-sm text-[9px] leading-none font-semibold">3</span></button><div class="w-11 h-11 flex items-center justify-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWvKeTZtEDkbs-CzNvY3aew92fuU0doWTMQf7BN1HDEx9u_Mai2HQ8QmaFUzmUiF3KdFtz4KIYNUPaCTYS3gGjMTr148E0EWmPyfQk-IBNunYxqT_kui5qSVmDtADxn9CGjWECKGObdl9eObE4G59DuL4TW4UtN0sQ64Y_0y5Su-Dx3lxwgNnhWevYOu8pk9hPXAQO5XWy7kH-_WLfet_lrlIIHekrkTKywX9Qapah79lPn2QurxRS"/></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-20 bg-surface"><div class="flex flex-col w-full">
+<!-- Status / Business Spotlights Reel -->
+<section aria-label="Verified Spotlights" class="w-full pt-space-xs pb-space-sm bg-surface-container-low">
+<div class="flex items-center gap-space-md overflow-x-auto px-margin-compact no-scrollbar py-space-xs">
+<!-- User's Add Story / Status Node -->
+<div class="flex flex-col items-center gap-space-xs flex-shrink-0 cursor-pointer group">
+<div class="relative w-[60px] h-[60px] rounded-full p-[2px] bg-surface-container-highest flex items-center justify-center">
+<div class="w-full h-full rounded-full bg-surface-container flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</div>
+<span class="absolute bottom-0 right-0 w-5 h-5 bg-primary-container text-on-primary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[13px]">add</span>
+</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium tracking-tight">Your Asset</span>
+</div>
+<!-- Verified Institution 1 -->
+<div class="flex flex-col items-center gap-space-xs flex-shrink-0 cursor-pointer">
+<div class="relative w-[60px] h-[60px] rounded-full p-[2.5px] bg-gradient-to-tr from-secondary to-primary-container flex items-center justify-center shadow-sm">
+<div class="w-full h-full rounded-full p-[1.5px] bg-surface-container-lowest">
+<img class="w-full h-full object-cover rounded-full" data-alt="Monochrome corporate emblem of an elite Geneva private vault and horology depository, clean architectural geometric lines on deep dark slate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCy1LiogbwHxO1w4YkfRPAZfHOSuvGw9sO8__8uwbjcu8gYBckvssSO3LofBAKpQJQwwyJvupvRylvGhnLYhIH2e1qNQfDLPXPVoSsiUJvRigQnEDXcEjpb9GR9OSr6rZJ38yxbVAVR_zsq3nBEY7qwtrCyNLcg7TVFLWTLo8WY8plv01y8KxFJfUjZffZqLL_WS6GHJM3RQ-RalO_ONI168WYR8Wn4uVWp6PMLZ80CQLweUEg9KNmP"/>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 bg-surface-container-lowest rounded-full p-0.5 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-medium truncate w-16 text-center">GenevaVault</span>
+</div>
+<!-- Verified Dealer 2 -->
+<div class="flex flex-col items-center gap-space-xs flex-shrink-0 cursor-pointer">
+<div class="relative w-[60px] h-[60px] rounded-full p-[2.5px] bg-gradient-to-tr from-secondary to-primary-container flex items-center justify-center shadow-sm">
+<div class="w-full h-full rounded-full p-[1.5px] bg-surface-container-lowest">
+<img class="w-full h-full object-cover rounded-full" data-alt="Portrait of a sophisticated senior European fine art advisor in a tailored charcoal navy blazer with minimalist gallery lighting behind" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrg0qL9PKJxdVxyA3cXPKhFPvLT-IlrAAE7JdIaUqGnYSH7SDzXJOnjige9ZgRNiuGfvSZt7lLlExwuqLbxLoqr8sH3z3Lwn-_l38LVhznN_mcum6eFMnyY8lDB4LQ-__99XD2y13ikSvjmJnNLvX9TCjaDrVdmjfSYWt1519L9qu0rSH80rBkkJJK1H3psoS1ZzSHA-x0Z-fAJZktQ_Y3dI3es5CttzFoXp5ZFh55y7dT4dc--k7U"/>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 bg-surface-container-lowest rounded-full p-0.5 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-medium truncate w-16 text-center">A. Vane</span>
+</div>
+<!-- Verified Institutional Fund 3 -->
+<div class="flex flex-col items-center gap-space-xs flex-shrink-0 cursor-pointer">
+<div class="relative w-[60px] h-[60px] rounded-full p-[2.5px] bg-surface-container-highest flex items-center justify-center">
+<div class="w-full h-full rounded-full p-[1.5px] bg-surface-container-lowest">
+<img class="w-full h-full object-cover rounded-full" data-alt="Minimalist emblem of an algorithmic private credit fund, sleek metallic platinum seal with deep cobalt accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHsQjsx3RnRsppr9lMmOYYq0jRGwrbV1Yl08_Cj3i_SdLOFdTzzOMNBwDPkOVfz78li_gP8QjEzTH-aTwu8RBzw9rstn-TZQiScqPzgzgAg8d_tMdvmB5x_OrWGSSf6j9o5wMskUgrjMdgTAhCco3TcHVXCqXXtbx2ZKzEcx5tcd0s6DmEF31ZQjmuxM8-pkjGFzpn_F2ZK8k2Lg1IuX1G21gZWqlD-386IhR91lUM8FeOs7Nz8XC1"/>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 bg-surface-container-lowest rounded-full p-0.5 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium truncate w-16 text-center">Helios Cap</span>
+</div>
+<!-- Verified Collector 4 -->
+<div class="flex flex-col items-center gap-space-xs flex-shrink-0 cursor-pointer">
+<div class="relative w-[60px] h-[60px] rounded-full p-[2.5px] bg-gradient-to-tr from-secondary to-primary-container flex items-center justify-center shadow-sm">
+<div class="w-full h-full rounded-full p-[1.5px] bg-surface-container-lowest">
+<img class="w-full h-full object-cover rounded-full" data-alt="Editorial portrait of an executive female tech founder and high-end automotive collector against a modern architectural pavilion" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHLbH0qB8E7yIZtnegDIaVUgpRBSdcQFFWt-WoBrWN9y0Iqd3OT9oYoTxx0MCrAZHTp_OLGenmFnKZEW_flRFhCtapsnFnqHWN7xpx9qai073F4H1y1idJL7KynGVRMc4_klHxew3o5l-shvClKHv3FCscFeb_a-PetITFlbBskGvX7_jKf0BzvYOcZ1WD-CLOVePHxQtbtybmgbubRIIrGDiIAWBYuYCjUJEXlcBKIN8ObGuyXBlw"/>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 bg-surface-container-lowest rounded-full p-0.5 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface font-medium truncate w-16 text-center">Claire.S</span>
+</div>
+<!-- Verified Custodian 5 -->
+<div class="flex flex-col items-center gap-space-xs flex-shrink-0 cursor-pointer">
+<div class="relative w-[60px] h-[60px] rounded-full p-[2.5px] bg-surface-container-highest flex items-center justify-center">
+<div class="w-full h-full rounded-full p-[1.5px] bg-surface-container-lowest">
+<img class="w-full h-full object-cover rounded-full" data-alt="Insignia crest of Zurich bullion registry, frosted matte titanium finish on midnight navy background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAwr4IK7px3ss7E-HZgu0ZPy8BGbfB5ga7sF-n900tgZDvJ_Fl3vFqoZjOjoUMxtyE9dZW4tuFZ1RBFwBHIvt8HUH_GMj52CufE0dXluqz6M5ZQnuYRwDbWRPRdiVCjJcu4dzoFDZRi_U84Jesrf0Nd5ewny6njof6B4bDezKD3O78TxMNvcmnyj_-8G4mwLbugL7L7j3Y2c1X3mmD3ozgF1JnHSqjan1HYVioA3ttyFr4t4Y6SOsk"/>
+</div>
+<span class="absolute -bottom-0.5 -right-0.5 bg-surface-container-lowest rounded-full p-0.5 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary" style="font-variation-settings: 'FILL' 1;">verified</span>
+</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium truncate w-16 text-center">ZürichSafe</span>
+</div>
+</div>
+</section>
+<!-- Filter Chips Bar -->
+<section aria-label="Category Filters" class="w-full py-space-sm bg-surface sticky top-16 z-30 shadow-sm">
+<div class="flex items-center gap-space-xs overflow-x-auto px-margin-compact no-scrollbar" id="filterContainer">
+<button class="filter-chip h-8 px-3.5 rounded-lg font-label-lg text-label-lg flex items-center gap-1.5 whitespace-nowrap bg-primary-container text-on-primary shadow-sm transition-all" data-active="true">
+<span class="material-symbols-outlined text-[16px]">stars</span>
+<span>All</span>
+</button>
+<button class="filter-chip h-8 px-3.5 rounded-lg font-label-lg text-label-lg flex items-center gap-1.5 whitespace-nowrap bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all" data-active="false">
+<span class="material-symbols-outlined text-[16px]">local_mall</span>
+<span>Marketplace Drops</span>
+</button>
+<button class="filter-chip h-8 px-3.5 rounded-lg font-label-lg text-label-lg flex items-center gap-1.5 whitespace-nowrap bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all" data-active="false">
+<span class="material-symbols-outlined text-[16px]">forum</span>
+<span>Discussions</span>
+</button>
+<button class="filter-chip h-8 px-3.5 rounded-lg font-label-lg text-label-lg flex items-center gap-1.5 whitespace-nowrap bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all" data-active="false">
+<span class="material-symbols-outlined text-[16px]">account_balance</span>
+<span>Institutional</span>
+</button>
+<button class="filter-chip h-8 px-3.5 rounded-lg font-label-lg text-label-lg flex items-center gap-1.5 whitespace-nowrap bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all" data-active="false">
+<span class="material-symbols-outlined text-[16px]">analytics</span>
+<span>Insights</span>
+</button>
+</div>
+</section>
+<!-- Feed Streams -->
+<div class="flex flex-col gap-space-sm px-margin-compact pt-space-xs pb-space-3xl">
+<!-- Card 1: Verified Luxury Marketplace Asset Drop -->
+<article class="w-full bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+<!-- Author Header -->
+<div class="flex items-center justify-between p-space-base pb-space-xs">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="relative w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Headshot of a master watchmaker and accredited valuer in crisp studio lighting, neutral luxury background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRBXka4QcS7FnDkF3e7Sa2Rw84O9nY_IkzgvfbY4I4Rk6snCYv7aMqdrSB_67NcZg15z3JcRJM7R30UdHLEdHMZPo-pEHv0I-epXyjKHGfOsxCXBNDLt6RGcNJ4c2jKj8Fv7BCHDGmeOEvKHM-XMnJbOK8wQEMEfOIPO4aTE0riWogbW-e99oIZ4yiprLtXc0WvN3HpH6QpWGK74q45YDNRXs4tscZGVJr3g1iSImZUoM3M0wj_Z-W"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold truncate">Maison Horlogerie Geneva</span>
+<span class="material-symbols-outlined text-[16px] text-secondary flex-shrink-0" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-md text-label-md">
+<span>@geneva_vault</span>
+<span>•</span>
+<span>18m ago</span>
+<span>•</span>
+<span class="inline-flex items-center gap-0.5 text-secondary">
+<span class="material-symbols-outlined text-[12px]">lock</span>
+<span>Tier 1 Escrow</span>
+</span>
+</div>
+</div>
+</div>
+<button aria-label="More options" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+<!-- Post Body Copy -->
+<div class="px-space-base pt-space-xs pb-space-sm">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+          Released from private Swiss custody: A flawless 2022 Patek Philippe Nautilus 5711/1R in 18k Rose Gold with sunburst brown dial. Full provenance papers, original presentation box, and authenticated by Geneva Assay Office.
+        </p>
+<div class="flex flex-wrap gap-1.5 mt-space-xs">
+<span class="font-label-md text-label-md text-secondary font-medium hover:underline cursor-pointer">#HauteHorlogerie</span>
+<span class="font-label-md text-label-md text-secondary font-medium hover:underline cursor-pointer">#PatekPhilippe</span>
+<span class="font-label-md text-label-md text-secondary font-medium hover:underline cursor-pointer">#EscrowProtected</span>
+<span class="font-label-md text-label-md text-secondary font-medium hover:underline cursor-pointer">#AssetClass</span>
+</div>
+</div>
+<!-- Embedded Marketplace Asset Card -->
+<div class="px-space-base pb-space-sm">
+<div class="w-full bg-surface-container-low rounded-lg overflow-hidden flex flex-col group cursor-pointer">
+<!-- Asset Image Container -->
+<div class="relative w-full aspect-[16/10] bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out" data-alt="Close-up macro studio photograph of an authentic Patek Philippe Nautilus 5711/1R in polished rose gold with warm amber reflections on deep slate stone backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn_140DS6ZBosw0raUKyws53MZoXNAs_4APnpUC2-jlO-6Arcu4pQWjDZL9dzZHDNpjCd54Rn52YfeG4U0Gwda1RTZMFeF4Cz0bf9b4yH65OEkOzwxJsHBOTHsaETpVUCBTDG51SIW-u3YPL9J0tVzrpHrZjk9MwXGRsI1CN9sARbEtRYBp8TubmEt5DlQsAr4qnIJjeFyuRj8oGnmyWkCbw3_r9yijO8Bcdqa_9YektR-rVtaCwO7"/>
+<!-- Floating Top Badges -->
+<div class="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+<span class="px-2.5 py-1 rounded bg-primary-container/90 backdrop-blur-md text-on-primary font-label-sm text-label-sm tracking-wider uppercase font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">verified_user</span>
+                Choropia Custody
+              </span>
+<span class="px-2 py-1 rounded bg-surface-container-lowest/90 backdrop-blur-md text-on-surface font-label-sm text-label-sm font-semibold">
+                Mint Condition
+              </span>
+</div>
+<!-- Price & Settlement Overlay Pill -->
+<div class="absolute bottom-2.5 right-2.5">
+<span class="px-3 py-1.5 rounded-lg bg-surface-container-lowest/95 backdrop-blur-md text-on-surface shadow-sm flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium uppercase">Settlement</span>
+<span class="font-title-md text-title-md text-on-surface font-bold tracking-tight">$148,500</span>
+</span>
+</div>
+</div>
+<!-- Asset Details Footer Bar -->
+<div class="p-space-base flex items-center justify-between gap-space-sm bg-surface-container-low">
+<div class="flex flex-col min-w-0">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold truncate">Ref. 5711/1R-001 (Complete Set)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Depository: Geneva FreePort Safe #410-B</span>
+</div>
+<button class="flex-shrink-0 h-9 px-3.5 rounded-lg bg-primary-container text-on-primary font-label-lg text-label-lg flex items-center gap-1.5 active:scale-95 transition-transform" onclick="event.stopPropagation()">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+<span>Inspect Listing</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Engagement Action Bar -->
+<div class="flex items-center justify-between px-space-base py-space-sm bg-surface-container-lowest">
+<div class="flex items-center gap-space-lg">
+<!-- Like Metric -->
+<button aria-label="Like post" class="flex items-center gap-1.5 text-on-surface-variant hover:text-error transition-colors group">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">favorite</span>
+<span class="font-label-md text-label-md font-medium">342</span>
+</button>
+<!-- Comment Metric -->
+<button aria-label="View comments" class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">mode_comment</span>
+<span class="font-label-md text-label-md font-medium">48</span>
+</button>
+<!-- Repost Metric -->
+<button aria-label="Share or repost" class="flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors group">
+<span class="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform">repeat</span>
+<span class="font-label-md text-label-md font-medium">19</span>
+</button>
+</div>
+<!-- Escrow / Bookmark Action -->
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-2.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1 hover:bg-surface-container-high transition-colors" title="Bookmark in Escrow Vault">
+<span class="material-symbols-outlined text-[16px] text-secondary">bookmark_add</span>
+<span class="hidden xs:inline font-medium">Watchlist</span>
+</button>
+<button aria-label="Share externally" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Card 2: Market Intelligence & Institutional Insights Report -->
+<article class="w-full bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+<!-- Author Header -->
+<div class="flex items-center justify-between p-space-base pb-space-xs">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="relative w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Executive corporate portrait of a financial macro strategist in steel-gray business attire with soft natural window reflection" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoiu6afi0kVDEMqk272p7rNcN_mxPNhZGEMEldpnEXdQVm5GG39CtRmuU7hEhWWqd8InJBHUDC7aFscQ3xanSZJKZxcbz7g3kNoLH3gQ2dvphJ-9XowJMcopU4klVyEvUG9JoorUmGbvV_e9m2XD8TyDbwYCRkl4u4QEnYnPEN1OwjKqtBsZUNjIiduQwgGekJ_U9fmfmWu2BUg5nqV2cA5t2fN53571aC7sBJbwbeLbYa-_W0X_gc"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold truncate">Dr. Sterling Vance</span>
+<span class="material-symbols-outlined text-[16px] text-secondary flex-shrink-0" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-md text-label-md">
+<span>Chief Macro Strategist</span>
+<span>•</span>
+<span>2h ago</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+            Institutional Report
+          </span>
+<button aria-label="More options" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[20px]">more_vert</span>
+</button>
+</div>
+</div>
+<!-- Post Body Copy -->
+<div class="px-space-base pt-space-xs pb-space-sm">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+          Q3 Alternative Assets Liquidity Benchmark: Luxury indices maintain negative correlation (-0.42) against broad equity drawdown. Secondary watch settlement cycles accelerated to 4.2 days via guaranteed Choropia smart-settlement.
+        </p>
+<div class="flex flex-wrap gap-1.5 mt-space-xs">
+<span class="font-label-md text-label-md text-secondary font-medium hover:underline cursor-pointer">#MacroInsights</span>
+<span class="font-label-md text-label-md text-secondary font-medium hover:underline cursor-pointer">#LiquidityReport</span>
+<span class="font-label-md text-label-md text-secondary font-medium hover:underline cursor-pointer">#PrivateWealth</span>
+</div>
+</div>
+<!-- Analytical Chart & Metric Preview -->
+<div class="px-space-base pb-space-sm">
+<div class="w-full bg-surface-container-low rounded-lg p-space-base flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Choropia Liquidity Index (CLI)</span>
+<span class="font-title-lg text-title-lg text-on-surface font-bold tracking-tight">142.84 pts <span class="text-secondary font-label-lg text-label-lg font-medium">+6.4% MoM</span></span>
+</div>
+<div class="h-8 px-2.5 rounded bg-surface-container-highest flex items-center gap-1 text-on-surface font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Verified Data Feed</span>
+</div>
+</div>
+<!-- Minimal SVG Sparkline Chart -->
+<div class="w-full h-24 relative flex items-end">
+<svg class="w-full h-full text-secondary" fill="none" preserveaspectratio="none" viewbox="0 0 320 90">
+<defs>
+<lineargradient id="cliGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="currentColor" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="currentColor" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,75 Q35,68 70,55 T140,50 T210,35 T260,28 T320,10 L320,90 L0,90 Z" fill="url(#cliGradient)"></path>
+<path d="M0,75 Q35,68 70,55 T140,50 T210,35 T260,28 T320,10" stroke="currentColor" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+<div class="absolute top-1 right-2 flex items-center gap-1 bg-surface-container-lowest px-2 py-0.5 rounded shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">trending_up</span>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">Peak Volume</span>
+</div>
+</div>
+<!-- Quick Metrics Bar -->
+<div class="grid grid-cols-3 gap-space-xs pt-space-xs">
+<div class="bg-surface-container-lowest p-2 rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Escrow Vol</span>
+<span class="font-title-sm text-title-sm font-semibold text-on-surface">$84.2M</span>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Avg Cleared</span>
+<span class="font-title-sm text-title-sm font-semibold text-on-surface">4.2 Days</span>
+</div>
+<div class="bg-surface-container-lowest p-2 rounded flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Risk Index</span>
+<span class="font-title-sm text-title-sm font-semibold text-on-surface">0.08 (Low)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Engagement Action Bar -->
+<div class="flex items-center justify-between px-space-base py-space-sm bg-surface-container-lowest">
+<div class="flex items-center gap-space-lg">
+<button aria-label="Like report" class="flex items-center gap-1.5 text-on-surface-variant hover:text-error transition-colors group">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">favorite</span>
+<span class="font-label-md text-label-md font-medium">891</span>
+</button>
+<button aria-label="View analysis remarks" class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors group">
+<span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">mode_comment</span>
+<span class="font-label-md text-label-md font-medium">114</span>
+</button>
+<button aria-label="Cite report" class="flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors group">
+<span class="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform">repeat</span>
+<span class="font-label-md text-label-md font-medium">107</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-2.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm flex items-center gap-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[16px] text-secondary">download</span>
+<span class="font-medium">Dossier PDF</span>
+</button>
+<button aria-label="Share analysis" class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<!-- Floating Action Button (FAB) - Jetpack Compose Extended FAB Style -->
+<div class="fixed bottom-24 right-4 z-40">
+<a class="flex items-center gap-2 h-14 pl-4 pr-5 rounded-full bg-primary-container text-on-primary shadow-xl hover:opacity-95 active:scale-95 transition-all group" href="create-post">
+<span class="material-symbols-outlined text-[24px] group-hover:rotate-90 transition-transform duration-300">add</span>
+<span class="font-label-lg text-label-lg tracking-wide font-semibold">Create Post</span>
+</a>
+</div>
+</div>
+<script>
+  // Simple filter chip toggle interaction
+  document.querySelectorAll('#filterContainer .filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#filterContainer .filter-chip').forEach(c => {
+        c.classList.remove('bg-primary-container', 'text-on-primary', 'shadow-sm');
+        c.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+        c.setAttribute('data-active', 'false');
+      });
+      chip.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+      chip.classList.add('bg-primary-container', 'text-on-primary', 'shadow-sm');
+      chip.setAttribute('data-active', 'true');
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/95 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary-container font-semibold [&amp;_span.material-symbols-outlined]:bg-secondary-container [&amp;_span.material-symbols-outlined]:text-on-secondary-container"><div class="flex justify-around items-center h-20 px-space-xs"><a aria-current="page" class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 transition-all text-primary-container font-semibold [&amp;_span.material-symbols-outlined]:bg-secondary-container [&amp;_span.material-symbols-outlined]:text-on-secondary-container" data-path="feed" href="feed"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">dynamic_feed</span><span class="font-label-md text-label-md tracking-normal">Feed</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="reels" href="reels"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">play_circle</span><span class="font-label-md text-label-md tracking-normal">Reels</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="marketplace" href="marketplace"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">store</span><span class="font-label-md text-label-md tracking-normal">Marketplace</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="banking" href="banking"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">account_balance_wallet</span><span class="font-label-md text-label-md tracking-normal">Banking</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="profile" href="profile"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">person</span><span class="font-label-md text-label-md tracking-normal">Profile</span></a></div></nav></body></html>

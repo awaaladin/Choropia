@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-bright": "#f8f9ff",
+          "primary-fixed-dim": "#bac7e1",
+          "inverse-primary": "#bac7e1",
+          "on-surface": "#0b1c30",
+          "surface-variant": "#d3e4fe",
+          "tertiary-container": "#00174b",
+          "background": "#f8f9ff",
+          "surface-container-high": "#dce9ff",
+          "primary-fixed": "#d6e3fe",
+          "surface-container-highest": "#d3e4fe",
+          "tertiary": "#000000",
+          "on-error-container": "#93000a",
+          "surface-container-low": "#eff4ff",
+          "tertiary-fixed": "#dbe1ff",
+          "on-primary-fixed": "#0e1c2f",
+          "error-container": "#ffdad6",
+          "on-primary": "#ffffff",
+          "inverse-surface": "#213145",
+          "error": "#ba1a1a",
+          "tertiary-fixed-dim": "#b4c5ff",
+          "outline": "#75777d",
+          "on-background": "#0b1c30",
+          "surface": "#f8f9ff",
+          "primary": "#000000",
+          "on-error": "#ffffff",
+          "on-surface-variant": "#44474c",
+          "on-secondary-container": "#3b5a7f",
+          "surface-tint": "#525f75",
+          "secondary": "#426086",
+          "on-primary-fixed-variant": "#3a475c",
+          "on-secondary": "#ffffff",
+          "secondary-fixed": "#d3e4ff",
+          "on-secondary-fixed": "#001c38",
+          "on-tertiary": "#ffffff",
+          "primary-container": "#0e1c2f",
+          "on-primary-container": "#77849c",
+          "secondary-fixed-dim": "#aac9f4",
+          "surface-dim": "#cbdbf5",
+          "outline-variant": "#c5c6cd",
+          "inverse-on-surface": "#eaf1ff",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-container": "#497cff",
+          "secondary-container": "#b3d1fd",
+          "on-tertiary-fixed": "#00174b",
+          "on-tertiary-fixed-variant": "#003ea8",
+          "surface-container": "#e5eeff",
+          "on-secondary-fixed-variant": "#29486d"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "margin-mobile": "1rem",
+          "space-3xl": "4rem",
+          "space-xl": "2rem",
+          "space-md": "0.75rem",
+          "space-2xl": "3rem",
+          "gutter-mobile": "1rem",
+          "gutter-desktop": "1.5rem",
+          "space-base": "1rem",
+          "space-xs": "0.25rem",
+          "margin-desktop": "3rem",
+          "margin-tablet": "2rem",
+          "space-xxs": "0.125rem"
+        },
+        "fontFamily": {
+          "label-md": ["Inter"],
+          "body-sm": ["Inter"],
+          "display": ["Inter"],
+          "headline-lg": ["Inter"],
+          "headline-md": ["Inter"],
+          "mono-financial": ["Inter"],
+          "label-sm": ["Inter"],
+          "body-md": ["Inter"],
+          "headline-lg-mobile": ["Inter"],
+          "headline-sm": ["Inter"],
+          "body-lg": ["Inter"]
+        },
+        "fontSize": {
+          "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}],
+          "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+          "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "mono-financial": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "headline-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "headline-sm": ["18px", {"lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full max-w-[1440px] mx-auto px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg shrink-0"><div class="flex items-center gap-space-xs"><img alt="Choropia Marketplace Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UmRW9huFY4OWAO5ag9uVrwcIRRsjKrb8qJvg97xAfUXnBb3meL2yneKiJQACe-W_GohlJgEH2yheZTctACfY9pv0MD9TvrDdgs1FIcmbLVVcX2NVOkeV_s_gLabhz_c5Qz6HiRdG9ZylnCHkxTD70Dt7bpNQN7Fdc_zCZbSwanD2uYLq2-yM0HQhnpMpVukcKR3EO-qpl_MydE111aU3DY_OUOeMz85-FRXJ9hJI2waMF7hYaf-UKkoUM"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">Choropia</span></div><div class="relative hidden lg:flex items-center"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">search</span><input class="w-72 xl:w-80 h-9 pl-9 pr-14 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-secondary transition-all" placeholder="Search posts, goods, services, or verified users..." type="text"/><kbd class="absolute right-2 px-1.5 py-0.5 bg-surface-container-lowest rounded text-[10px] font-mono-financial text-on-surface-variant shadow-[0_1px_2px_rgba(11,25,44,0.06)]">⌘K</kbd></div></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container text-on-surface font-semibold rounded-lg"><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="feed" href="#">Feed</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="reels" href="#">Reels</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="marketplace" href="#">Marketplace</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="banking-wallet" href="#">Banking & Wallet</a><a class="relative px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all flex items-center gap-space-xs" data-path="messages" href="#"><span>Messages</span><span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded-full">3</span></a></nav><div class="flex items-center gap-space-sm shrink-0"><button class="inline-flex items-center gap-space-xs h-9 px-space-md bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span class="hidden sm:inline">Create Post</span></button><button class="relative w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-on-error font-label-sm text-[10px] rounded-full flex items-center justify-center font-bold ring-2 ring-surface-container-lowest">4</span></button><button class="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">dark_mode</span></button><div class="relative flex items-center gap-space-xs pl-space-xs cursor-pointer"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3XdH6sHHTR0I01DogpSNWPAqCPl6alpW9NqwLayaoB4LeG4WOL-jEwM_b-G3mfS1NYbFCRUdhPBYW-11t_Y-sw-TpTOluQY_RMLz377laXdYasuCSNTdvLtXcy3J1R3EAotz_L20ONAHoLOTlh5NQ3E8i-ZE0avaDZA5dGp9hzKEGDE9qcBxy0x2z-nzxVohw7Gi2OXcx-hJWqoQV7P1pCU8WIwkqka7dHWFN1sCWmu6Hh9GXpWZw"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary rounded-full ring-2 ring-surface-container-lowest"></span></div><span class="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span></div></div></div></header><main class="w-full max-w-[1440px] mx-auto px-gutter-desktop pt-16 bg-surface"><div class="flex flex-col w-full py-space-xl pb-space-3xl">
+<!-- Protocol Status Strip -->
+<div class="w-full max-w-5xl mx-auto mb-space-lg flex flex-wrap items-center justify-between gap-space-sm px-space-base py-space-sm bg-surface-container-low rounded-xl shadow-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="inline-flex items-center justify-center w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Node: US-EAST-CLR-09</span>
+<span class="text-outline-variant font-mono-financial text-body-sm">/</span>
+<span class="font-mono-financial text-body-sm text-on-surface truncate">Dual-Sign Escrow Clearing Protocol v4.12</span>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
+<span>Hardware Enclave Active</span>
+</div>
+<div class="px-space-xs py-0.5 bg-surface-container rounded font-mono-financial text-label-sm text-on-surface">
+        Latency: 18ms
+      </div>
+</div>
+</div>
+<!-- Primary Workspace: Split Authority Layout -->
+<div class="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- Left Column: Primary Transaction Constructor (7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Module Header -->
+<div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">Escrow & Settlement Terminal</span>
+<span class="px-space-xs py-0.5 rounded bg-surface-container font-mono-financial text-label-sm text-on-surface">TX-902-881E</span>
+</div>
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">Send Funds or Create Milestone Escrow</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Instant zero-fee settlement across verified Choropia institutional and commercial nodes.</p>
+</div>
+<!-- Step 1: Verified Recipient Selector -->
+<div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-5 h-5 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-mono-financial text-label-sm">1</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Select Counterparty</h2>
+</div>
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1 cursor-pointer hover:underline">
+<span class="material-symbols-outlined text-[14px]">history</span> Recent Parties
+          </span>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">person_search</span>
+<input class="w-full h-10 pl-9 pr-24 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest focus:shadow-md transition-all" placeholder="Search verified handle, ENS, or tax ID..." type="text" value="sarah_crafts"/>
+<span class="absolute right-2.5 top-2 px-2 py-0.5 bg-surface-container rounded font-label-sm text-label-sm text-secondary">MATCH 1/1</span>
+</div>
+<!-- Selected Recipient Card with Reputation Data -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="relative shrink-0">
+<img class="w-12 h-12 rounded-lg object-cover" data-alt="Editorial profile portrait of Sarah Jenkins, artisan ceramicist, clean high-key studio lighting with neutral slate background, wearing navy workwear apron, calm authoritative demeanor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoj8pZt17X6-SRRRs-EM5nIuAajWSlYf8pCWmHGHLo8brDfnlfVO8YILQbxKScTrqadfd2L0zTdiYttwLpwTppX4H-lOcEe7X_wLKpvP2MQPvG5p1C7O1jm8pO1FMwqbxrYI0BS0b70NAeucSHr5ZA0w2sNM4LWcqfwLxkNTsFL1mwmreH-Oa-ebwLm1p3YuS8UHO2cQsMxPBM61lUlvbPNOtsiCQTj0h742TiK0qMj6OGRAJ_Sv-6"/>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-secondary text-on-secondary rounded-full flex items-center justify-center text-[10px]">
+<span class="material-symbols-outlined text-[11px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Sarah Jenkins</span>
+<span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-[10px] rounded tracking-wide uppercase font-semibold">Tier-1 Merchant</span>
+</div>
+<span class="font-mono-financial text-body-sm text-on-surface-variant">@sarah_crafts • ID: CHR-884210</span>
+</div>
+</div>
+<div class="flex sm:flex-col items-baseline sm:items-end justify-between w-full sm:w-auto pt-space-xs sm:pt-0">
+<div class="flex items-center gap-1 font-label-md text-label-md text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span>99.8% Trust Index</span>
+</div>
+<span class="font-mono-financial text-body-sm text-on-surface-variant">$14,200.00 Settled Vol</span>
+</div>
+</div>
+</div>
+<!-- Step 2: Currency & Clearing Amount -->
+<div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-5 h-5 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-mono-financial text-label-sm">2</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Amount & Liquidity Source</h2>
+</div>
+<div class="px-space-xs py-0.5 bg-surface-container-low rounded font-mono-financial text-label-sm text-on-surface-variant">
+            Available: <strong class="text-on-surface">$28,450.00 USD</strong>
+</div>
+</div>
+<div class="bg-surface-container-low p-space-lg rounded-xl flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Debit Sum</span>
+<div class="flex items-center gap-1 px-space-xs py-0.5 bg-surface-container-lowest rounded font-mono-financial text-label-md text-on-surface">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+<span>USD - Commercial Clearing</span>
+</div>
+</div>
+<div class="flex items-baseline justify-between gap-space-md">
+<div class="flex items-baseline gap-1">
+<span class="font-display text-display text-on-surface font-semibold tracking-tight">$</span>
+<input class="w-full bg-transparent font-display text-display text-on-surface font-semibold tracking-tight focus:outline-none placeholder:text-outline-variant max-w-[280px]" id="transfer-amount" type="text" value="1,400.00"/>
+</div>
+<span class="font-mono-financial text-headline-sm text-on-surface-variant">USD</span>
+</div>
+</div>
+<!-- Quick Presets -->
+<div class="grid grid-cols-5 gap-space-xs">
+<button class="preset-btn py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface rounded font-mono-financial text-label-md transition-colors" data-val="100.00" type="button">$100</button>
+<button class="preset-btn py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface rounded font-mono-financial text-label-md transition-colors" data-val="250.00" type="button">$250</button>
+<button class="preset-btn py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface rounded font-mono-financial text-label-md transition-colors" data-val="500.00" type="button">$500</button>
+<button class="preset-btn py-1.5 bg-surface-container-low hover:bg-surface-container text-on-surface rounded font-mono-financial text-label-md transition-colors" data-val="1000.00" type="button">$1,000</button>
+<button class="preset-btn py-1.5 bg-surface-container text-on-surface font-semibold rounded font-mono-financial text-label-md hover:bg-secondary-container transition-colors" data-val="28450.00" type="button">Max</button>
+</div>
+</div>
+<!-- Step 3: Transfer Mechanism Architecture -->
+<div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-5 h-5 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-mono-financial text-label-sm">3</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Settlement Mechanism</h2>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<!-- Option A: Escrow (Default Selected) -->
+<label class="relative flex flex-col p-space-md rounded-xl bg-surface-container cursor-pointer transition-all hover:shadow-md">
+<input checked="" class="sr-only" id="type-escrow" name="transfer_type" type="radio" value="escrow"/>
+<div class="flex items-center justify-between mb-space-xs">
+<span class="flex items-center gap-space-xs text-on-surface font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-secondary text-[20px]">assured_workload</span>
+                Escrow Custody
+              </span>
+<span class="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-lowest"></span>
+</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Funds locked into cryptographic escrow with milestone-based inspection release.</p>
+<div class="mt-space-md pt-space-xs flex items-center gap-1 font-label-sm text-label-sm text-secondary font-semibold">
+<span class="material-symbols-outlined text-[14px]">shield</span>
+<span>Full Buyer & Merchant Protection</span>
+</div>
+</label>
+<!-- Option B: Direct P2P -->
+<label class="relative flex flex-col p-space-md rounded-xl bg-surface-container-low cursor-pointer transition-all hover:bg-surface-container">
+<input class="sr-only" id="type-direct" name="transfer_type" type="radio" value="direct"/>
+<div class="flex items-center justify-between mb-space-xs">
+<span class="flex items-center gap-space-xs text-on-surface font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">bolt</span>
+                Direct P2P
+              </span>
+<span class="w-4 h-4 rounded-full bg-outline-variant flex items-center justify-center"></span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Instant irrevocable balance release to counterparty wallet immediately.</p>
+<div class="mt-space-md pt-space-xs flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">info</span>
+<span>Zero Holding Period</span>
+</div>
+</label>
+</div>
+<!-- Step 4: Escrow Parameters (Interactive Container) -->
+<div class="flex flex-col gap-space-md pt-space-sm" id="escrow-parameters">
+<div class="flex items-center justify-between pt-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-5 h-5 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-mono-financial text-label-sm">4</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Escrow Verification Terms</h3>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Smart Contract V4</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface">Inspection Window</label>
+<div class="relative">
+<select class="w-full h-10 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none appearance-none cursor-pointer">
+<option>48 Hours Post-Delivery</option>
+<option>24 Hours Fast Track</option>
+<option>7 Calendar Days Extended</option>
+<option>Upon Verified Carrier Scan</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant text-[18px] pointer-events-none">unfold_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface">Clearance Trigger</label>
+<div class="relative">
+<select class="w-full h-10 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none appearance-none cursor-pointer">
+<option>Manual Buyer Sign-off (Auto-settle 48h)</option>
+<option>Dual Cryptographic Multi-Sig</option>
+<option>Third-Party Consignor Inspection</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant text-[18px] pointer-events-none">unfold_more</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface">Memo / Deliverable Contract Reference</label>
+<input class="w-full h-10 px-3 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:shadow-md transition-all" type="text" value="Phase 1 - Handcrafted Ceramic Collection batch A"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Institutional Settlement Summary & Authorization Deck (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg sticky top-20">
+<!-- Transaction Card Preview -->
+<div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-md flex flex-col gap-space-md relative overflow-hidden">
+<!-- Visual Accent Line -->
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary"></div>
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Ledger Settlement Breakdown</span>
+<span class="inline-flex items-center gap-1 font-mono-financial text-label-sm text-secondary bg-surface-container px-2 py-0.5 rounded">
+<span class="material-symbols-outlined text-[12px]">lock</span> Escrow Mode
+          </span>
+</div>
+<!-- Ledger Items -->
+<div class="flex flex-col gap-space-sm py-space-xs">
+<div class="flex items-center justify-between font-body-md text-body-md">
+<span class="text-on-surface-variant">Disbursed Principal</span>
+<span class="font-mono-financial font-semibold text-on-surface">$1,400.00 USD</span>
+</div>
+<div class="flex items-center justify-between font-body-md text-body-md">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>Network Settlement Fee</span>
+<span class="material-symbols-outlined text-[14px] text-outline cursor-help" title="Institutional zero-fee consensus">help_outline</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-financial text-body-sm line-through text-outline-variant">$4.50</span>
+<span class="font-mono-financial font-semibold text-secondary">$0.00 (Zero-Fee)</span>
+</div>
+</div>
+<div class="flex items-center justify-between font-body-md text-body-md">
+<span class="text-on-surface-variant">Escrow Protocol Custody</span>
+<span class="font-mono-financial font-semibold text-secondary">$0.00 (Sponsored)</span>
+</div>
+<div class="flex items-center justify-between font-body-md text-body-md">
+<span class="text-on-surface-variant">Dispute Protection Bond</span>
+<span class="font-mono-financial text-on-surface font-semibold">Included</span>
+</div>
+<!-- Total Calculation Module -->
+<div class="mt-space-xs p-space-md bg-surface-container rounded-lg flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Total Debited</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Immediate clearing reserve</span>
+</div>
+<div class="text-right">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">$1,400.00</span>
+<span class="block font-mono-financial text-label-sm text-on-surface-variant">USD NET</span>
+</div>
+</div>
+</div>
+<!-- Workflow Visual State -->
+<div class="p-space-md bg-surface-container-low rounded-lg flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Release Progression Pipeline</span>
+<div class="flex items-center justify-between relative">
+<div class="flex flex-col items-center gap-1 z-10">
+<span class="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center font-mono-financial text-[11px] font-bold">1</span>
+<span class="font-label-sm text-[10px] text-on-surface font-medium">Fund Lock</span>
+</div>
+<div class="flex-1 h-0.5 bg-secondary-container mx-2 -mt-4"></div>
+<div class="flex flex-col items-center gap-1 z-10">
+<span class="w-6 h-6 rounded-full bg-surface-container text-on-surface flex items-center justify-center font-mono-financial text-[11px] font-bold">2</span>
+<span class="font-label-sm text-[10px] text-on-surface-variant">Fulfillment</span>
+</div>
+<div class="flex-1 h-0.5 bg-surface-container mx-2 -mt-4"></div>
+<div class="flex flex-col items-center gap-1 z-10">
+<span class="w-6 h-6 rounded-full bg-surface-container text-on-surface flex items-center justify-center font-mono-financial text-[11px] font-bold">3</span>
+<span class="font-label-sm text-[10px] text-on-surface-variant">Inspect</span>
+</div>
+<div class="flex-1 h-0.5 bg-surface-container mx-2 -mt-4"></div>
+<div class="flex flex-col items-center gap-1 z-10">
+<span class="w-6 h-6 rounded-full bg-surface-container text-on-surface flex items-center justify-center font-mono-financial text-[11px] font-bold">4</span>
+<span class="font-label-sm text-[10px] text-on-surface-variant">Disburse</span>
+</div>
+</div>
+</div>
+<!-- Transaction Action Center -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<button class="w-full h-11 bg-primary-container text-on-primary rounded-lg font-label-md text-label-md flex items-center justify-center gap-space-xs hover:bg-on-surface active:scale-[0.99] transition-all shadow-sm" id="authorize-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span>Authorize & Sign Escrow Transfer</span>
+</button>
+<div class="grid grid-cols-2 gap-space-xs">
+<button class="h-9 px-space-md bg-surface-container-low text-on-surface rounded-lg font-label-sm text-label-sm hover:bg-surface-container transition-all" type="button">
+              Save as Draft
+            </button>
+<button class="h-9 px-space-md bg-surface-container-low text-on-surface-variant hover:text-error rounded-lg font-label-sm text-label-sm hover:bg-surface-container transition-all" type="button">
+              Cancel Transfer
+            </button>
+</div>
+</div>
+<!-- Institutional Security Badges -->
+<div class="pt-space-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">fingerprint</span>
+<span>Multi-Sig Key Signing Required on Execution</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">encrypted</span>
+<span>TLS 1.3 End-to-End Cryptographic Audit Trail</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">gavel</span>
+<span>Binding Digital Arbitrage via Choropia Resolution Guild</span>
+</div>
+</div>
+</div>
+<!-- Merchant Lineage Preview / Mini Proof of Work -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex items-center gap-space-md">
+<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Handcrafted minimalist ceramic stoneware bowls in matte charcoal glaze stacked neatly on concrete pedestal with soft daylight and dark stone texture." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZpBdsAbxqU85lg43AdWAGn-YAltb0uMyW5s7Z8dAu8yUHBDy2XROlMW4O2c4i8dVqG1Dy3F_fi1dwUFwnDI_XxuyxvzV3Wmb6rAamdZdObLl_b8KsmkktGtekGm4TFqqivjEzLOl6rJTbxzHc-MX4h2ueWkpdbtRi7baG4vrxCuvZKg09OdJcsQnDKiI7bgGZtclPkJvGk432a7D9X2GyhQppqWMPCJ1Pp7M5rDdthUT5WoIvxhZ7"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Linked Deliverable</span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Ceramic Collection Batch A</span>
+<span class="font-body-sm text-body-sm text-secondary truncate">Inventory SKU: CR-2025-091A (12 Units)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Preset amount buttons
+    const amountInput = document.getElementById('transfer-amount');
+    const presetButtons = document.querySelectorAll('.preset-btn');
+
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.getAttribute('data-val');
+        if (amountInput && val) {
+          amountInput.value = parseFloat(val).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          });
+        }
+      });
+    });
+
+    // Toggle escrow options
+    const escrowRadio = document.getElementById('type-escrow');
+    const directRadio = document.getElementById('type-direct');
+    const escrowParams = document.getElementById('escrow-parameters');
+    const authorizeBtn = document.getElementById('authorize-btn');
+
+    function updateTransferMode() {
+      if (escrowRadio && escrowRadio.checked) {
+        if (escrowParams) escrowParams.style.display = 'flex';
+        if (authorizeBtn) {
+          authorizeBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[18px]">verified_user</span>
+            <span>Authorize & Sign Escrow Transfer</span>
+          `;
+        }
+      } else {
+        if (escrowParams) escrowParams.style.display = 'none';
+        if (authorizeBtn) {
+          authorizeBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[18px]">bolt</span>
+            <span>Authorize Instant Direct Transfer</span>
+          `;
+        }
+      }
+    }
+
+    if (escrowRadio && directRadio) {
+      escrowRadio.parentElement.addEventListener('click', () => {
+        escrowRadio.checked = true;
+        directRadio.checked = false;
+        escrowRadio.parentElement.classList.add('bg-surface-container');
+        escrowRadio.parentElement.classList.remove('bg-surface-container-low');
+        directRadio.parentElement.classList.remove('bg-surface-container');
+        directRadio.parentElement.classList.add('bg-surface-container-low');
+        updateTransferMode();
+      });
+
+      directRadio.parentElement.addEventListener('click', () => {
+        directRadio.checked = true;
+        escrowRadio.checked = false;
+        directRadio.parentElement.classList.add('bg-surface-container');
+        directRadio.parentElement.classList.remove('bg-surface-container-low');
+        escrowRadio.parentElement.classList.remove('bg-surface-container');
+        escrowRadio.parentElement.classList.add('bg-surface-container-low');
+        updateTransferMode();
+      });
+    }
+
+    if (authorizeBtn) {
+      authorizeBtn.addEventListener('click', () => {
+        const currentText = authorizeBtn.innerHTML;
+        authorizeBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px] animate-spin">sync</span>
+          <span>Signing Multi-Sig Payload...</span>
+        `;
+        setTimeout(() => {
+          authorizeBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+            <span>Escrow Vault Activated</span>
+          `;
+          authorizeBtn.classList.remove('bg-primary-container');
+          authorizeBtn.classList.add('bg-secondary');
+        }, 1200);
+      });
+    }
+  })();
+</script></main><footer class="w-full bg-surface-container-lowest mt-space-3xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-[1440px] mx-auto px-gutter-desktop py-space-xl flex flex-col md:flex-row items-center justify-between gap-space-base"><div class="flex items-center gap-space-sm"><img alt="Choropia Marketplace Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UmRW9huFY4OWAO5ag9uVrwcIRRsjKrb8qJvg97xAfUXnBb3meL2yneKiJQACe-W_GohlJgEH2yheZTctACfY9pv0MD9TvrDdgs1FIcmbLVVcX2NVOkeV_s_gLabhz_c5Qz6HiRdG9ZylnCHkxTD70Dt7bpNQN7Fdc_zCZbSwanD2uYLq2-yM0HQhnpMpVukcKR3EO-qpl_MydE111aU3DY_OUOeMz85-FRXJ9hJI2waMF7hYaf-UKkoUM"/><span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 Choropia Marketplace, Inc. Institutional Social Commerce & Escrow Clearing.</span></div><div class="flex items-center gap-space-lg"><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms of Service</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Escrow Protocol</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Security Standards</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Compliance</a></div></div></footer></body></html>

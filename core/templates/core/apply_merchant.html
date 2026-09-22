@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+{% block title %}Become a merchant — Choropia{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto card p-6">
+  <h1 class="text-xl font-bold mb-1">Open a storefront</h1>
+  <p class="text-sm text-on-surface-variant mb-4">Merchant storefronts get their own followers and listing feed, separate from your personal profile. Applications are reviewed by a moderator.</p>
+  <form id="apply-form" class="space-y-3">
+    <input type="text" name="business_name" placeholder="Business name" required class="input-field" />
+    <textarea name="business_description" placeholder="What do you sell?" rows="3" class="input-field"></textarea>
+    <input type="text" name="business_phone" placeholder="Business phone" required class="input-field" />
+    <input type="text" name="business_address" placeholder="Business address" required class="input-field" />
+    <p id="apply-error" class="text-sm text-red-500 hidden"></p>
+    <p id="apply-success" class="text-sm text-green-600 hidden">Application submitted — you'll be notified once it's reviewed.</p>
+    <button type="submit" class="btn-primary w-full">Submit application</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  if (!Choropia.isAuthenticated()) window.location.href = "{% url 'login' %}";
+
+  document.getElementById("apply-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("apply-error");
+    const successEl = document.getElementById("apply-success");
+    errorEl.classList.add("hidden");
+    successEl.classList.add("hidden");
+
+    const form = new FormData(e.target);
+    const payload = Object.fromEntries(form.entries());
+    try {
+      await Choropia.applyForMerchant(payload);
+      successEl.classList.remove("hidden");
+      e.target.reset();
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.classList.remove("hidden");
+    }
+  });
+</script>
+{% endblock %}

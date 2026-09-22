@@ -1,0 +1,155 @@
+{% extends "core/base.html" %}
+{% block title %}Marketplace — Choropia{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <div>
+    <span class="text-xs font-semibold uppercase tracking-widest text-secondary">Escrow-protected listings</span>
+    <h1 class="text-2xl font-bold text-on-surface">Marketplace</h1>
+  </div>
+  <a href="{% url 'create-listing' %}" class="btn-primary flex items-center gap-1">
+    <span class="material-symbols-outlined !text-base">add</span>
+    <span>New listing</span>
+  </a>
+</div>
+
+<div id="category-pills" class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+  <button type="button" class="category-pill chip chip-selected whitespace-nowrap" data-slug="">All categories</button>
+</div>
+
+<form id="filter-form" class="card p-4 mb-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+  <div class="md:col-span-4">
+    <label class="block text-xs font-medium text-on-surface-variant mb-1">Search</label>
+    <input type="text" name="search" placeholder="Search listings&hellip;" class="input-field" />
+  </div>
+  <div class="md:col-span-2">
+    <label class="block text-xs font-medium text-on-surface-variant mb-1">Condition</label>
+    <select name="condition" class="input-field">
+      <option value="">Any</option>
+      <option value="new">New</option>
+      <option value="used">Used</option>
+    </select>
+  </div>
+  <div class="md:col-span-2">
+    <label class="block text-xs font-medium text-on-surface-variant mb-1">Min price</label>
+    <input type="number" name="min_price" class="input-field" />
+  </div>
+  <div class="md:col-span-2">
+    <label class="block text-xs font-medium text-on-surface-variant mb-1">Max price</label>
+    <input type="number" name="max_price" class="input-field" />
+  </div>
+  <div class="md:col-span-2">
+    <label class="block text-xs font-medium text-on-surface-variant mb-1">Sort by</label>
+    <select name="ordering" class="input-field">
+      <option value="-created_at">Newest</option>
+      <option value="price">Price: low to high</option>
+      <option value="-price">Price: high to low</option>
+      <option value="-views_count">Most viewed</option>
+    </select>
+  </div>
+  <div class="md:col-span-12 flex justify-end">
+    <button type="submit" class="btn-secondary">Apply filters</button>
+  </div>
+</form>
+
+<div class="flex items-center justify-between mb-3 text-sm text-on-surface-variant" id="results-count"></div>
+
+<div id="listings-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+  <p class="text-outline col-span-full">Loading listings&hellip;</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const grid = document.getElementById("listings-grid");
+  const form = document.getElementById("filter-form");
+  const pillsEl = document.getElementById("category-pills");
+  const resultsCountEl = document.getElementById("results-count");
+  let selectedCategorySlug = "";
+
+  function listingCard(listing) {
+    return `
+    <a href="/listings/${listing.id}/" class="card flex flex-col hover:shadow-elevated transition-shadow">
+      <div class="relative aspect-[4/3] bg-surface-container overflow-hidden">
+        ${
+          listing.cover_photo
+            ? `<img src="${listing.cover_photo}" class="w-full h-full object-cover" />`
+            : `<div class="w-full h-full flex items-center justify-center text-outline text-sm">No photo</div>`
+        }
+        <span class="absolute top-2 left-2 badge">${listing.condition}</span>
+        <span class="absolute bottom-2 right-2 bg-surface-container-lowest/90 backdrop-blur px-2 py-1 rounded font-semibold text-on-surface">
+          &#8358;${Number(listing.price).toLocaleString()}
+        </span>
+      </div>
+      <div class="p-4 flex flex-col gap-2 flex-1">
+        <div class="flex items-center justify-between text-xs text-on-surface-variant">
+          <span class="truncate">${listing.seller_name || ""}</span>
+          <span class="flex items-center gap-1 shrink-0">
+            <span class="material-symbols-outlined !text-[14px] text-error">favorite</span>${listing.likes_count}
+          </span>
+        </div>
+        <h3 class="font-semibold text-on-surface leading-snug">${listing.title}</h3>
+        <p class="text-xs text-on-surface-variant mt-auto">${listing.location || "Uyo"}</p>
+      </div>
+    </a>`;
+  }
+
+  async function loadCategories() {
+    try {
+      const categories = await Choropia.listCategories();
+      categories.forEach((c) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "category-pill chip whitespace-nowrap";
+        btn.dataset.slug = c.slug;
+        btn.textContent = c.name;
+        pillsEl.appendChild(btn);
+      });
+
+      pillsEl.querySelectorAll(".category-pill").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          selectedCategorySlug = btn.dataset.slug;
+          pillsEl.querySelectorAll(".category-pill").forEach((b) => b.classList.remove("chip-selected"));
+          btn.classList.add("chip-selected");
+          loadListings(currentParams());
+        });
+      });
+    } catch (err) {
+      /* categories are a nice-to-have filter; ignore failure */
+    }
+  }
+
+  function currentParams() {
+    const data = new FormData(form);
+    const params = {};
+    for (const [key, value] of data.entries()) {
+      if (value) params[key] = value;
+    }
+    if (selectedCategorySlug) params.category = selectedCategorySlug;
+    return params;
+  }
+
+  async function loadListings(params = {}) {
+    grid.innerHTML = '<p class="text-outline col-span-full">Loading listings&hellip;</p>';
+    try {
+      const data = await Choropia.listListings(params);
+      const results = data.results || data;
+      resultsCountEl.textContent =
+        typeof data.count === "number" ? `Showing ${results.length} of ${data.count} listings` : "";
+      grid.innerHTML = results.length
+        ? results.map(listingCard).join("")
+        : '<p class="text-outline col-span-full">No listings match those filters.</p>';
+    } catch (err) {
+      grid.innerHTML = `<p class="text-red-500 col-span-full">Could not load listings: ${err.message}</p>`;
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    loadListings(currentParams());
+  });
+
+  loadCategories();
+  loadListings();
+</script>
+{% endblock %}

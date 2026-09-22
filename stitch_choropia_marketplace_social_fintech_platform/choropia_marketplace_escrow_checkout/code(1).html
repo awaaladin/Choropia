@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-bright": "#f8f9ff",
+          "primary-fixed-dim": "#bac7e1",
+          "inverse-primary": "#bac7e1",
+          "on-surface": "#0b1c30",
+          "surface-variant": "#d3e4fe",
+          "tertiary-container": "#00174b",
+          "background": "#f8f9ff",
+          "surface-container-high": "#dce9ff",
+          "primary-fixed": "#d6e3fe",
+          "surface-container-highest": "#d3e4fe",
+          "tertiary": "#000000",
+          "on-error-container": "#93000a",
+          "surface-container-low": "#eff4ff",
+          "tertiary-fixed": "#dbe1ff",
+          "on-primary-fixed": "#0e1c2f",
+          "error-container": "#ffdad6",
+          "on-primary": "#ffffff",
+          "inverse-surface": "#213145",
+          "error": "#ba1a1a",
+          "tertiary-fixed-dim": "#b4c5ff",
+          "outline": "#75777d",
+          "on-background": "#0b1c30",
+          "surface": "#f8f9ff",
+          "primary": "#000000",
+          "on-error": "#ffffff",
+          "on-surface-variant": "#44474c",
+          "on-secondary-container": "#3b5a7f",
+          "surface-tint": "#525f75",
+          "secondary": "#426086",
+          "on-primary-fixed-variant": "#3a475c",
+          "on-secondary": "#ffffff",
+          "secondary-fixed": "#d3e4ff",
+          "on-secondary-fixed": "#001c38",
+          "on-tertiary": "#ffffff",
+          "primary-container": "#0e1c2f",
+          "on-primary-container": "#77849c",
+          "secondary-fixed-dim": "#aac9f4",
+          "surface-dim": "#cbdbf5",
+          "outline-variant": "#c5c6cd",
+          "inverse-on-surface": "#eaf1ff",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-container": "#497cff",
+          "secondary-container": "#b3d1fd",
+          "on-tertiary-fixed": "#00174b",
+          "on-tertiary-fixed-variant": "#003ea8",
+          "surface-container": "#e5eeff",
+          "on-secondary-fixed-variant": "#29486d"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "margin-mobile": "1rem",
+          "space-3xl": "4rem",
+          "space-xl": "2rem",
+          "space-md": "0.75rem",
+          "space-2xl": "3rem",
+          "gutter-mobile": "1rem",
+          "gutter-desktop": "1.5rem",
+          "space-base": "1rem",
+          "space-xs": "0.25rem",
+          "margin-desktop": "3rem",
+          "margin-tablet": "2rem",
+          "space-xxs": "0.125rem"
+        },
+        "fontFamily": {
+          "label-md": ["Inter"],
+          "body-sm": ["Inter"],
+          "display": ["Inter"],
+          "headline-lg": ["Inter"],
+          "headline-md": ["Inter"],
+          "mono-financial": ["Inter"],
+          "label-sm": ["Inter"],
+          "body-md": ["Inter"],
+          "headline-lg-mobile": ["Inter"],
+          "headline-sm": ["Inter"],
+          "body-lg": ["Inter"]
+        },
+        "fontSize": {
+          "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}],
+          "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+          "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "mono-financial": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "headline-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "headline-sm": ["18px", {"lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full max-w-[1440px] mx-auto px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg shrink-0"><div class="flex items-center gap-space-xs"><img alt="Choropia Marketplace Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UmRW9huFY4OWAO5ag9uVrwcIRRsjKrb8qJvg97xAfUXnBb3meL2yneKiJQACe-W_GohlJgEH2yheZTctACfY9pv0MD9TvrDdgs1FIcmbLVVcX2NVOkeV_s_gLabhz_c5Qz6HiRdG9ZylnCHkxTD70Dt7bpNQN7Fdc_zCZbSwanD2uYLq2-yM0HQhnpMpVukcKR3EO-qpl_MydE111aU3DY_OUOeMz85-FRXJ9hJI2waMF7hYaf-UKkoUM"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">Choropia</span></div><div class="relative hidden lg:flex items-center"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">search</span><input class="w-72 xl:w-80 h-9 pl-9 pr-14 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-secondary transition-all" placeholder="Search posts, goods, services, or verified users..." type="text"/><kbd class="absolute right-2 px-1.5 py-0.5 bg-surface-container-lowest rounded text-[10px] font-mono-financial text-on-surface-variant shadow-[0_1px_2px_rgba(11,25,44,0.06)]">⌘K</kbd></div></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container text-on-surface font-semibold rounded-lg"><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="feed" href="#">Feed</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="reels" href="#">Reels</a><a aria-current="page" class="px-space-md py-space-xs transition-all bg-surface-container text-on-surface font-semibold rounded-lg" data-path="marketplace" href="#">Marketplace</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="banking-wallet" href="#">Banking & Wallet</a><a class="relative px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all flex items-center gap-space-xs" data-path="messages" href="#"><span>Messages</span><span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded-full">3</span></a></nav><div class="flex items-center gap-space-sm shrink-0"><button class="inline-flex items-center gap-space-xs h-9 px-space-md bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span class="hidden sm:inline">Create Post</span></button><button class="relative w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-on-error font-label-sm text-[10px] rounded-full flex items-center justify-center font-bold ring-2 ring-surface-container-lowest">4</span></button><button class="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">dark_mode</span></button><div class="relative flex items-center gap-space-xs pl-space-xs cursor-pointer"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3XdH6sHHTR0I01DogpSNWPAqCPl6alpW9NqwLayaoB4LeG4WOL-jEwM_b-G3mfS1NYbFCRUdhPBYW-11t_Y-sw-TpTOluQY_RMLz377laXdYasuCSNTdvLtXcy3J1R3EAotz_L20ONAHoLOTlh5NQ3E8i-ZE0avaDZA5dGp9hzKEGDE9qcBxy0x2z-nzxVohw7Gi2OXcx-hJWqoQV7P1pCU8WIwkqka7dHWFN1sCWmu6Hh9GXpWZw"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary rounded-full ring-2 ring-surface-container-lowest"></span></div><span class="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span></div></div></div></header><main class="w-full max-w-[1440px] mx-auto px-gutter-desktop pt-16 bg-surface"><div class="flex flex-col w-full">
+<div class="w-full py-space-md flex flex-col gap-space-lg">
+<!-- Top Utility & Institutional Meta Banner -->
+<div class="bg-surface-container-low px-space-lg py-space-md rounded-xl flex flex-wrap items-center justify-between gap-space-md shadow-sm">
+<div class="flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface">Institutional Clearing & Social Commerce</span>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded">ISO-20022 Aligned</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Dual-custody smart escrow contracts deployed across all physical, consultative, and digital asset settlements.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-lg">
+<div class="hidden sm:flex flex-col text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Vault Liquidity</span>
+<span class="font-mono-financial text-mono-financial text-on-surface font-semibold">$14,892,100.00 USD</span>
+</div>
+<div class="hidden md:flex flex-col text-right">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Settlement Time</span>
+<span class="font-mono-financial text-mono-financial text-on-surface font-semibold">< 180ms Instant</span>
+</div>
+</div>
+</div>
+<!-- Filter Control Bar & Horizontal Category Segments -->
+<div class="flex flex-col gap-space-md">
+<!-- Category Segments -->
+<div class="flex items-center justify-between flex-wrap gap-space-md pb-space-xs">
+<div class="flex items-center gap-space-xs overflow-x-auto py-1" id="category-tabs">
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-label-md text-label-md bg-surface-container-highest text-on-surface flex items-center gap-space-xs shadow-sm transition-all" data-category="all" type="button">
+<span>All Listings</span>
+<span class="px-1.5 py-0.2 bg-surface-container text-on-surface font-mono-financial text-[11px] rounded">1,248</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-space-xs transition-all" data-category="goods" type="button">
+<span>Goods (Physical Products)</span>
+<span class="px-1.5 py-0.2 bg-surface-container-low text-on-surface-variant font-mono-financial text-[11px] rounded">614</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-space-xs transition-all" data-category="services" type="button">
+<span>Services & Advisory</span>
+<span class="px-1.5 py-0.2 bg-surface-container-low text-on-surface-variant font-mono-financial text-[11px] rounded">382</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-space-xs transition-all" data-category="info" type="button">
+<span>Info & Digital Kits</span>
+<span class="px-1.5 py-0.2 bg-surface-container-low text-on-surface-variant font-mono-financial text-[11px] rounded">252</span>
+</button>
+</div>
+<!-- Right Utility Actions -->
+<div class="flex items-center gap-space-sm">
+<div class="relative w-72">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full h-10 pl-9 pr-16 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant shadow-sm focus:outline-none focus:bg-surface-container-low transition-all" id="marketplace-search" placeholder="Search title, seller ID, SKU..." type="text"/>
+<span class="absolute right-2.5 top-2.5 px-1.5 py-0.5 bg-surface-container rounded text-[10px] font-mono-financial text-on-surface-variant">ESC</span>
+</div>
+<button class="h-10 px-space-md bg-surface-container text-on-surface rounded-lg font-label-md text-label-md flex items-center gap-space-xs shadow-sm hover:bg-surface-variant transition-all" id="open-drawer-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+<span class="hidden sm:inline">Checkout Drawer</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</button>
+</div>
+</div>
+<!-- Financial Filter Strip: Slider, Sorting, KYC Toggle -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-space-lg">
+<!-- Price Range Slider -->
+<div class="flex items-center gap-space-md min-w-[280px] flex-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider shrink-0">Price Ceiling</span>
+<input class="w-full accent-primary h-1.5 bg-surface-container rounded-lg cursor-pointer" id="price-slider" max="2500" min="50" step="25" type="range" value="2500"/>
+<div class="px-2.5 py-1 bg-surface-container-low rounded font-mono-financial text-mono-financial text-on-surface font-semibold shrink-0" id="price-display">
+            $2,500.00 Max
+          </div>
+</div>
+<!-- Sort Select & Verified Toggle -->
+<div class="flex items-center gap-space-md flex-wrap">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sort By</span>
+<div class="relative">
+<select class="appearance-none h-9 pl-space-md pr-8 bg-surface-container-low text-on-surface rounded-lg font-body-sm text-body-sm focus:outline-none cursor-pointer" id="sort-order">
+<option value="recommended">Institutional Recommended</option>
+<option value="newest">Newest Settlements</option>
+<option value="price-asc">Price: Ascending</option>
+<option value="price-desc">Price: Descending</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-on-surface-variant text-[16px]">expand_more</span>
+</div>
+</div>
+<!-- Verified Sellers Only Toggle -->
+<label class="flex items-center gap-space-xs cursor-pointer select-none bg-surface-container-low px-space-md py-1.5 rounded-lg hover:bg-surface-container transition-all">
+<input checked="" class="w-4 h-4 rounded text-primary accent-primary cursor-pointer" id="verified-only" type="checkbox"/>
+<span class="font-label-md text-label-md text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+              Tier 1 / KYC Verified Only
+            </span>
+</label>
+<!-- Escrow Protocol Badge -->
+<div class="hidden lg:flex items-center gap-space-xs px-2.5 py-1 bg-surface-container-high rounded text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span>Choropia Multi-Sig Guarded</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Marketplace Grid & Content Flow -->
+<div class="relative w-full">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-space-lg" id="listing-grid">
+<!-- Card 1: Walnut Desk (Goods) -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="relative h-56 w-full overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" data-alt="Handcrafted solid walnut standing desk with brass cable pass-through, set against an architectural minimalist loft interior with diffused morning window light, high-end furniture aesthetics, sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuClu-263Ibns0ahaNUsG_2ANdE6k9kkgG_uQjGB18Ltj6cdGAbGFGOizuyd1rryqGy6zxWjAD9S3j74Cwr9hkUa5ePpql1Tp5ZkXgKg166JsEZbmHIRc5OA4QUADpGTr0TSKYur_YRBHeokNZLPFBrjVq4RGACHRG6PBYgZnEHwnwscBmDg_VJj3UJtFsmnk5n9C79HiXf9fTd_yqHSXVmd-lP7q1JuuqMryl5MDq1o4ufkAPdZ6lyj"/>
+<div class="absolute top-3 left-3 flex items-center gap-1.5">
+<span class="px-2.5 py-0.5 bg-surface-container-lowest/90 backdrop-blur-md rounded font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">Goods</span>
+<span class="px-2 py-0.5 bg-surface-container-lowest/90 backdrop-blur-md text-on-surface font-mono-financial text-[11px] rounded">Stock: 4 Units</span>
+</div>
+<div class="absolute top-3 right-3">
+<button class="w-8 h-8 rounded-full bg-surface-container-lowest/80 backdrop-blur-md flex items-center justify-center text-on-surface hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+</div>
+</div>
+<div class="p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] font-mono-financial font-bold">AW</div>
+<span class="font-label-md text-label-md text-on-surface font-medium">@artisan_wood</span>
+<span class="material-symbols-outlined text-[15px] text-secondary" title="KYC Tier 1 Verified">verified</span>
+</div>
+<div class="flex items-center gap-1 font-mono-financial text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[15px] text-on-surface fill-1">star</span>
+<span class="font-semibold text-on-surface">4.9</span>
+<span>(128)</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Handcrafted Walnut Standing Desk</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Solid American walnut top with motorized dual-column frame, magnetic wire raceway, and integrated inductive power port.</p>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between font-mono-financial text-body-sm">
+<span class="text-on-surface-variant">Escrow Hold</span>
+<span class="font-semibold text-on-surface">Direct Multi-Sig Clear</span>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs flex items-center justify-between gap-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Price</span>
+<span class="font-headline-md text-headline-md font-mono-financial text-on-surface">$850.00</span>
+<span class="font-mono-financial text-[11px] text-on-surface-variant">USD</span>
+</div>
+<button class="h-10 px-space-lg bg-primary-container text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-space-xs hover:bg-on-surface transition-all shadow-sm" onclick="openCheckoutDrawer('Handcrafted Walnut Standing Desk', 850.00, 45.00, '@artisan_wood')" type="button">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+<span>Buy with Escrow</span>
+</button>
+</div>
+</article>
+<!-- Card 2: Django Audit (Services) -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="relative h-56 w-full overflow-hidden bg-surface-container flex flex-col justify-end p-space-md">
+<img class="w-full h-full object-cover absolute inset-0 group-hover:scale-[1.02] transition-transform duration-300" data-alt="High-contrast software architecture system diagram displayed on a dark developer workstation monitor, code terminal, clean lines, ambient deep indigo backlighting, institutional tech engineering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdzxdd93qD3t7krpgKt1LQeESNx7FVyT6crfAvG-VkjcBWHDT33Nm8UvuFPlOatvVfR0_Jv29wQK0NOwU_DUuPIlMOD6CZ0tehReGAywPYGJtC8MPZsRoIrEuDsNSdTEDWdFVTzWWRF5_rYwza0H9ShK85gKVf_1n4f7VFBkbcHPCj4jxu1dbtAOv8Wx-4hqkoxJxld5UBHBxpp-aVgYByXL9veIWhEauVkPhZQKhbPIygD9OoEpZH"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary-container/80 via-primary-container/30 to-transparent"></div>
+<div class="relative z-10 flex items-center justify-between text-on-primary">
+<div class="flex items-center gap-1.5">
+<span class="px-2.5 py-0.5 bg-surface-container-lowest/90 backdrop-blur-md rounded font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">Services</span>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded">Instant Booking</span>
+</div>
+<span class="font-mono-financial text-[11px] bg-primary-container/70 px-2 py-0.5 rounded backdrop-blur">Sprint-Based</span>
+</div>
+</div>
+<div class="p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] font-mono-financial font-bold">DG</div>
+<span class="font-label-md text-label-md text-on-surface font-medium">@dev_guru</span>
+<span class="material-symbols-outlined text-[15px] text-secondary" title="Verified Tier 1">verified</span>
+</div>
+<div class="flex items-center gap-1 font-mono-financial text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[15px] text-on-surface fill-1">star</span>
+<span class="font-semibold text-on-surface">5.0</span>
+<span>(64)</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Full-Stack Django Architecture Audit</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Complete codebase security analysis, database query bottlenecks, indexing review, and async worker architecture roadmap.</p>
+</div>
+<!-- Deliverables checklist -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-1 text-on-surface">
+<div class="flex items-center gap-1.5 text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-on-secondary-fixed-variant">check_circle</span>
+<span class="font-body-sm text-body-sm">30-Page Technical Remediation PDF</span>
+</div>
+<div class="flex items-center gap-1.5 text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-on-secondary-fixed-variant">check_circle</span>
+<span class="font-body-sm text-body-sm">Live 90-Min Architecture Walkthrough</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs flex items-center justify-between gap-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Rate</span>
+<span class="font-headline-md text-headline-md font-mono-financial text-on-surface">$1,400.00</span>
+<span class="font-mono-financial text-[11px] text-on-surface-variant">USD / sprint</span>
+</div>
+<button class="h-10 px-space-lg bg-primary-container text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-space-xs hover:bg-on-surface transition-all shadow-sm" onclick="openCheckoutDrawer('Django Architecture Audit', 1400.00, 0.00, '@dev_guru')" type="button">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Hire & Hold Escrow</span>
+</button>
+</div>
+</article>
+<!-- Card 3: SaaS Modeling Kit (Info) -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="relative h-56 w-full overflow-hidden bg-surface-container flex flex-col justify-end p-space-md">
+<img class="w-full h-full object-cover absolute inset-0 group-hover:scale-[1.02] transition-transform duration-300" data-alt="Clean corporate financial spreadsheet model open on a sleek laptop screen, financial charts, venture metrics, ARR forecasts, ambient cool neutral lighting, crisp editorial finish." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBu_tNGSNgthrtREkHsr_FNYngi5R_N1Y5gYu2AoQU8FTnI31OmLiVf_bwsv23wrJdlHWKhLeEWlw2d3sScJc53YBO6ENcP1HchmeCK5r5vjNY6Cr2UP_W8mzn6TcWxxPcyUpLB-q0JHi-XY_NEQIbcZ_O7jNjvxXziTHQHoUeLqVSqulOqKl5cuKxLIT8iNZ93a3wdj8icUZh0tsCSeyFFIFFNjvkgYGgst3HMjY6fpGe8YSCPFlcq"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary-container/80 via-transparent to-transparent"></div>
+<div class="relative z-10 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="px-2.5 py-0.5 bg-surface-container-lowest/90 backdrop-blur-md rounded font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">Info / Digital</span>
+<span class="px-2 py-0.5 bg-surface-container-high text-on-surface font-mono-financial text-[11px] rounded">Instant Unlock</span>
+</div>
+<span class="font-mono-financial text-[11px] text-on-primary bg-primary-container/80 px-2 py-0.5 rounded">v4.2 (2025)</span>
+</div>
+</div>
+<div class="p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] font-mono-financial font-bold">FI</div>
+<span class="font-label-md text-label-md text-on-surface font-medium">@fintech_insider</span>
+<span class="material-symbols-outlined text-[15px] text-secondary" title="Institutional Creator">verified</span>
+</div>
+<div class="flex items-center gap-1 font-mono-financial text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[15px] text-on-surface fill-1">star</span>
+<span class="font-semibold text-on-surface">4.8</span>
+<span>(312)</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">SaaS Financial Modeling & Equity Kit</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Series A to C dynamic forecasting models with waterfall equity distributions, cap table math, and investor decks in native Excel & Sheets.</p>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between font-mono-financial text-body-sm">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px]">account_balance_wallet</span>
+                  Direct to Wallet
+                </span>
+<span class="font-semibold text-on-surface">Instant Key Delivery</span>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs flex items-center justify-between gap-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Price</span>
+<span class="font-headline-md text-headline-md font-mono-financial text-on-surface">$95.00</span>
+<span class="font-mono-financial text-[11px] text-on-surface-variant">USD</span>
+</div>
+<button class="h-10 px-space-lg bg-primary-container text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-space-xs hover:bg-on-surface transition-all shadow-sm" onclick="openCheckoutDrawer('SaaS Financial Modeling Kit', 95.00, 0.00, '@fintech_insider')" type="button">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+<span>Instant Buy</span>
+</button>
+</div>
+</article>
+<!-- Card 4: Mechanical Keyboard (Goods) -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="relative h-56 w-full overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" data-alt="Custom mechanical keyboard with CNC milled aluminum case, muted slate and monochrome keycaps, braided artisan cable, clean desk setup, precise architectural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsBCgLYF4i9IBGzC33nUnqZUuvau7sbjX-3C_l7IoHxwBPFEOJIfkz3DlG-fNnlg-Z0rQmIKAAuul5QRnzjXrjFfpOfUp1_PGQgBxPnzAMnqF8WhaQ4ojy8tsU0mhOAsUVBCX7ZkC2y7eECNI8GkH-gclKm4FhCDGvnfjC_efq2wKQGiqQ8Iplmn-b2iAz4SNuroAgOXvI0OSZVC-G1HrE_HiLsa_FLk7S31QEYhvPUfkZR1gW7kht"/>
+<div class="absolute top-3 left-3 flex items-center gap-1.5">
+<span class="px-2.5 py-0.5 bg-surface-container-lowest/90 backdrop-blur-md rounded font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">Goods</span>
+<span class="px-2 py-0.5 bg-surface-container-lowest/90 backdrop-blur-md text-on-surface font-mono-financial text-[11px] rounded">Stock: 12 Units</span>
+</div>
+</div>
+<div class="p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] font-mono-financial font-bold">KS</div>
+<span class="font-label-md text-label-md text-on-surface font-medium">@keeb_studio</span>
+<span class="material-symbols-outlined text-[15px] text-secondary">verified</span>
+</div>
+<div class="flex items-center gap-1 font-mono-financial text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[15px] text-on-surface fill-1">star</span>
+<span class="font-semibold text-on-surface">4.9</span>
+<span>(89)</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Minimalist Mechanical Keyboard</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">CNC aluminum 75% hot-swappable chassis, pre-lubed linear silent switches, FR4 plate, and brass internal weight.</p>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between font-mono-financial text-body-sm">
+<span class="text-on-surface-variant">Courier Partner</span>
+<span class="font-semibold text-on-surface">Insured 2-Day Air</span>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs flex items-center justify-between gap-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Price</span>
+<span class="font-headline-md text-headline-md font-mono-financial text-on-surface">$185.00</span>
+<span class="font-mono-financial text-[11px] text-on-surface-variant">USD</span>
+</div>
+<button class="h-10 px-space-lg bg-primary-container text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-space-xs hover:bg-on-surface transition-all shadow-sm" onclick="openCheckoutDrawer('Minimalist Mechanical Keyboard', 185.00, 15.00, '@keeb_studio')" type="button">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+<span>Buy with Escrow</span>
+</button>
+</div>
+</article>
+<!-- Card 5: Brand Identity (Services) -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="relative h-56 w-full overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300" data-alt="High-end corporate identity book with embossed typography, bespoke stationery guidelines, minimalist brand deck, precise geometric layouts on stone tabletop, studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByq6T1wYcdxUQ0kHs23DssYe-hJ0UWGKvxCDJiopHv9yV6_kq2zlG0UtzW8rQcpfmM5n9WoCWu9zdJF40csu5y9FTELUK0PZVtRp8vmhrrvJygMVABd056-M7wjUhgelFJ3jdJo9OnGSbiALTyE_tR4aCRwQYNXyf5GeWihigwCDqTsSoAqcIfDDCjyDjFHhyKlWS5_sloP56Vx8SKQYGONIbpUmV4A8wXp8LvH00BQI-ggOM1fdhh"/>
+<div class="absolute top-3 left-3 flex items-center gap-1.5">
+<span class="px-2.5 py-0.5 bg-surface-container-lowest/90 backdrop-blur-md rounded font-label-sm text-label-sm text-on-surface font-semibold shadow-sm">Services</span>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded">3 Slots Open</span>
+</div>
+</div>
+<div class="p-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] font-mono-financial font-bold">SA</div>
+<span class="font-label-md text-label-md text-on-surface font-medium">@studio_alpha</span>
+<span class="material-symbols-outlined text-[15px] text-secondary">verified</span>
+</div>
+<div class="flex items-center gap-1 font-mono-financial text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[15px] text-on-surface fill-1">star</span>
+<span class="font-semibold text-on-surface">5.0</span>
+<span>(42)</span>
+</div>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Brand Identity & Design System</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">Complete corporate visual language, Figma design tokens, icon sets, guidelines manual, and presentation suites for tech enterprises.</p>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between font-mono-financial text-body-sm">
+<span class="text-on-surface-variant">Milestone Clearing</span>
+<span class="font-semibold text-on-surface">3-Tier Release</span>
+</div>
+</div>
+</div>
+<div class="px-space-lg pb-space-lg pt-space-xs flex items-center justify-between gap-space-md">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Package</span>
+<span class="font-headline-md text-headline-md font-mono-financial text-on-surface">$2,200.00</span>
+<span class="font-mono-financial text-[11px] text-on-surface-variant">USD</span>
+</div>
+<button class="h-10 px-space-lg bg-primary-container text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-space-xs hover:bg-on-surface transition-all shadow-sm" onclick="openCheckoutDrawer('Brand Identity & Design System Package', 2200.00, 0.00, '@studio_alpha')" type="button">
+<span class="material-symbols-outlined text-[18px]">lock_clock</span>
+<span>Hold in Escrow</span>
+</button>
+</div>
+</article>
+<!-- Dynamic Escrow Metric Highlight Card -->
+<article class="bg-surface-container-low rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Settlement Architecture</span>
+<span class="material-symbols-outlined text-secondary text-[22px]">security</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Choropia Multi-Party Safe Custody</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Every marketplace transaction is isolated into an escrow vault with dual cryptographic sign-offs between counter-parties.</p>
+<!-- Inline Metric Visualization SVG -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm">
+<div class="flex items-center justify-between text-on-surface mb-2 font-mono-financial text-body-sm">
+<span>Dispute Frequency</span>
+<span class="font-semibold text-on-surface">0.024%</span>
+</div>
+<svg class="w-full h-12 text-secondary" fill="none" viewbox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 35 L20 32 L40 33 L60 28 L80 30 L100 22 L120 25 L140 18 L160 19 L180 10 L200 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<path d="M0 35 L20 32 L40 33 L60 28 L80 30 L100 22 L120 25 L140 18 L160 19 L180 10 L200 8 V40 H0 Z" fill="currentColor" fill-opacity="0.12"></path>
+</svg>
+<div class="flex items-center justify-between text-[11px] text-on-surface-variant font-mono-financial mt-1">
+<span>Q1 2024</span>
+<span>Audited Instant Resolution</span>
+<span>Current</span>
+</div>
+</div>
+</div>
+<div class="mt-space-md pt-space-md bg-surface-container-highest/40 p-space-md rounded-lg flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-on-surface">shield</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Zero Platform Escrow Fee</span>
+<span class="font-body-sm text-[12px] text-on-surface-variant">Promotional tier sponsored by Banking Layer</span>
+</div>
+</div>
+</article>
+</div>
+</div>
+</div>
+<!-- Screen #28 Preview: Active Slide-Over / Instant Escrow Checkout Drawer -->
+<div class="fixed inset-0 bg-primary-container/40 backdrop-blur-sm z-50 transition-opacity duration-300 opacity-0 pointer-events-none" id="checkout-drawer-backdrop">
+<div class="absolute inset-0" onclick="closeCheckoutDrawer()"></div>
+<aside class="absolute top-0 right-0 h-full w-full max-w-lg bg-surface-container-lowest shadow-xl transform translate-x-full transition-transform duration-300 flex flex-col justify-between overflow-y-auto" id="checkout-drawer-panel">
+<!-- Drawer Top Bar -->
+<div>
+<div class="p-space-lg flex items-center justify-between bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[22px]">lock</span>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Escrow Clearing Checkout</h2>
+<span class="font-mono-financial text-[11px] text-on-surface-variant">Protocol Version: 2025.4-SEC</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all" onclick="closeCheckoutDrawer()" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Drawer Content Section -->
+<div class="p-space-lg flex flex-col gap-space-lg">
+<!-- Selected Item Overview Card -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex gap-space-md items-start">
+<div class="w-20 h-20 rounded-lg overflow-hidden bg-surface-container shrink-0">
+<img class="w-full h-full object-cover" data-alt="Close up architectural detail of solid American walnut desktop grain and chamfered edge beveling, natural light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUtIGTVtfdUAM-PZ9t5pulHdizKQlutS1cKCXzTvrBElP6Q3yVkdFlYo6TtF1BWwvnrikBzddsny8ZK7EcAbMvFpW-sVo_KHh0N7XkQjgSkUc1bKLw7aWwcg8ng01IREmtj2W6NIJRHeLG47FPSlBbb0Vsbkr0Y4N6GKToeaqaYerjn-xMIjaqI5TheWkJpBGM-4x8v71ThpYka2tNnyBOrC3zc7zJu8uIWD-Wmm4yVXyvyyvs7nU3"/>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="font-label-sm text-label-sm" id="drawer-seller">@artisan_wood</span>
+<span class="material-symbols-outlined text-[13px] text-secondary">verified</span>
+</div>
+<h4 class="font-label-md text-label-md text-on-surface font-semibold truncate mt-0.5" id="drawer-item-title">Handcrafted Walnut Standing Desk</h4>
+<div class="flex items-center gap-2 mt-2">
+<span class="px-2 py-0.5 bg-surface-container-highest rounded text-on-surface font-mono-financial text-[11px]">Condition: Mint</span>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-mono-financial text-[11px]">Vault Held</span>
+</div>
+</div>
+</div>
+<!-- Escrow Protection Guarantee Callout -->
+<div class="p-space-md rounded-xl bg-surface-container-high text-on-surface flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-on-secondary-fixed-variant shrink-0 mt-0.5">verified_user</span>
+<div>
+<span class="font-label-md text-label-md font-semibold block">Choropia Safe-Hold Assurance</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Funds do not reach seller until physical delivery verification or consultation sign-off is cryptographically validated.</p>
+</div>
+</div>
+<!-- Financial Breakdown Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Settlement Ledger</span>
+<div class="flex items-center justify-between font-mono-financial text-body-sm py-1">
+<span class="text-on-surface-variant">Item Principal Subtotal</span>
+<span class="text-on-surface font-semibold" id="drawer-subtotal">$850.00 USD</span>
+</div>
+<div class="flex items-center justify-between font-mono-financial text-body-sm py-1">
+<div class="flex items-center gap-1">
+<span class="text-on-surface-variant">Escrow Protection Protocol</span>
+<span class="px-1.5 py-0.2 bg-surface-container text-[10px] text-on-surface rounded">Promo</span>
+</div>
+<span class="text-on-secondary-fixed-variant font-semibold">$0.00 USD</span>
+</div>
+<div class="flex items-center justify-between font-mono-financial text-body-sm py-1">
+<span class="text-on-surface-variant">Insured Freight / Delivery</span>
+<span class="text-on-surface font-semibold" id="drawer-shipping">$45.00 USD</span>
+</div>
+<div class="pt-space-sm mt-space-xs bg-surface-container-low px-space-md py-space-sm rounded-lg flex items-center justify-between font-mono-financial">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Total Escrow Allocation</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold" id="drawer-total">$895.00 USD</span>
+</div>
+</div>
+<!-- Payment Source Selection -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Funding Source</span>
+<!-- Choropia Wallet Option (Active) -->
+<label class="p-space-md rounded-xl bg-surface-container-low cursor-pointer flex items-center justify-between shadow-sm hover:bg-surface-container transition-all">
+<div class="flex items-center gap-space-sm">
+<input checked="" class="w-4 h-4 accent-primary text-primary" name="payment-method" type="radio"/>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Choropia Wallet Balance</span>
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+</div>
+<span class="font-mono-financial text-body-sm text-on-surface-variant">$28,450.00 available</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-on-secondary-container bg-secondary-container px-2 py-0.5 rounded font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px]">check_circle</span>
+<span>Sufficient</span>
+</div>
+</label>
+<!-- External Credit/Debit Option -->
+<label class="p-space-md rounded-xl bg-surface-container-lowest cursor-pointer flex items-center justify-between shadow-sm hover:bg-surface-container-low transition-all">
+<div class="flex items-center gap-space-sm">
+<input class="w-4 h-4 accent-primary text-primary" name="payment-method" type="radio"/>
+<div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Corporate Card / Wire</span>
+<span class="font-mono-financial text-body-sm text-on-surface-variant block">JPMorgan Chase (•••• 8820)</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">+ Add Card</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Drawer Persistent Footer -->
+<div class="p-space-lg bg-surface-container-low flex flex-col gap-space-sm shadow-md">
+<button class="w-full h-12 bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center justify-center gap-space-xs hover:bg-on-surface transition-all shadow-sm active:scale-[0.99]" id="confirm-fund-btn" onclick="executeEscrowPayment()" type="button">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+<span id="confirm-fund-text">Confirm & Fund Escrow ($895.00 USD)</span>
+</button>
+<div class="flex items-center justify-center gap-1.5 text-center font-body-sm text-[12px] text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span>Dual-signed release protocol. Disbursed only upon satisfactory delivery.</span>
+</div>
+</div>
+</aside>
+</div>
+<!-- Inline Micro-interactions & Logic -->
+<script>
+    (function() {
+      // Elements
+      const drawerBackdrop = document.getElementById('checkout-drawer-backdrop');
+      const drawerPanel = document.getElementById('checkout-drawer-panel');
+      const drawerTitle = document.getElementById('drawer-item-title');
+      const drawerSeller = document.getElementById('drawer-seller');
+      const drawerSubtotal = document.getElementById('drawer-subtotal');
+      const drawerShipping = document.getElementById('drawer-shipping');
+      const drawerTotal = document.getElementById('drawer-total');
+      const confirmFundText = document.getElementById('confirm-fund-text');
+      const confirmFundBtn = document.getElementById('confirm-fund-btn');
+      const priceSlider = document.getElementById('price-slider');
+      const priceDisplay = document.getElementById('price-display');
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const openDrawerBtn = document.getElementById('open-drawer-btn');
+
+      // Drawer Open Function
+      window.openCheckoutDrawer = function(title, subtotal, shipping, seller) {
+        if (title) drawerTitle.textContent = title;
+        if (seller) drawerSeller.textContent = seller;
+        
+        const subtotalVal = subtotal !== undefined ? subtotal : 850.00;
+        const shippingVal = shipping !== undefined ? shipping : 45.00;
+        const totalVal = subtotalVal + shippingVal;
+
+        drawerSubtotal.textContent = '$' + subtotalVal.toFixed(2) + ' USD';
+        drawerShipping.textContent = shippingVal > 0 ? '$' + shippingVal.toFixed(2) + ' USD' : 'Free (Digital Delivery)';
+        drawerTotal.textContent = '$' + totalVal.toFixed(2) + ' USD';
+        confirmFundText.textContent = 'Confirm & Fund Escrow ($' + totalVal.toFixed(2) + ' USD)';
+
+        drawerBackdrop.classList.remove('opacity-0', 'pointer-events-none');
+        drawerBackdrop.classList.add('opacity-100');
+        drawerPanel.classList.remove('translate-x-full');
+        drawerPanel.classList.add('translate-x-0');
+        document.body.style.overflow = 'hidden';
+      };
+
+      // Drawer Close Function
+      window.closeCheckoutDrawer = function() {
+        drawerBackdrop.classList.remove('opacity-100');
+        drawerBackdrop.classList.add('opacity-0', 'pointer-events-none');
+        drawerPanel.classList.remove('translate-x-0');
+        drawerPanel.classList.add('translate-x-full');
+        document.body.style.overflow = '';
+      };
+
+      if (openDrawerBtn) {
+        openDrawerBtn.addEventListener('click', function() {
+          window.openCheckoutDrawer('Handcrafted Walnut Standing Desk', 850.00, 45.00, '@artisan_wood');
+        });
+      }
+
+      // Slider visual feedback
+      if (priceSlider && priceDisplay) {
+        priceSlider.addEventListener('input', function(e) {
+          const val = parseInt(e.target.value, 10);
+          priceDisplay.textContent = '$' + val.toLocaleString() + '.00 Max';
+        });
+      }
+
+      // Category tab toggle active styling
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabBtns.forEach(b => {
+            b.classList.remove('bg-surface-container-highest', 'text-on-surface');
+            b.classList.add('text-on-surface-variant');
+          });
+          btn.classList.add('bg-surface-container-highest', 'text-on-surface');
+          btn.classList.remove('text-on-surface-variant');
+        });
+      });
+
+      // Confirm & Fund action state
+      window.executeEscrowPayment = function() {
+        confirmFundBtn.disabled = true;
+        const originalContent = confirmFundText.textContent;
+        confirmFundText.textContent = 'Authorizing Multi-Sig Hold...';
+        confirmFundBtn.classList.add('opacity-80');
+
+        setTimeout(() => {
+          confirmFundText.textContent = 'Vault Funded & Protected ✓';
+          confirmFundBtn.classList.remove('bg-primary');
+          confirmFundBtn.classList.add('bg-secondary');
+          setTimeout(() => {
+            window.closeCheckoutDrawer();
+            confirmFundBtn.disabled = false;
+            confirmFundText.textContent = originalContent;
+            confirmFundBtn.classList.remove('bg-secondary', 'opacity-80');
+            confirmFundBtn.classList.add('bg-primary');
+          }, 1400);
+        }, 800);
+      };
+
+      // Keyboard escape to close drawer
+      window.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          window.closeCheckoutDrawer();
+        }
+      });
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-3xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-[1440px] mx-auto px-gutter-desktop py-space-xl flex flex-col md:flex-row items-center justify-between gap-space-base"><div class="flex items-center gap-space-sm"><img alt="Choropia Marketplace Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UmRW9huFY4OWAO5ag9uVrwcIRRsjKrb8qJvg97xAfUXnBb3meL2yneKiJQACe-W_GohlJgEH2yheZTctACfY9pv0MD9TvrDdgs1FIcmbLVVcX2NVOkeV_s_gLabhz_c5Qz6HiRdG9ZylnCHkxTD70Dt7bpNQN7Fdc_zCZbSwanD2uYLq2-yM0HQhnpMpVukcKR3EO-qpl_MydE111aU3DY_OUOeMz85-FRXJ9hJI2waMF7hYaf-UKkoUM"/><span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 Choropia Marketplace, Inc. Institutional Social Commerce & Escrow Clearing.</span></div><div class="flex items-center gap-space-lg"><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms of Service</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Escrow Protocol</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Security Standards</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Compliance</a></div></div></footer></body></html>

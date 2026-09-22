@@ -1,0 +1,77 @@
+{% extends "core/base.html" %}
+{% block title %}Notifications — Choropia{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-bold text-on-surface">Notifications</h1>
+  <button id="mark-all-btn" class="btn-secondary !py-1.5">Mark all read</button>
+</div>
+<div id="notifications-list" class="card divide-y divide-outline-variant">
+  <p class="p-4 text-outline">Loading&hellip;</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const list = document.getElementById("notifications-list");
+
+  const TYPE_ICONS = {
+    follow: "person_add",
+    like: "favorite",
+    comment: "chat_bubble",
+    order: "handshake",
+    dispute: "gavel",
+    message: "mail",
+  };
+
+  function render(notifications) {
+    if (!notifications.length) {
+      list.innerHTML = '<p class="p-4 text-outline">You\'re all caught up.</p>';
+      return;
+    }
+    list.innerHTML = notifications
+      .map(
+        (n) => `
+      <div class="p-4 flex items-start gap-3 ${n.is_read ? "" : "bg-secondary-container/30"}" data-id="${n.id}">
+        <span class="material-symbols-outlined !text-[20px] ${n.is_read ? "text-on-surface-variant" : "text-secondary"} shrink-0 mt-0.5">
+          ${TYPE_ICONS[n.notification_type] || "notifications"}
+        </span>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm text-on-surface">${n.verb}</p>
+          <p class="text-xs text-outline mt-1">${new Date(n.created_at).toLocaleString()}</p>
+        </div>
+        ${!n.is_read ? `<button class="text-xs text-secondary font-medium mark-read-btn shrink-0">Mark read</button>` : ""}
+      </div>`
+      )
+      .join("");
+
+    list.querySelectorAll(".mark-read-btn").forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        const id = e.target.closest("[data-id]").dataset.id;
+        await Choropia.markNotificationRead(id);
+        load();
+      });
+    });
+  }
+
+  async function load() {
+    if (!Choropia.isAuthenticated()) {
+      window.location.href = "{% url 'login' %}";
+      return;
+    }
+    try {
+      const data = await Choropia.listNotifications();
+      render(data.results || data);
+    } catch (err) {
+      list.innerHTML = `<p class="p-4 text-red-500">${err.message}</p>`;
+    }
+  }
+
+  document.getElementById("mark-all-btn").addEventListener("click", async () => {
+    await Choropia.markAllNotificationsRead();
+    load();
+  });
+
+  load();
+</script>
+{% endblock %}

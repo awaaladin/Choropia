@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface-bright": "#f8f9ff",
+          "primary-fixed-dim": "#bac7e1",
+          "inverse-primary": "#bac7e1",
+          "on-surface": "#0b1c30",
+          "surface-variant": "#d3e4fe",
+          "tertiary-container": "#00174b",
+          "background": "#f8f9ff",
+          "surface-container-high": "#dce9ff",
+          "primary-fixed": "#d6e3fe",
+          "surface-container-highest": "#d3e4fe",
+          "tertiary": "#000000",
+          "on-error-container": "#93000a",
+          "surface-container-low": "#eff4ff",
+          "tertiary-fixed": "#dbe1ff",
+          "on-primary-fixed": "#0e1c2f",
+          "error-container": "#ffdad6",
+          "on-primary": "#ffffff",
+          "inverse-surface": "#213145",
+          "error": "#ba1a1a",
+          "tertiary-fixed-dim": "#b4c5ff",
+          "outline": "#75777d",
+          "on-background": "#0b1c30",
+          "surface": "#f8f9ff",
+          "primary": "#000000",
+          "on-error": "#ffffff",
+          "on-surface-variant": "#44474c",
+          "on-secondary-container": "#3b5a7f",
+          "surface-tint": "#525f75",
+          "secondary": "#426086",
+          "on-primary-fixed-variant": "#3a475c",
+          "on-secondary": "#ffffff",
+          "secondary-fixed": "#d3e4ff",
+          "on-secondary-fixed": "#001c38",
+          "on-tertiary": "#ffffff",
+          "primary-container": "#0e1c2f",
+          "on-primary-container": "#77849c",
+          "secondary-fixed-dim": "#aac9f4",
+          "surface-dim": "#cbdbf5",
+          "outline-variant": "#c5c6cd",
+          "inverse-on-surface": "#eaf1ff",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-container": "#497cff",
+          "secondary-container": "#b3d1fd",
+          "on-tertiary-fixed": "#00174b",
+          "on-tertiary-fixed-variant": "#003ea8",
+          "surface-container": "#e5eeff",
+          "on-secondary-fixed-variant": "#29486d"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "space-lg": "1.5rem",
+          "space-sm": "0.5rem",
+          "margin-mobile": "1rem",
+          "space-3xl": "4rem",
+          "space-xl": "2rem",
+          "space-md": "0.75rem",
+          "space-2xl": "3rem",
+          "gutter-mobile": "1rem",
+          "gutter-desktop": "1.5rem",
+          "space-base": "1rem",
+          "space-xs": "0.25rem",
+          "margin-desktop": "3rem",
+          "margin-tablet": "2rem",
+          "space-xxs": "0.125rem"
+        },
+        "fontFamily": {
+          "label-md": ["Inter"],
+          "body-sm": ["Inter"],
+          "display": ["Inter"],
+          "headline-lg": ["Inter"],
+          "headline-md": ["Inter"],
+          "mono-financial": ["Inter"],
+          "label-sm": ["Inter"],
+          "body-md": ["Inter"],
+          "headline-lg-mobile": ["Inter"],
+          "headline-sm": ["Inter"],
+          "body-lg": ["Inter"]
+        },
+        "fontSize": {
+          "label-md": ["13px", {"lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}],
+          "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+          "headline-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "mono-financial": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+          "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+          "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+          "headline-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+          "headline-sm": ["18px", {"lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 w-full max-w-[1440px] mx-auto px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg shrink-0"><div class="flex items-center gap-space-xs"><img alt="Choropia Marketplace Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UmRW9huFY4OWAO5ag9uVrwcIRRsjKrb8qJvg97xAfUXnBb3meL2yneKiJQACe-W_GohlJgEH2yheZTctACfY9pv0MD9TvrDdgs1FIcmbLVVcX2NVOkeV_s_gLabhz_c5Qz6HiRdG9ZylnCHkxTD70Dt7bpNQN7Fdc_zCZbSwanD2uYLq2-yM0HQhnpMpVukcKR3EO-qpl_MydE111aU3DY_OUOeMz85-FRXJ9hJI2waMF7hYaf-UKkoUM"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">Choropia</span></div><div class="relative hidden lg:flex items-center"><span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-[18px]">search</span><input class="w-72 xl:w-80 h-9 pl-9 pr-14 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-secondary transition-all" placeholder="Search posts, goods, services, or verified users..." type="text"/><kbd class="absolute right-2 px-1.5 py-0.5 bg-surface-container-lowest rounded text-[10px] font-mono-financial text-on-surface-variant shadow-[0_1px_2px_rgba(11,25,44,0.06)]">⌘K</kbd></div></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container text-on-surface font-semibold rounded-lg"><a aria-current="page" class="px-space-md py-space-xs transition-all bg-surface-container text-on-surface font-semibold rounded-lg" data-path="feed" href="#">Feed</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="reels" href="#">Reels</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="marketplace" href="#">Marketplace</a><a class="px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="banking-wallet" href="#">Banking & Wallet</a><a class="relative px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all flex items-center gap-space-xs" data-path="messages" href="#"><span>Messages</span><span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm rounded-full">3</span></a></nav><div class="flex items-center gap-space-sm shrink-0"><button class="inline-flex items-center gap-space-xs h-9 px-space-md bg-primary-container text-on-primary rounded-lg font-label-md text-label-md hover:bg-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[16px]">add</span><span class="hidden sm:inline">Create Post</span></button><button class="relative w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-error text-on-error font-label-sm text-[10px] rounded-full flex items-center justify-center font-bold ring-2 ring-surface-container-lowest">4</span></button><button class="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all" type="button"><span class="material-symbols-outlined text-[20px]">dark_mode</span></button><div class="relative flex items-center gap-space-xs pl-space-xs cursor-pointer"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3XdH6sHHTR0I01DogpSNWPAqCPl6alpW9NqwLayaoB4LeG4WOL-jEwM_b-G3mfS1NYbFCRUdhPBYW-11t_Y-sw-TpTOluQY_RMLz377laXdYasuCSNTdvLtXcy3J1R3EAotz_L20ONAHoLOTlh5NQ3E8i-ZE0avaDZA5dGp9hzKEGDE9qcBxy0x2z-nzxVohw7Gi2OXcx-hJWqoQV7P1pCU8WIwkqka7dHWFN1sCWmu6Hh9GXpWZw"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary rounded-full ring-2 ring-surface-container-lowest"></span></div><span class="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span></div></div></div></header><main class="w-full max-w-[1440px] mx-auto px-gutter-desktop pt-16 bg-surface"><div class="flex flex-col w-full">
+<div class="w-full py-space-md grid grid-cols-1 md:grid-cols-12 gap-gutter-desktop">
+<!-- LEFT NAVIGATION RAIL (Desktop) -->
+<aside class="hidden lg:flex lg:col-span-3 xl:col-span-3 flex-col gap-space-md sticky top-20 self-start">
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm p-space-sm rounded-lg bg-surface-container text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-secondary">feed</span>
+<span class="font-label-md text-label-md font-semibold">Home Feed</span>
+</div>
+<a class="flex items-center justify-between p-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px]">storefront</span>
+<span class="font-label-md text-label-md">Direct Listings</span>
+</div>
+<span class="bg-secondary-container text-on-secondary-container px-1.5 py-0.2 rounded font-mono-financial text-label-sm">24</span>
+</a>
+<a class="flex items-center justify-between p-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px]">handshake</span>
+<span class="font-label-md text-label-md">Active Escrows</span>
+</div>
+<span class="bg-surface-container-high text-on-surface px-1.5 py-0.2 rounded font-mono-financial text-label-sm">2</span>
+</a>
+<a class="flex items-center gap-space-sm p-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+<span class="font-label-md text-label-md">Saved Items</span>
+</a>
+<a class="flex items-center gap-space-sm p-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">insights</span>
+<span class="font-label-md text-label-md">Merchant Stats</span>
+</a>
+</div>
+<!-- Quick Trust Protocol Widget -->
+<div class="bg-surface-container-low p-space-md rounded-xl flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary">Institutional Escrow</span>
+<span class="material-symbols-outlined text-secondary text-[16px]">verified_user</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          100% of marketplace interactions feature cryptographic asset holding until mutual confirmation.
+        </p>
+<div class="pt-space-xs flex items-center gap-space-xs text-secondary">
+<span class="font-label-sm text-label-sm font-semibold">Audited Protocol v4.2</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</div>
+</div>
+</aside>
+<!-- CENTER STREAM (FEED) -->
+<section class="col-span-1 md:col-span-8 lg:col-span-6 xl:col-span-6 flex flex-col gap-space-md">
+<!-- Persistent Composer Box -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<img alt="My Profile" class="w-10 h-10 rounded-full object-cover shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3XdH6sHHTR0I01DogpSNWPAqCPl6alpW9NqwLayaoB4LeG4WOL-jEwM_b-G3mfS1NYbFCRUdhPBYW-11t_Y-sw-TpTOluQY_RMLz377laXdYasuCSNTdvLtXcy3J1R3EAotz_L20ONAHoLOTlh5NQ3E8i-ZE0avaDZA5dGp9hzKEGDE9qcBxy0x2z-nzxVohw7Gi2OXcx-hJWqoQV7P1pCU8WIwkqka7dHWFN1sCWmu6Hh9GXpWZw"/>
+<div class="w-full flex flex-col gap-space-xs">
+<textarea class="w-full bg-surface-container-low rounded-lg p-space-sm font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-secondary resize-none transition-all" id="composer-input" placeholder="What are you working on or selling today?" rows="2"></textarea>
+</div>
+</div>
+<!-- Composer Tools & Tags -->
+<div class="flex flex-wrap items-center justify-between gap-space-xs pt-space-xs">
+<!-- Intent Pill Selectors -->
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1 md:pb-0">
+<button class="px-space-sm py-0.5 rounded-lg text-label-sm font-label-sm bg-surface-container text-on-surface font-semibold hover:bg-surface-container-high transition-colors" type="button">Standard</button>
+<button class="px-space-sm py-0.5 rounded-lg text-label-sm font-label-sm bg-secondary-container text-on-secondary-container hover:opacity-90 transition-opacity flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[13px]">sell</span>Goods
+            </button>
+<button class="px-space-sm py-0.5 rounded-lg text-label-sm font-label-sm bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors" type="button">Services</button>
+<button class="px-space-sm py-0.5 rounded-lg text-label-sm font-label-sm bg-surface-container-low text-on-surface-variant hover:bg-surface-container transition-colors" type="button">Info</button>
+</div>
+<!-- Attachments & Submit -->
+<div class="flex items-center gap-space-xs ml-auto">
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" title="Attach Media" type="button">
+<span class="material-symbols-outlined text-[19px]">image</span>
+</button>
+<button class="p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors" title="Attach Video" type="button">
+<span class="material-symbols-outlined text-[19px]">movie</span>
+</button>
+<button class="p-1.5 rounded-lg text-secondary hover:bg-surface-container transition-colors" title="Add Pricing Card" type="button">
+<span class="material-symbols-outlined text-[19px]">loyalty</span>
+</button>
+<button class="h-8 px-space-md bg-primary-container text-on-primary rounded-lg font-label-sm text-label-sm hover:bg-on-surface transition-all flex items-center gap-1" id="open-modal-btn" type="button">
+<span>Publish</span>
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- POST 1: Purchasable Goods Post (Artisan Wood) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col gap-space-sm">
+<!-- Post Header -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Close up portrait photograph of an artisanal furniture woodworker in his studio workshop, wearing canvas apron, warm natural daylight, high detail, authentic craftsperson aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDqwqqWpQeOmKDYcaYwXbfVKeYna3oWZVwTTVnJpNI7IVb3d7CBfkGP4XjpMyKNowKq4oqFbT2hvLSWd7JTUnCncGxBTq2ir0VboPaZ6eYRhdo9YdSyG7pF5d1y3M6swjpyeouYJNVA7iVdhlWsQ9_X93EQs_an-wlFTq62U78_JuOGGVzQyvH9b3GHRZWvcAiHIlN1a6zXZFaops6yGyK02r_2fwnmtNf_InLpgWs_S7nMDOsbI1u"/>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-body-lg font-semibold text-on-surface">Artisan Furniture Studio</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;" title="Verified Merchant">verified</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">@artisan_wood</span>
+<span class="text-on-surface-variant text-[10px]">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">2h ago</span>
+</div>
+</div>
+</div>
+<!-- Menu dropdown trigger -->
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-lg" type="button">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<!-- Post Content -->
+<p class="font-body-md text-body-md text-on-surface">
+          Freshly finished solid American walnut desk ready to ship. Hand-rubbed organic oil finish with brass joinery accents. Integrated with Choropia Escrow checkout right below!
+        </p>
+<!-- Post Media Asset -->
+<div class="relative w-full aspect-[16/10] rounded-lg overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="High-end solid American walnut writing desk with subtle brass inlays in a minimalist architectural loft interior with clean light, architectural shadows, editorial product photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuApR9w9bViaGp4aJBOTBjk7scrViqlKadix5YPgKrx1T1_2cktqdyZIu-WGRH6mZt0rQ9f4VZyK9ouvx6cg-oPyl7vXvpRmaFu08RIs-NSMRtjBCfdXsiOBKOftdHpe8yPIWMTTTg67xJ7OIAaMlPd5RserPj7PQh74q93F2FBcdaBvp8twODTJVfisQ9VyRQjOK0SvXEPYQW5fWK1QzIQyg_o785P2cc8M86_kgvsJB4-TQlcaONY9"/>
+<div class="absolute top-3 left-3 bg-primary-container/85 backdrop-blur-md px-2.5 py-1 rounded text-on-primary font-mono-financial text-label-sm uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">verified</span> Escrow Guaranteed
+          </div>
+</div>
+<!-- Interactive Purchase Card -->
+<div class="p-space-sm rounded-lg bg-surface-container flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">chair</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface font-semibold">Goods</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">1 unit in stock</span>
+</div>
+<span class="font-mono-financial text-headline-sm font-semibold text-on-surface">$850.00 USD</span>
+</div>
+</div>
+<button class="h-9 px-space-md bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-secondary transition-colors flex items-center justify-center gap-1" onclick="alert('Proceeding to instant wallet escrow authorization for $850.00 USD')" type="button">
+<span class="material-symbols-outlined text-[16px]">shopping_bag</span>
+<span>Buy Now (Escrow)</span>
+</button>
+</div>
+<!-- Actions Bar -->
+<div class="flex items-center justify-between pt-space-xs text-on-surface-variant">
+<div class="flex items-center gap-space-md">
+<button class="flex items-center gap-1 hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+<span class="font-label-sm text-label-sm">142</span>
+</button>
+<button class="flex items-center gap-1 hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span class="font-label-sm text-label-sm">28</span>
+</button>
+<button class="flex items-center gap-1 hover:text-secondary transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">repeat</span>
+<span class="font-label-sm text-label-sm">9</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+<button class="p-1 hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">bookmark</span>
+</button>
+</div>
+</div>
+</article>
+<!-- POST 2: Services Post (Architectural Consultation) -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Professional portrait photograph of a senior cloud software engineer in a modern minimalist workspace, soft studio illumination, thoughtful expression, deep navy background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHGbRTRnl_n4k7CfZhQ4nl8wuw--UXAdJS_MUpOW1Yn8NyBJHsN9xdycE0sJCx0Dnf-qaF0A_mytZ29jBS85VTTNFalYD5wDyTJqMF_zPWXguYxd5_NriP7YW5_HR9AwJS1LKxdHgMyFtV9pH_b8SqRljm-bD_qD11qGg2XtRTqi6L7-YWSadzVJzw4cLQP0A2p5E7KfB9wtUqNy3kO0XdeIU7eaQG0PHSF21MzNULGt_0SfAtt_RA"/>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-body-lg font-semibold text-on-surface">Alex Rivera</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">@dev_guru</span>
+<span class="text-on-surface-variant text-[10px]">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">4h ago</span>
+</div>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded-lg" type="button">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+          Most multi-tenant SaaS bottlenecks aren't database queries—they are asynchronous state synchronization gaps across distributed message brokers. Happy to review system schematics live this week.
+        </p>
+<!-- Service Consultation Action Card -->
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded bg-surface-container-high text-on-surface flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded bg-surface-container-highest text-on-surface-variant font-semibold">Service</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">1:1 Video Audit</span>
+</div>
+<span class="font-mono-financial text-headline-sm font-semibold text-on-surface">$150.00 <span class="text-body-sm text-on-surface-variant font-normal">/ hour</span></span>
+</div>
+</div>
+<button class="h-9 px-space-md bg-secondary text-on-secondary rounded-lg font-label-md text-label-md hover:bg-on-surface transition-colors flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[16px]">event_available</span>
+<span>Book Consulting Hour</span>
+</button>
+</div>
+<!-- Actions Bar -->
+<div class="flex items-center justify-between pt-space-xs text-on-surface-variant">
+<div class="flex items-center gap-space-md">
+<button class="flex items-center gap-1 hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+<span class="font-label-sm text-label-sm">89</span>
+</button>
+<button class="flex items-center gap-1 hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span class="font-label-sm text-label-sm">16</span>
+</button>
+<button class="flex items-center gap-1 hover:text-secondary transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">repeat</span>
+<span class="font-label-sm text-label-sm">12</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+<button class="p-1 hover:text-on-surface transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">bookmark</span>
+</button>
+</div>
+</div>
+</article>
+<!-- POST 3: Community Post with Open Ellipsis Context Menu & Expanded Threaded Comments -->
+<article class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col gap-space-sm relative">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="Portrait photograph of a woman digital creator in Scandinavian style sunlit office with minimalist architectural furniture, calm professional tone." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBycTbVhh3oEGi-BxiXTJnH-3ypmmv-gVY52iV8SUQwz6W50e1xK-ZARiA1ouPdgwYPQZM7zPnpuwtgir_wX6RsewpScudt5pvaDpu66t0LgyqU1eyrRhGakfeaGAtnV1UPiB2YjnPZz9rPhHjd4j_GLmZeJNpxtvKma1urJIaH3SY-AF6Urwj-CBi6rlQ3QSNpaQtx3XoSPAm4nUzdK6k5fVRev7cbG8C_tAOcwwK9aHydSG8TweWy"/>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-body-lg font-semibold text-on-surface">Elena Rostova</span>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded bg-surface-container text-on-surface">You</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">@elena_design</span>
+<span class="text-on-surface-variant text-[10px]">•</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">6h ago</span>
+</div>
+</div>
+</div>
+<!-- Ellipsis Trigger & Open Context Menu -->
+<div class="relative">
+<button class="text-on-surface-variant bg-surface-container p-1 rounded-lg hover:text-on-surface transition-colors" id="menu-trigger-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+<!-- Dropdown Menu / Screen #6 Manage Post Affordance -->
+<div class="absolute right-0 top-8 z-30 w-56 bg-surface-container-lowest rounded-xl shadow-xl p-1.5 flex flex-col gap-0.5" id="post-menu-dropdown">
+<button class="w-full px-space-sm py-2 rounded-lg text-left font-label-md text-label-md text-on-surface hover:bg-surface-container-low flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+<span>Edit Listing Details</span>
+</button>
+<button class="w-full px-space-sm py-2 rounded-lg text-left font-label-md text-label-md text-on-surface hover:bg-surface-container-low flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Mark as Sold</span>
+</button>
+<button class="w-full px-space-sm py-2 rounded-lg text-left font-label-md text-label-md text-on-surface hover:bg-surface-container-low flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">bar_chart</span>
+<span>View Analytics</span>
+</button>
+<div class="h-[1px] bg-surface-container my-1"></div>
+<button class="w-full px-space-sm py-2 rounded-lg text-left font-label-md text-label-md text-error hover:bg-error-container hover:text-on-error-container flex items-center gap-space-xs transition-colors" onclick="alert('Post deletion confirmed.')" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+<span>Delete Post (Danger)</span>
+</button>
+</div>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+          Design systems thrive when they prioritize predictable constraints over decorative excess. Here is how we reduced ambiguity in multi-party escrow clearing:
+        </p>
+<!-- Rich Embedded Quote / Mini Infographic -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>ESCROW CLEARANCE FLOW</span>
+<span class="font-mono-financial">LATENCY: 180ms</span>
+</div>
+<!-- SVG Flow Graph -->
+<div class="w-full py-1">
+<svg class="w-full h-10 text-secondary" fill="none" viewbox="0 0 500 40" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 20 H140 M180 20 H300 M340 20 H480" stroke="currentColor" stroke-dasharray="4 4" stroke-width="2"></path>
+<circle cx="20" cy="20" fill="currentColor" r="8"></circle>
+<circle cx="160" cy="20" fill="currentColor" r="10"></circle>
+<circle cx="320" cy="20" fill="currentColor" r="10"></circle>
+<circle cx="480" cy="20" fill="currentColor" r="8"></circle>
+</svg>
+<div class="flex justify-between text-[11px] font-mono-financial text-on-surface-variant px-1">
+<span>Deposit Locked</span>
+<span>Identity Attestation</span>
+<span>Proof of Delivery</span>
+<span>Settled</span>
+</div>
+</div>
+</div>
+<!-- Threaded Comments Drawer -->
+<div class="pt-space-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Discussion (3)</span>
+<span class="font-label-sm text-label-sm text-secondary cursor-pointer hover:underline">Sort by Top</span>
+</div>
+<!-- Thread Comment 1 -->
+<div class="flex items-start gap-space-sm p-space-xs rounded-lg bg-surface-container-low">
+<img class="w-8 h-8 rounded-full object-cover shrink-0 mt-1" data-alt="Avatar headshot of an executive product manager with dark hair in a charcoal turtleneck, minimalist studio lighting, high sharpness." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-yUVbzR3S4JngzxrBUDvX2c6aeMCM4pcCmQNXMJ2kgE2zkotEb-c5iNK2PwutRsiXXbjjYwuzEjj-cPRwohiRhnXjIq41hC6MoT3-NYxgazkePM7zZVZ53Oy44FKfB5iKasoCbCqKAwJTPIc1ZZANA8StrAi6AZSQ1PasoT0aQ5xVxc7js24cItPZq7UbyrXtE-HnYzyM_HPbmlYxc6Me_73Fc08r8Bj2sU8D8ur4SzCLn3JXh3o_"/>
+<div class="flex flex-col gap-0.5 w-full">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Marcus Vance</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">3h ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">
+                The 180ms latency checkpoint is a game changer for counter-party escrow. Are all multi-sigs resolved on L2?
+              </p>
+<div class="flex items-center gap-space-md pt-1 text-on-surface-variant">
+<button class="flex items-center gap-1 text-[11px] hover:text-error transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px]">favorite</span> 14
+                </button>
+<button class="text-[11px] font-semibold hover:text-on-surface transition-colors" type="button">Reply</button>
+</div>
+<!-- Nested Reply -->
+<div class="mt-space-xs pl-space-sm flex items-start gap-space-xs">
+<img class="w-6 h-6 rounded-full object-cover shrink-0 mt-0.5" data-alt="Portrait photo of a young female tech entrepreneur, modern neutral background, warm lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFiH7pzkKAgRknD_XendbewqkXvaocOXx90eP5HkA5p2SVsr1bDzGdNkc2UZ1UhM6Shd-caawmq7zZkLJz1W-rVzPs6gk5ZivwKBFEMZJMns_HS4goIgRwO2eWRqmlfXV3SBhWf5nFkltp5Ldp5z2RaXMYYNkh6_VJjZaRqL1nJDCgcuTtf0-3NFepmQcu5JdrdujjPcQ5YLl8GkMr-53n-JM8x-L21_t53fRCblH3Tp_-MmWWWwqD"/>
+<div class="flex flex-col gap-0.5 w-full bg-surface-container-lowest p-2 rounded-lg">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Elena Rostova</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant">1h ago</span>
+</div>
+<p class="font-body-sm text-[12px] text-on-surface">
+                    Yes! Batch clearing executes on the institutional rollup with state proofs posted every 50 blocks.
+                  </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Add Quick Reply -->
+<div class="flex items-center gap-space-xs pt-space-xs">
+<input class="w-full h-8 px-space-sm bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-secondary" placeholder="Write a verified response..." type="text"/>
+<button class="h-8 px-space-sm bg-surface-container text-on-surface rounded-lg font-label-sm text-label-sm hover:bg-surface-container-high transition-colors" type="button">Send</button>
+</div>
+</div>
+</article>
+</section>
+<!-- RIGHT DISCOVERY SIDEBAR -->
+<aside class="col-span-1 md:col-span-4 lg:col-span-3 xl:col-span-3 flex flex-col gap-space-md">
+<!-- Live Wallet Balance Snapshot Card -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Settled Balance</span>
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+</div>
+<div class="flex flex-col">
+<span class="font-mono-financial text-headline-md font-semibold text-on-surface">$28,450.00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">lock</span>
+            $3,200.00 in active escrow
+          </span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs pt-space-xs">
+<button class="h-8 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[15px]">add</span>
+<span>Deposit</span>
+</button>
+<button class="h-8 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-[15px]">send</span>
+<span>Transfer</span>
+</button>
+</div>
+</div>
+<!-- Trending in Marketplace -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">Trending Market</span>
+<span class="font-label-sm text-label-sm text-secondary cursor-pointer hover:underline">Explore</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Trend 1 -->
+<div class="flex items-center justify-between gap-space-xs group cursor-pointer">
+<div class="flex items-center gap-space-xs min-w-0">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[16px]">draw</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-semibold text-on-surface truncate group-hover:text-secondary transition-colors">Fine Art Series #04</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">14 sales this week</span>
+</div>
+</div>
+<span class="font-mono-financial text-label-md font-semibold text-on-surface shrink-0">$1,450</span>
+</div>
+<!-- Trend 2 -->
+<div class="flex items-center justify-between gap-space-xs group cursor-pointer">
+<div class="flex items-center gap-space-xs min-w-0">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[16px]">terminal</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-semibold text-on-surface truncate group-hover:text-secondary transition-colors">Smart Contract Audit</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">8 contracts locked</span>
+</div>
+</div>
+<span class="font-mono-financial text-label-md font-semibold text-on-surface shrink-0">$2,200</span>
+</div>
+<!-- Trend 3 -->
+<div class="flex items-center justify-between gap-space-xs group cursor-pointer">
+<div class="flex items-center gap-space-xs min-w-0">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[16px]">watch</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md font-semibold text-on-surface truncate group-hover:text-secondary transition-colors">Vintage Chronograph</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Escrow secured</span>
+</div>
+</div>
+<span class="font-mono-financial text-label-md font-semibold text-on-surface shrink-0">$5,800</span>
+</div>
+</div>
+</div>
+<!-- Suggested Creators & Sellers to Follow -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">Suggested Verified</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">group_add</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- Suggestion 1 -->
+<div class="flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<img class="w-8 h-8 rounded-full object-cover shrink-0" data-alt="Headshot of a Japanese minimalist leather craft designer in a pristine Tokyo design studio, natural daylight, soft bokeh background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcAkJ6WvzinJP149l2WZoHz0kPljiR8YAWaau_yLGHmTO8hq86v0qCAmoAz5iQjS-xb2Q6Vl9YHC-_HUrCaryumg62iuB14QGq5jrM4DjydOofZ_nL3Z6ZlHJ_SbF3koUWEbvRP6zTZW-puJhkf-XofpTqL5NwRorab_9U8AZh37_AznokvkznbdKIlbRZeHG2ANnq-jJqyKhajeQX7Qzh-FmOzjL-yZZZdvFraseFjNMElfecYS-c"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-0.5">
+<span class="font-label-md text-label-md font-semibold text-on-surface truncate">Kenji Sato</span>
+<span class="material-symbols-outlined text-secondary text-[14px]">verified</span>
+</div>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Bespoke Leather</span>
+</div>
+</div>
+<button class="h-7 px-space-sm bg-surface-container text-on-surface font-label-sm text-label-sm rounded hover:bg-surface-container-high transition-colors" type="button">Follow</button>
+</div>
+<!-- Suggestion 2 -->
+<div class="flex items-center justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<img class="w-8 h-8 rounded-full object-cover shrink-0" data-alt="Professional studio portrait of an urban architectural photographer with vintage camera gear, subdued ambient light, sharp contrast." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfNw-IlfMCqPibz1r9BfM7xPGKJxN_5-LysN734u9TSMqEQSIFeVJPrPH-xcmxRrftOIwbfV613PH0Vpe7OWkDKKobZbmEqY82ufDa1tZ-30FCdJrbVNA1TnH5KTN-vyip1iwDA8Nq_BITvPopBtGz65G-JE94te9mgJg3RJXtYQpH8nVhd3xfbKjjzb_zicHRoGLhpVw6WIlre2mnQtFc6U-t6-dUZB1MZKF40wqa1gyvMfCDCbzV"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-0.5">
+<span class="font-label-md text-label-md font-semibold text-on-surface truncate">Nadia Solis</span>
+<span class="material-symbols-outlined text-secondary text-[14px]">verified</span>
+</div>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Arch Photography</span>
+</div>
+</div>
+<button class="h-7 px-space-sm bg-surface-container text-on-surface font-label-sm text-label-sm rounded hover:bg-surface-container-high transition-colors" type="button">Follow</button>
+</div>
+</div>
+</div>
+<!-- Quick Platform Telemetry & Policy Info -->
+<div class="flex flex-wrap gap-x-space-sm gap-y-1 px-space-xs text-[11px] font-body-sm text-on-surface-variant">
+<a class="hover:underline" href="#">Escrow Guarantees</a>
+<span>•</span>
+<a class="hover:underline" href="#">Anti-Fraud KYC</a>
+<span>•</span>
+<a class="hover:underline" href="#">Clearing Nodes</a>
+<span>•</span>
+<a class="hover:underline" href="#">Privacy Architecture</a>
+</div>
+</aside>
+</div>
+<!-- CREATE POST MODAL (Screen #5 / Screen #7 - Marketplace Listing Integration) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-inverse-surface/40 backdrop-blur-sm hidden" id="create-post-modal">
+<div class="w-full max-w-xl bg-surface-container-lowest rounded-xl shadow-xl flex flex-col overflow-hidden max-h-[921px]">
+<!-- Modal Header -->
+<div class="p-space-md bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[22px]">post_add</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Create Post or Marketplace Listing</span>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" id="close-modal-btn" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body -->
+<div class="p-space-md overflow-y-auto flex flex-col gap-space-md">
+<!-- Post Type Radio / Pill Tabs -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Listing Intent</label>
+<div class="grid grid-cols-3 gap-space-xs">
+<label class="cursor-pointer">
+<input class="peer sr-only" name="post_type" type="radio" value="standard"/>
+<div class="p-space-xs rounded-lg text-center font-label-md text-label-md bg-surface-container-low text-on-surface-variant peer-checked:bg-primary-container peer-checked:text-on-primary transition-all">
+                Standard Post
+              </div>
+</label>
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="post_type" type="radio" value="goods"/>
+<div class="p-space-xs rounded-lg text-center font-label-md text-label-md bg-surface-container-low text-on-surface-variant peer-checked:bg-primary-container peer-checked:text-on-primary transition-all">
+                Physical Goods
+              </div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="post_type" type="radio" value="service"/>
+<div class="p-space-xs rounded-lg text-center font-label-md text-label-md bg-surface-container-low text-on-surface-variant peer-checked:bg-primary-container peer-checked:text-on-primary transition-all">
+                Professional Service
+              </div>
+</label>
+</div>
+</div>
+<!-- Creator Identification -->
+<div class="flex items-center gap-space-sm">
+<img alt="Active User" class="w-10 h-10 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3XdH6sHHTR0I01DogpSNWPAqCPl6alpW9NqwLayaoB4LeG4WOL-jEwM_b-G3mfS1NYbFCRUdhPBYW-11t_Y-sw-TpTOluQY_RMLz377laXdYasuCSNTdvLtXcy3J1R3EAotz_L20ONAHoLOTlh5NQ3E8i-ZE0avaDZA5dGp9hzKEGDE9qcBxy0x2z-nzxVohw7Gi2OXcx-hJWqoQV7P1pCU8WIwkqka7dHWFN1sCWmu6Hh9GXpWZw"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Elena Rostova</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-secondary">verified</span> KYC Tier 2 Verified Merchant
+            </span>
+</div>
+</div>
+<!-- Post Body Editor -->
+<textarea class="w-full p-space-sm bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-1 focus:ring-secondary resize-none" placeholder="Describe the item, service specification, or project details..." rows="3"></textarea>
+<!-- Marketplace Financial Specification Accordion -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[18px]">payments</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Escrow Pricing Details</span>
+</div>
+<span class="px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface font-mono-financial text-[11px]">Instant Clearing</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Listing Price</label>
+<div class="relative flex items-center">
+<input class="w-full h-10 pl-space-sm pr-16 bg-surface-container-lowest rounded-lg font-mono-financial text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-secondary" placeholder="850.00" type="number"/>
+<span class="absolute right-2 px-2 py-1 bg-surface-container rounded text-label-sm font-mono-financial text-on-surface">USD</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Available Inventory / Slots</label>
+<input class="w-full h-10 px-space-sm bg-surface-container-lowest rounded-lg font-mono-financial text-body-md text-on-surface focus:outline-none focus:ring-1 focus:ring-secondary" placeholder="1" type="number"/>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Institutional Escrow Fee (0.8%)</span>
+<span class="font-mono-financial text-body-sm text-on-surface">$6.80 USD</span>
+</div>
+</div>
+<!-- Media Attachment Mock Drag Area -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col items-center justify-center text-center gap-1 cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-[28px]">cloud_upload</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Drag & drop high-resolution photos or media</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Supports PNG, JPG, or WEBP up to 25MB</span>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-space-md bg-surface-container-lowest flex items-center justify-between gap-space-sm">
+<button class="h-10 px-space-md bg-surface-container text-on-surface rounded-lg font-label-md text-label-md hover:bg-surface-container-high transition-colors" id="cancel-modal-btn" type="button">
+          Save Draft
+        </button>
+<button class="h-10 px-space-xl bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-secondary transition-colors flex items-center gap-1" onclick="alert('Post and escrow listing published directly to feed!'); document.getElementById('create-post-modal').classList.add('hidden');" type="button">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Publish Listing</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+    // Simple Modal and Menu Toggle Micro-interactions
+    const openModalBtn = document.getElementById('open-modal-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const cancelModalBtn = document.getElementById('cancel-modal-btn');
+    const modal = document.getElementById('create-post-modal');
+
+    const menuTriggerBtn = document.getElementById('menu-trigger-btn');
+    const postMenuDropdown = document.getElementById('post-menu-dropdown');
+
+    if (openModalBtn && modal) {
+      openModalBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+      });
+    }
+
+    if (closeModalBtn && modal) {
+      closeModalBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+    }
+
+    if (cancelModalBtn && modal) {
+      cancelModalBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+    }
+
+    if (menuTriggerBtn && postMenuDropdown) {
+      menuTriggerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        postMenuDropdown.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!postMenuDropdown.contains(e.target) && e.target !== menuTriggerBtn) {
+          postMenuDropdown.classList.add('hidden');
+        }
+      });
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-lowest mt-space-3xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="max-w-[1440px] mx-auto px-gutter-desktop py-space-xl flex flex-col md:flex-row items-center justify-between gap-space-base"><div class="flex items-center gap-space-sm"><img alt="Choropia Marketplace Logo" class="h-6 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UmRW9huFY4OWAO5ag9uVrwcIRRsjKrb8qJvg97xAfUXnBb3meL2yneKiJQACe-W_GohlJgEH2yheZTctACfY9pv0MD9TvrDdgs1FIcmbLVVcX2NVOkeV_s_gLabhz_c5Qz6HiRdG9ZylnCHkxTD70Dt7bpNQN7Fdc_zCZbSwanD2uYLq2-yM0HQhnpMpVukcKR3EO-qpl_MydE111aU3DY_OUOeMz85-FRXJ9hJI2waMF7hYaf-UKkoUM"/><span class="font-body-sm text-body-sm text-on-surface-variant">© 2025 Choropia Marketplace, Inc. Institutional Social Commerce & Escrow Clearing.</span></div><div class="flex items-center gap-space-lg"><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Terms of Service</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Escrow Protocol</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Security Standards</a><a class="font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface transition-colors" href="#">Compliance</a></div></div></footer></body></html>

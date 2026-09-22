@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary-container": "#0e1c2f", "on-background": "#191c1e", "on-primary": "#ffffff", "on-tertiary-container": "#76859b", "surface-dim": "#d8dadd", "secondary-container": "#b3d1fd", "on-primary-fixed-variant": "#3a475c", "surface-container-highest": "#e0e3e6", "inverse-on-surface": "#eff1f4", "secondary-fixed": "#d3e4ff", "inverse-primary": "#bac7e1", "primary-fixed-dim": "#bac7e1", "on-tertiary": "#ffffff", "secondary": "#426086", "primary-fixed": "#d6e3fe", "surface-bright": "#f7f9fc", "on-surface": "#191c1e", "on-secondary-fixed": "#001c38", "on-secondary-fixed-variant": "#29486d", "on-error-container": "#93000a", "on-secondary-container": "#3b5a7f", "error-container": "#ffdad6", "inverse-surface": "#2d3133", "surface-container-lowest": "#ffffff", "tertiary": "#000000", "surface-variant": "#e0e3e6", "on-primary-container": "#77849c", "on-error": "#ffffff", "on-secondary": "#ffffff", "on-primary-fixed": "#0e1c2f", "error": "#ba1a1a", "background": "#f7f9fc", "secondary-fixed-dim": "#aac9f4", "on-surface-variant": "#44474c", "surface-container-high": "#e6e8eb", "surface-container": "#eceef1", "surface": "#f7f9fc", "on-tertiary-fixed": "#0d1c2f", "on-tertiary-fixed-variant": "#3a485c", "surface-tint": "#525f75", "tertiary-fixed-dim": "#b9c7e0", "primary": "#000000", "outline": "#75777d", "tertiary-container": "#0d1c2f", "surface-container-low": "#f2f4f7", "tertiary-fixed": "#d5e3fd", "outline-variant": "#c5c6cd" }, borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, spacing: { "space-3xl": "4rem", "space-sm": "0.5rem", "margin-expanded": "2rem", "gutter-medium": "1rem", "space-xl": "2rem", "space-xxs": "0.125rem", "margin-compact": "1rem", "space-base": "1rem", "space-lg": "1.5rem", "gutter-expanded": "1.5rem", "space-2xl": "3rem", "gutter-compact": "0.75rem", "margin-medium": "1.5rem", "space-xs": "0.25rem", "space-md": "0.75rem" }, fontFamily: { "body-lg": ["Inter"], "headline-lg": ["Inter"], "display-lg-mobile": ["Inter"], "label-lg": ["Inter"], "title-sm": ["Inter"], "body-sm": ["Inter"], "label-sm": ["Inter"], "title-md": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"], "display-lg": ["Inter"], "label-md": ["Inter"], "body-md": ["Inter"], "numeric-metric": ["Inter"], "title-lg": ["Inter"] }, fontSize: { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }], "title-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.005em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "numeric-metric": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.03em", "fontWeight": "500" }], "title-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100vh;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-margin-compact flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmKHLGmJpbvEwAzO60uOyvmnrzbOndYDruJ1Qxu7G60P2IPpk5ZFVzqM6kcn8q1JzG2gdVdx54X4N7VTcKzBs8UM2HMOW06F3zS0cx5nMGdIGAqT6mxorkYGw8cofqf0G2RGfDqHLV22zrqpytKBR2Hmb6O9Nas3m8qYUW88SDNxxvhmA2I17nC-gFxqMlNPtYwBhq8GMNI4pcFFz-QE7EDzR4OjyrUQNWyio0GVe4y6IGVZKA9bpD"/><div class="flex flex-col"><span class="font-title-lg text-title-lg text-on-surface tracking-tight leading-none">Choropia</span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Marketplace</span></div></div><div class="flex items-center gap-space-xs"><a aria-label="Create Post" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="create-post"><span class="material-symbols-outlined text-[24px]">add_circle</span></a><a aria-label="Notifications" class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="notifications-feed"><span class="material-symbols-outlined text-[24px]">notifications</span><span class="absolute top-2.5 right-2.5 w-4 h-4 bg-error text-on-error rounded-full flex items-center justify-center font-label-sm text-[9px] leading-none font-semibold">3</span></a><a class="w-11 h-11 flex items-center justify-center" href="profile"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWvKeTZtEDkbs-CzNvY3aew92fuU0doWTMQf7BN1HDEx9u_Mai2HQ8QmaFUzmUiF3KdFtz4KIYNUPaCTYS3gGjMTr148E0EWmPyfQk-IBNunYxqT_kui5qSVmDtADxn9CGjWECKGObdl9eObE4G59DuL4TW4UtN0sQ64Y_0y5Su-Dx3lxwgNnhWevYOu8pk9hPXAQO5XWy7kH-_WLfet_lrlIIHekrkTKywX9Qapah79lPn2QurxRS"/></a></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-20 bg-surface"><div class="flex flex-col w-full">
+<!-- Search and Actions Bar -->
+<section class="px-margin-compact pt-space-base pb-space-sm">
+<div class="flex items-center gap-space-sm mb-space-sm">
+<div class="flex-1 flex items-center bg-surface-container-low px-space-base py-space-sm rounded-xl shadow-sm focus-within:bg-surface-container-lowest transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-space-sm">search</span>
+<input class="bg-transparent w-full text-on-surface placeholder:text-on-surface-variant font-body-md text-body-md focus:outline-none" id="conversation-search" placeholder="Search conversations or counterparties..." type="text"/>
+<button aria-label="Clear Search" class="hidden text-on-surface-variant hover:text-on-surface transition-colors" id="clear-search">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+</button>
+</div>
+<button aria-label="New Message or Escrow Chat" class="h-11 px-space-base bg-primary-container text-on-primary rounded-xl flex items-center gap-space-xs shadow-sm active:opacity-90 transition-all cursor-pointer" id="btn-new-escrow">
+<span class="material-symbols-outlined text-[20px]">add_moderator</span>
+<span class="font-label-lg text-label-lg tracking-normal hidden xs:inline">New Escrow</span>
+</button>
+</div>
+<!-- Filter Chips Horizontal Scroller -->
+<div class="flex items-center gap-space-xs overflow-x-auto no-scrollbar py-space-xxs">
+<button class="filter-chip active flex items-center gap-space-xs px-space-base py-1.5 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md transition-all shadow-sm cursor-pointer whitespace-nowrap" data-filter="all">
+<span class="material-symbols-outlined text-[16px]">all_inbox</span>
+<span>All</span>
+</button>
+<button class="filter-chip flex items-center gap-space-xs px-space-base py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md transition-all shadow-sm cursor-pointer whitespace-nowrap" data-filter="escrow">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span>Escrow Deals</span>
+</button>
+<button class="filter-chip flex items-center gap-space-xs px-space-base py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md transition-all shadow-sm cursor-pointer whitespace-nowrap" data-filter="unread">
+<span class="material-symbols-outlined text-[16px]">mark_email_unread</span>
+<span>Unread (2)</span>
+</button>
+<button class="filter-chip flex items-center gap-space-xs px-space-base py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md transition-all shadow-sm cursor-pointer whitespace-nowrap" data-filter="institutional">
+<span class="material-symbols-outlined text-[16px]">account_balance</span>
+<span>Institutional</span>
+</button>
+</div>
+</section>
+<!-- Active Transaction Escrow Chat Alert Banner -->
+<section class="px-margin-compact py-space-xs">
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-base shadow-sm active:scale-[0.99] transition-all cursor-pointer relative overflow-hidden group" id="active-escrow-banner">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm flex-1 min-w-0">
+<div class="w-10 h-10 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center flex-shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]">shield_with_heart</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<div class="flex items-center gap-space-xs mb-space-xxs flex-wrap">
+<span class="px-space-xs py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm uppercase tracking-wider">Active Escrow</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">#CH-9842</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+</div>
+<h2 class="font-title-sm text-title-sm text-on-surface truncate font-semibold">
+              Apple MacBook Pro M3 Max • $2,450.00
+            </h2>
+<div class="flex items-center gap-space-xs mt-space-xxs text-on-surface-variant font-body-sm text-body-sm">
+<span class="font-medium text-on-surface truncate">Sarah Jenkins</span>
+<span>•</span>
+<span class="text-secondary font-medium truncate">Awaiting Inspection Sign-off</span>
+</div>
+</div>
+</div>
+<div class="flex items-center h-10 pl-space-xs">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant group-hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[20px]">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+<!-- Progress Bar Track -->
+<div class="w-full bg-surface-container-high h-1 rounded-full mt-space-md overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 75%;"></div>
+</div>
+<div class="flex justify-between items-center mt-space-xxs text-on-surface-variant font-label-sm text-label-sm">
+<span>Phase 3 of 4: Parity Inspection</span>
+<span class="font-medium text-on-surface">Sign-off required</span>
+</div>
+</div>
+</section>
+<!-- Primary Conversations Feed -->
+<section class="px-margin-compact py-space-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between px-space-xs py-space-xxs">
+<span class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-wider">Secured Feeds &amp; Chats</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Encrypted E2EE</span>
+</div>
+<!-- Conversation 1: Sarah Jenkins (Escrow, Unread, Active) -->
+<article class="conversation-item w-full bg-surface-container-lowest rounded-xl p-space-base shadow-sm hover:bg-surface-container-low transition-all cursor-pointer relative" data-category="escrow unread">
+<div class="flex items-start gap-space-md">
+<!-- Counterparty Avatar -->
+<div class="relative flex-shrink-0">
+<img class="w-12 h-12 rounded-xl object-cover shadow-sm" data-alt="Editorial close-up corporate portrait of Sarah Jenkins, a professional technology dealer wearing a tailored charcoal blazer with subtle studio lighting and a clean neutral gradient background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQzr8dqWJinHraYYNYrVEhprx6rDIs0fvTcAIlsvcj9FUKr9HvMicIfR9tY0r8HSQp_dqlmeeMrXmJs5SCpBK-n6ILke8Jgff7i1kS41hkuXMRtDZjUlxxLY-AbmGjOGGP_uP-bh1DrU91sKYjGQKNpn0nqD4_R7swUMqioIicJ_gUmBuEcRPKOOMBGHrXB6Ev1uVrzGAfG9L138qLbSv1XzjmOTQlvOF2IbzCpfXRFWHJChFXEsN3"/>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 bg-primary-container text-on-primary rounded-full flex items-center justify-center ring-2 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[13px]">verified</span>
+</div>
+</div>
+<!-- Conversation Details -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-space-xs mb-space-xxs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Sarah Jenkins</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm flex-shrink-0">Merchant T1</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary-container font-semibold flex-shrink-0">10:42 AM</span>
+</div>
+<!-- Deal Asset Badge -->
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="inline-flex items-center gap-space-xxs px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">lock</span>
+              Escrow $2,450.00
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">MacBook Pro M3 Max</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface line-clamp-2 leading-snug">
+            Inspection logs attached. Please review the cryptographic parity test before approving release.
+          </p>
+</div>
+<!-- Unread Badge indicator -->
+<div class="flex flex-col items-end justify-between self-stretch flex-shrink-0 pl-space-xs">
+<span class="w-5 h-5 bg-primary-container text-on-primary rounded-full flex items-center justify-center font-label-sm text-[11px] font-bold shadow-sm">
+            2
+          </span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">attach_file</span>
+</div>
+</div>
+</article>
+<!-- Conversation 2: Maison Horlogerie Geneva (Tier 1 Escrow) -->
+<article class="conversation-item w-full bg-surface-container-lowest rounded-xl p-space-base shadow-sm hover:bg-surface-container-low transition-all cursor-pointer relative" data-category="escrow institutional">
+<div class="flex items-start gap-space-md">
+<!-- Counterparty Avatar -->
+<div class="relative flex-shrink-0">
+<img class="w-12 h-12 rounded-xl object-cover shadow-sm" data-alt="Monochrome luxury logo of a Swiss high-horology auction house Maison Horlogerie Geneva, featuring sharp architectural heraldic geometry against a deep slate backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLLQYRtaDqw66Bh_AqafUeFd1t0FZUSp7O5875z1rvj4r3u2Br3RWlFbkfsWSr91eID6tBdkktMHv1Pt8MUYHhccR57WnCDX3_T9_cNxvSfrRoBtT8ixNTEzcP01apjRwLBub7ag9JgSzks4Ad1EnqVWIKdlUBbyVuT8Pbeh01yQf0ZBoY0X61wF5Z0jAKRbloUwBXXv2fwhvymHEDk1Kw18gKjQBDlvcDgX30Oa3NWgsIfthKunXR"/>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center ring-2 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[13px]">policy</span>
+</div>
+</div>
+<!-- Conversation Details -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-space-xs mb-space-xxs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Maison Horlogerie Geneva</span>
+<span class="material-symbols-outlined text-[16px] text-secondary flex-shrink-0">verified</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">Yesterday</span>
+</div>
+<!-- Deal Tag -->
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="inline-flex items-center gap-space-xxs px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">watch</span>
+              Rolex Submariner #8104
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Tier 1 Escrow</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 leading-snug">
+            Vault courier protocol initiated. Transit tracking code dispatched.
+          </p>
+</div>
+<!-- Read Tick Status -->
+<div class="flex flex-col items-end justify-between self-stretch flex-shrink-0 pl-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary">done_all</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">local_shipping</span>
+</div>
+</div>
+</article>
+<!-- Conversation 3: Choropia Protocol Escrow Bot -->
+<article class="conversation-item w-full bg-surface-container-lowest rounded-xl p-space-base shadow-sm hover:bg-surface-container-low transition-all cursor-pointer relative" data-category="escrow institutional">
+<div class="flex items-start gap-space-md">
+<!-- Counterparty Avatar -->
+<div class="relative flex-shrink-0">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[24px]">smart_toy</span>
+</div>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 bg-surface-container-highest text-primary rounded-full flex items-center justify-center ring-2 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[12px]">code</span>
+</div>
+</div>
+<!-- Conversation Details -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-space-xs mb-space-xxs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Choropia Protocol Bot</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm flex-shrink-0">System</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">2 days ago</span>
+</div>
+<!-- Deal Status Tag -->
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="inline-flex items-center gap-space-xxs px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">token</span>
+              Contract #88192
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-semibold uppercase tracking-wider">Collateral Secured</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 leading-snug">
+            Automated notification: Smart contract #88192 state changed to COLLATERAL SECURED.
+          </p>
+</div>
+<!-- System State Icon -->
+<div class="flex flex-col items-end justify-between self-stretch flex-shrink-0 pl-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary">done_all</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">link</span>
+</div>
+</div>
+</article>
+<!-- Conversation 4: Dr. Sterling Vance -->
+<article class="conversation-item w-full bg-surface-container-lowest rounded-xl p-space-base shadow-sm hover:bg-surface-container-low transition-all cursor-pointer relative" data-category="institutional">
+<div class="flex items-start gap-space-md">
+<!-- Counterparty Avatar -->
+<div class="relative flex-shrink-0">
+<img class="w-12 h-12 rounded-xl object-cover shadow-sm" data-alt="Refined black and white headshot of Dr Sterling Vance, an institutional macro research economist with silver hair wearing bespoke spectacles and a dark wool turtleneck." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9ajJPsHEBxoWXFVP19uEtw-JT4x07hgnAnznyWYBN_XNpD46l-SRxLfO6YAvWkDHV0YvRGjbtqLDwab_54L9uAQvYh9sCjwJLPrmgvoGoUUPZG-oaKYpPQJEJ6UivOtaheS4R9LOd7sZRkgdfNPGdml_W8qdG_mf0Xh2VkWfnhE2c1fa6NBY31me95yEyiZ_gez81oGhIY1vaWENtGKsQWt1B3UJCJbgGDMXaUXfBE2V9Kkr84QLx"/>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 bg-surface-container-highest text-on-surface rounded-full flex items-center justify-center ring-2 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[13px]">insights</span>
+</div>
+</div>
+<!-- Conversation Details -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-space-xs mb-space-xxs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Dr. Sterling Vance</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">3 days ago</span>
+</div>
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Chief Macro Strategist • Capital Advisory</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 leading-snug">
+            The Q3 liquidity report dossier is ready for peer audit.
+          </p>
+</div>
+<!-- Read Indicator -->
+<div class="flex flex-col items-end justify-between self-stretch flex-shrink-0 pl-space-xs">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">done</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">description</span>
+</div>
+</div>
+</article>
+<!-- Conversation 5: Aethelgard Labs -->
+<article class="conversation-item w-full bg-surface-container-lowest rounded-xl p-space-base shadow-sm hover:bg-surface-container-low transition-all cursor-pointer relative" data-category="escrow institutional">
+<div class="flex items-start gap-space-md">
+<!-- Counterparty Avatar -->
+<div class="relative flex-shrink-0">
+<img class="w-12 h-12 rounded-xl object-cover shadow-sm" data-alt="Futuristic corporate identity emblem for Aethelgard Labs, featuring clean interlocking isometric silver geometric cubes illuminated by soft diffused studio rim lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF8vRyVrdil0PhSZ3cT3IKbg_ZYRVfsMrZlmz4M8cw6TI84I35oHIxD59U_OryH7-l72ZvJbH80ZZdzPJLFvlNnhWNIEGC-UBKiG6iKuriM3El6A82vcqvWqrjyV1fWFn_lYL-lJg4RIJ9pMrkquhug3F5i4w5U9JyNXauheoXxAxtmOkYktYoPcPHSHW3Nx0abKwKJmfneQz04z0Z2FO_332U7ktXQH_RYPxUFs_-qiNwJRZaBrtT"/>
+<div class="absolute -bottom-1 -right-1 w-5 h-5 bg-primary-container text-on-primary rounded-full flex items-center justify-center ring-2 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[12px]">security</span>
+</div>
+</div>
+<!-- Conversation Details -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-space-xs mb-space-xxs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Aethelgard Labs</span>
+<span class="material-symbols-outlined text-[16px] text-secondary flex-shrink-0">verified</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">May 10</span>
+</div>
+<!-- Contract Tag -->
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="inline-flex items-center gap-space-xxs px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[12px]">gavel</span>
+              Contract $1,200.00
+            </span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Milestone 2</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2 leading-snug">
+            Milestone 2 deliverables submitted for smart contract review.
+          </p>
+</div>
+<!-- Status -->
+<div class="flex flex-col items-end justify-between self-stretch flex-shrink-0 pl-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary">done_all</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">terminal</span>
+</div>
+</div>
+</article>
+</section>
+<!-- Empty State Placeholder (Filtered out view) -->
+<div class="hidden flex-col items-center justify-center py-space-3xl px-margin-compact text-center" id="empty-state">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-high flex items-center justify-center text-on-surface-variant mb-space-md shadow-sm">
+<span class="material-symbols-outlined text-[32px]">folder_off</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-space-xxs font-semibold">No records match</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs mb-space-lg">
+      No cryptographic chats or escrow deals align with your applied filters.
+    </p>
+<button class="px-space-lg py-space-sm bg-primary-container text-on-primary font-label-lg text-label-lg rounded-xl shadow-sm" id="reset-filter-btn">
+      Reset All Filters
+    </button>
+</div>
+<!-- Trust Guarantee Subfooter Card -->
+<section class="px-margin-compact py-space-base mt-auto">
+<div class="bg-surface-container rounded-xl p-space-base flex items-center gap-space-md">
+<div class="w-9 h-9 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface-variant flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">encrypted</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="font-label-md text-label-md text-on-surface uppercase tracking-wider font-semibold">Decentralized Custody</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-tight truncate">
+          Funds locked by institutional multi-sig timelock contracts.
+        </p>
+</div>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant flex-shrink-0">verified_user</span>
+</div>
+</section>
+<!-- Interactive Client Behavior Script -->
+<script>
+    (function() {
+      const searchInput = document.getElementById('conversation-search');
+      const clearBtn = document.getElementById('clear-search');
+      const filterChips = document.querySelectorAll('.filter-chip');
+      const conversationItems = document.querySelectorAll('.conversation-item');
+      const emptyState = document.getElementById('empty-state');
+      const resetFilterBtn = document.getElementById('reset-filter-btn');
+      const escrowBanner = document.getElementById('active-escrow-banner');
+      const newEscrowBtn = document.getElementById('btn-new-escrow');
+
+      let currentFilter = 'all';
+      let searchQuery = '';
+
+      function filterConversations() {
+        let visibleCount = 0;
+
+        conversationItems.forEach(item => {
+          const categories = item.getAttribute('data-category') || '';
+          const textContent = item.textContent.toLowerCase();
+
+          const matchesFilter = (currentFilter === 'all') || categories.includes(currentFilter);
+          const matchesSearch = !searchQuery || textContent.includes(searchQuery.toLowerCase());
+
+          if (matchesFilter && matchesSearch) {
+            item.classList.remove('hidden');
+            item.classList.add('flex');
+            visibleCount++;
+          } else {
+            item.classList.add('hidden');
+            item.classList.remove('flex');
+          }
+        });
+
+        if (visibleCount === 0) {
+          emptyState.classList.remove('hidden');
+          emptyState.classList.add('flex');
+        } else {
+          emptyState.classList.add('hidden');
+          emptyState.classList.remove('flex');
+        }
+      }
+
+      // Filter chips selection handler
+      filterChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+          filterChips.forEach(c => {
+            c.classList.remove('bg-primary-container', 'text-on-primary');
+            c.classList.add('bg-surface-container-lowest', 'text-on-surface-variant');
+          });
+          this.classList.remove('bg-surface-container-lowest', 'text-on-surface-variant');
+          this.classList.add('bg-primary-container', 'text-on-primary');
+          
+          currentFilter = this.getAttribute('data-filter');
+          filterConversations();
+        });
+      });
+
+      // Search input interaction
+      searchInput.addEventListener('input', function(e) {
+        searchQuery = e.target.value.trim();
+        if (searchQuery.length > 0) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+        filterConversations();
+      });
+
+      clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        searchQuery = '';
+        clearBtn.classList.add('hidden');
+        filterConversations();
+        searchInput.focus();
+      });
+
+      resetFilterBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        searchQuery = '';
+        clearBtn.classList.add('hidden');
+        filterChips[0].click();
+      });
+
+      // Escrow banner tap feedback
+      escrowBanner.addEventListener('click', function() {
+        this.classList.add('opacity-75');
+        setTimeout(() => {
+          this.classList.remove('opacity-75');
+        }, 150);
+      });
+
+      // New Escrow Button feedback
+      newEscrowBtn.addEventListener('click', function() {
+        this.classList.add('scale-95');
+        setTimeout(() => {
+          this.classList.remove('scale-95');
+        }, 120);
+      });
+
+      // Conversation item tap selection
+      conversationItems.forEach(item => {
+        item.addEventListener('click', function() {
+          const unreadBadge = this.querySelector('.bg-primary-container.rounded-full');
+          if (unreadBadge) {
+            unreadBadge.remove();
+          }
+        });
+      });
+    })();
+  </script>
+</div></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/95 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary-container font-semibold [&amp;_span.material-symbols-outlined]:bg-secondary-container [&amp;_span.material-symbols-outlined]:text-on-secondary-container"><div class="flex justify-around items-center h-20 px-space-xs"><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="feed" href="feed"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">dynamic_feed</span><span class="font-label-md text-label-md tracking-normal">Feed</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="reels" href="reels"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">play_circle</span><span class="font-label-md text-label-md tracking-normal">Reels</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="marketplace" href="marketplace"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">store</span><span class="font-label-md text-label-md tracking-normal">Market</span></a><a aria-current="page" class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 transition-all text-primary-container font-semibold [&amp;_span.material-symbols-outlined]:bg-secondary-container [&amp;_span.material-symbols-outlined]:text-on-secondary-container" data-path="messages" href="messages"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">chat_bubble_outline</span><span class="font-label-md text-label-md tracking-normal">Messages</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="profile" href="profile"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">person</span><span class="font-label-md text-label-md tracking-normal">Profile</span></a></div></nav></body></html>

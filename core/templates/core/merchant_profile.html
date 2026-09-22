@@ -1,0 +1,146 @@
+{% extends "core/base.html" %}
+{% block title %}Storefront — Choropia{% endblock %}
+
+{% block content %}
+<div id="merchant-root">
+  <p class="text-outline">Loading&hellip;</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const merchantId = {{ merchant_id }};
+
+  function averageRating(reviews) {
+    if (!reviews.length) return null;
+    return (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1);
+  }
+
+  function renderReviews(reviews) {
+    if (!reviews.length) return '<p class="text-sm text-outline">No reviews yet.</p>';
+    return reviews
+      .map(
+        (r) => `
+      <div class="text-sm border-b border-outline-variant py-2">
+        <span class="text-secondary">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span>
+        ${r.comment ? `<p class="text-on-surface-variant">${r.comment}</p>` : ""}
+      </div>`
+      )
+      .join("");
+  }
+
+  async function loadMerchant() {
+    const root = document.getElementById("merchant-root");
+    try {
+      const [merchant, listingsData] = await Promise.all([
+        Choropia.getMerchant(merchantId),
+        Choropia.listMerchantListings(merchantId),
+      ]);
+      const listings = listingsData.results || listingsData;
+      const reviews = await Choropia.listReviewsFor(merchant.owner_id).catch(() => []);
+      const reviewResults = reviews.results || reviews;
+
+      let isFollowing = false;
+      let myFollowId = null;
+      if (Choropia.isAuthenticated()) {
+        const mine = await Choropia.listMyFollows().catch(() => []);
+        const mineResults = mine.results || mine;
+        const existing = mineResults.find((f) => f.target_type_display === "merchant" && f.object_id === merchantId);
+        if (existing) {
+          isFollowing = true;
+          myFollowId = existing.id;
+        }
+      }
+
+      const avg = averageRating(reviewResults);
+
+      root.innerHTML = `
+        <div class="rounded-card overflow-hidden shadow-elevated bg-surface-container-lowest mb-6">
+          <div class="h-28 bg-primary"></div>
+          <div class="px-6 pb-6 -mt-10">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div class="flex items-end gap-4">
+                <div class="w-24 h-24 rounded-card bg-surface-container-low ring-4 ring-surface-container-lowest overflow-hidden shrink-0">
+                  ${merchant.logo ? `<img src="${merchant.logo}" class="w-full h-full object-cover" />` : `<div class="w-full h-full flex items-center justify-center text-outline"><span class="material-symbols-outlined !text-3xl">storefront</span></div>`}
+                </div>
+                <div class="min-w-0 pb-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <h1 class="text-xl font-bold text-on-surface truncate">${merchant.business_name}</h1>
+                    <span class="badge flex items-center gap-1"><span class="material-symbols-outlined !text-[13px]">verified</span>Verified</span>
+                  </div>
+                  <p class="text-sm text-on-surface-variant">${merchant.location || ""}</p>
+                </div>
+              </div>
+              <button id="follow-btn" class="${isFollowing ? "btn-secondary" : "btn-primary"} flex items-center gap-1 shrink-0">
+                <span class="material-symbols-outlined !text-base">${isFollowing ? "check" : "person_add"}</span>
+                <span>${isFollowing ? "Following" : "Follow"}</span>
+              </button>
+            </div>
+
+            <p class="mt-4 text-on-surface-variant max-w-2xl">${merchant.description || ""}</p>
+
+            <div class="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-outline-variant">
+              <div>
+                <span class="text-xs text-on-surface-variant uppercase tracking-wider">Followers</span>
+                <p class="text-lg font-semibold text-on-surface">${merchant.followers_count}</p>
+              </div>
+              <div>
+                <span class="text-xs text-on-surface-variant uppercase tracking-wider">Listings</span>
+                <p class="text-lg font-semibold text-on-surface">${listings.length}</p>
+              </div>
+              <div>
+                <span class="text-xs text-on-surface-variant uppercase tracking-wider">Rating</span>
+                <p class="text-lg font-semibold text-on-surface">${avg ? `${avg}★ (${reviewResults.length})` : "No reviews yet"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="text-sm font-semibold text-on-surface mb-2">Listings</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6" id="merchant-listings"></div>
+
+        <h2 class="text-sm font-semibold text-on-surface mb-2">Reviews</h2>
+        <div id="merchant-reviews" class="card p-4">${renderReviews(reviewResults)}</div>
+      `;
+
+      document.getElementById("follow-btn").addEventListener("click", async () => {
+        if (!Choropia.isAuthenticated()) {
+          window.location.href = "{% url 'login' %}";
+          return;
+        }
+        try {
+          if (isFollowing && myFollowId) {
+            await Choropia.unfollow(myFollowId);
+          } else {
+            await Choropia.follow("merchant", merchantId);
+          }
+          loadMerchant();
+        } catch (err) {
+          window.alert(err.message);
+        }
+      });
+
+      const grid = document.getElementById("merchant-listings");
+      grid.innerHTML = listings.length
+        ? listings
+            .map(
+              (listing) => `
+        <a href="/listings/${listing.id}/" class="card hover:shadow-elevated transition-shadow">
+          <div class="aspect-square bg-surface-container flex items-center justify-center">
+            ${listing.cover_photo ? `<img src="${listing.cover_photo}" class="w-full h-full object-cover" />` : `<span class="text-outline text-sm">No photo</span>`}
+          </div>
+          <div class="p-2">
+            <p class="text-sm font-medium text-on-surface truncate">${listing.title}</p>
+            <p class="text-secondary text-sm font-semibold">&#8358;${Number(listing.price).toLocaleString()}</p>
+          </div>
+        </a>`
+            )
+            .join("")
+        : '<p class="text-outline col-span-full">No listings yet.</p>';
+    } catch (err) {
+      root.innerHTML = `<p class="text-red-500">Could not load this storefront: ${err.message}</p>`;
+    }
+  }
+  loadMerchant();
+</script>
+{% endblock %}

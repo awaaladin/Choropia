@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary-container": "#0e1c2f", "on-background": "#191c1e", "on-primary": "#ffffff", "on-tertiary-container": "#76859b", "surface-dim": "#d8dadd", "secondary-container": "#b3d1fd", "on-primary-fixed-variant": "#3a475c", "surface-container-highest": "#e0e3e6", "inverse-on-surface": "#eff1f4", "secondary-fixed": "#d3e4ff", "inverse-primary": "#bac7e1", "primary-fixed-dim": "#bac7e1", "on-tertiary": "#ffffff", "secondary": "#426086", "primary-fixed": "#d6e3fe", "surface-bright": "#f7f9fc", "on-surface": "#191c1e", "on-secondary-fixed": "#001c38", "on-secondary-fixed-variant": "#29486d", "on-error-container": "#93000a", "on-secondary-container": "#3b5a7f", "error-container": "#ffdad6", "inverse-surface": "#2d3133", "surface-container-lowest": "#ffffff", "tertiary": "#000000", "surface-variant": "#e0e3e6", "on-primary-container": "#77849c", "on-error": "#ffffff", "on-secondary": "#ffffff", "on-primary-fixed": "#0e1c2f", "error": "#ba1a1a", "background": "#f7f9fc", "secondary-fixed-dim": "#aac9f4", "on-surface-variant": "#44474c", "surface-container-high": "#e6e8eb", "surface-container": "#eceef1", "surface": "#f7f9fc", "on-tertiary-fixed": "#0d1c2f", "on-tertiary-fixed-variant": "#3a485c", "surface-tint": "#525f75", "tertiary-fixed-dim": "#b9c7e0", "primary": "#000000", "outline": "#75777d", "tertiary-container": "#0d1c2f", "surface-container-low": "#f2f4f7", "tertiary-fixed": "#d5e3fd", "outline-variant": "#c5c6cd" }, borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, spacing: { "space-3xl": "4rem", "space-sm": "0.5rem", "margin-expanded": "2rem", "gutter-medium": "1rem", "space-xl": "2rem", "space-xxs": "0.125rem", "margin-compact": "1rem", "space-base": "1rem", "space-lg": "1.5rem", "gutter-expanded": "1.5rem", "space-2xl": "3rem", "gutter-compact": "0.75rem", "margin-medium": "1.5rem", "space-xs": "0.25rem", "space-md": "0.75rem" }, fontFamily: { "body-lg": ["Inter"], "headline-lg": ["Inter"], "display-lg-mobile": ["Inter"], "label-lg": ["Inter"], "title-sm": ["Inter"], "body-sm": ["Inter"], "label-sm": ["Inter"], "title-md": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"], "display-lg": ["Inter"], "label-md": ["Inter"], "body-md": ["Inter"], "numeric-metric": ["Inter"], "title-lg": ["Inter"] }, fontSize: { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }], "title-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.005em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "numeric-metric": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.03em", "fontWeight": "500" }], "title-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100vh;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style></head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-margin-compact flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmKHLGmJpbvEwAzO60uOyvmnrzbOndYDruJ1Qxu7G60P2IPpk5ZFVzqM6kcn8q1JzG2gdVdx54X4N7VTcKzBs8UM2HMOW06F3zS0cx5nMGdIGAqT6mxorkYGw8cofqf0G2RGfDqHLV22zrqpytKBR2Hmb6O9Nas3m8qYUW88SDNxxvhmA2I17nC-gFxqMlNPtYwBhq8GMNI4pcFFz-QE7EDzR4OjyrUQNWyio0GVe4y6IGVZKA9bpD"/><div class="flex flex-col"><span class="font-title-lg text-title-lg text-on-surface tracking-tight leading-none">Choropia</span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Marketplace</span></div></div><div class="flex items-center gap-space-xs"><a aria-label="Create Post" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="create-post"><span class="material-symbols-outlined text-[24px]">add_circle</span></a><a aria-label="Notifications" class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors" href="notifications-feed"><span class="material-symbols-outlined text-[24px]">notifications</span><span class="absolute top-2.5 right-2.5 w-4 h-4 bg-error text-on-error rounded-full flex items-center justify-center font-label-sm text-[9px] leading-none font-semibold">3</span></a><a class="w-11 h-11 flex items-center justify-center" href="profile"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWvKeTZtEDkbs-CzNvY3aew92fuU0doWTMQf7BN1HDEx9u_Mai2HQ8QmaFUzmUiF3KdFtz4KIYNUPaCTYS3gGjMTr148E0EWmPyfQk-IBNunYxqT_kui5qSVmDtADxn9CGjWECKGObdl9eObE4G59DuL4TW4UtN0sQ64Y_0y5Su-Dx3lxwgNnhWevYOu8pk9hPXAQO5XWy7kH-_WLfet_lrlIIHekrkTKywX9Qapah79lPn2QurxRS"/></a></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-20 bg-surface"><div class="flex flex-col w-full">
+<!-- Profile Dossier Top Section -->
+<section class="w-full px-margin-compact pb-space-lg flex flex-col gap-space-lg">
+<!-- User Credential Card -->
+<div class="bg-surface-container-lowest p-space-base rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="relative">
+<img alt="Elena Vance" class="w-20 h-20 rounded-xl object-cover shadow-sm" src="https://lh3.googleusercontent.com/aida/AEtjO1Us7RI3ptsq-6jaDyuNVxQFIb4XXf4hkhoBKTXuqc6La3bAUUbiI0uPaKe-Gs_K-5N-94vgQ0kXPx1gfMvGIjl0oSTMaB9x9DIhtdUTexFCN4C1ra5egZFajZQzzsM99Ljd43oz_q4V7B--GffzywHQOHFZDGP9EyzyBvt-FfVstxmlLQYPf2s0a7NA6628kbutCzWunA5vOTQtoziN6pJOom3a50uc5xuUrlFVg7ivX3ya35jonaD37Gc"/>
+<div class="absolute -bottom-1.5 -right-1.5 bg-primary-container text-on-primary w-6 h-6 rounded-full flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+</div>
+</div>
+<div class="flex-1 min-w-0 pl-space-xs">
+<div class="flex items-center gap-space-xs flex-wrap">
+<h2 class="font-headline-sm text-headline-sm text-on-surface truncate">Elena Vance</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">@elena_vance • VA-9042</p>
+<div class="flex items-center gap-space-xs text-on-surface-variant mt-space-xxs">
+<span class="material-symbols-outlined text-[15px]">location_on</span>
+<span class="font-label-sm text-label-sm tracking-normal">Zurich, Switzerland</span>
+</div>
+<!-- Institutional Tier Badge -->
+<div class="mt-space-sm inline-flex items-center gap-space-xs bg-surface-container-high text-on-surface px-space-sm py-0.5 rounded-lg">
+<span class="material-symbols-outlined text-[14px] text-secondary">workspace_premium</span>
+<span class="font-label-sm text-label-sm font-semibold tracking-wider uppercase">Tier 1 Institutional</span>
+</div>
+</div>
+</div>
+<!-- Actions: Edit Profile & Share Dossier -->
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+<button class="h-10 px-space-sm bg-primary-container text-on-primary rounded-lg flex items-center justify-center gap-space-xs font-label-lg text-label-lg transition-transform active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+<span>Edit Profile</span>
+</button>
+<button class="h-10 px-space-sm bg-surface-container text-on-surface rounded-lg flex items-center justify-center gap-space-xs font-label-lg text-label-lg transition-colors hover:bg-surface-container-high active:scale-[0.98]" id="share-dossier-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">ios_share</span>
+<span>Share Dossier</span>
+</button>
+</div>
+</div>
+<!-- Escrow & Institutional Metrics -->
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Escrow Rate</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">security</span>
+</div>
+<div class="mt-space-xs">
+<span class="font-numeric-metric text-numeric-metric text-on-surface font-semibold">100%</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Completion index</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Transactions</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">gavel</span>
+</div>
+<div class="mt-space-xs">
+<span class="font-numeric-metric text-numeric-metric text-on-surface font-semibold">14</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Deals finalized</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Reputation</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
+</div>
+<div class="mt-space-xs">
+<div class="flex items-center gap-space-xxs">
+<span class="font-numeric-metric text-numeric-metric text-on-surface font-semibold">4.9</span>
+<span class="material-symbols-outlined text-[18px] text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Audited score</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm tracking-wider uppercase">Tenure</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">history_edu</span>
+</div>
+<div class="mt-space-xs">
+<span class="font-title-lg text-title-lg text-on-surface font-semibold">2022</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Continuous standing</p>
+</div>
+</div>
+</div>
+<!-- Quick Wallet & Portfolio Liquidity Card -->
+<div class="bg-primary-container text-on-primary p-space-base rounded-xl shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-on-primary-container">
+<span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Settlement Custody</span>
+</div>
+<span class="bg-surface-container-high/20 text-on-primary px-space-xs py-0.5 rounded font-label-sm text-label-sm">FDIC / FINMA Backed</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-on-primary-container">Available Liquid Balance</span>
+<div class="flex items-baseline gap-space-xs">
+<span class="font-numeric-metric text-numeric-metric text-on-primary font-bold tracking-tight">$14,850.40</span>
+<span class="font-label-md text-label-md text-on-primary-container">USD</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+<button class="h-10 bg-on-primary text-primary-container font-label-md text-label-md rounded-lg flex items-center justify-center gap-space-xs transition-opacity hover:opacity-90" type="button">
+<span class="material-symbols-outlined text-[16px]">swap_horiz</span>
+<span>Deposit / Withdraw</span>
+</button>
+<button class="h-10 bg-surface-container-high/20 text-on-primary font-label-md text-label-md rounded-lg flex items-center justify-center gap-space-xs transition-opacity hover:opacity-80" type="button">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span>
+<span>Vault Ledger</span>
+</button>
+</div>
+</div>
+<!-- Segmented Tabs for Profile Content -->
+<div class="flex flex-col gap-space-sm">
+<div class="bg-surface-container-high p-space-xxs rounded-lg flex items-center justify-between" role="tablist">
+<button aria-selected="true" class="tab-btn flex-1 py-space-xs text-center rounded-lg font-label-md text-label-md transition-all bg-surface-container-lowest text-on-surface shadow-sm font-semibold" data-tab="active-listings" role="tab" type="button">
+          Active (3)
+        </button>
+<button aria-selected="false" class="tab-btn flex-1 py-space-xs text-center rounded-lg font-label-md text-label-md transition-all text-on-surface-variant hover:text-on-surface" data-tab="escrow-orders" role="tab" type="button">
+          Escrow (2)
+        </button>
+<button aria-selected="false" class="tab-btn flex-1 py-space-xs text-center rounded-lg font-label-md text-label-md transition-all text-on-surface-variant hover:text-on-surface" data-tab="watchlist" role="tab" type="button">
+          Watchlist
+        </button>
+</div>
+<!-- Tab Panels Container -->
+<div class="tab-content flex flex-col gap-space-sm">
+<!-- Panel: Active Listings -->
+<div class="tab-panel flex flex-col gap-space-sm" id="panel-active-listings">
+<!-- Item 1 -->
+<div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<img class="w-14 h-14 rounded-lg object-cover bg-surface-container" data-alt="High precision stainless steel luxury wristwatch with black chronograph dial resting on slate slab, macro photographic studio illumination, cool silver reflections" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpKmni1nMcBt-PoP4e0RZA2NkX69nqdi8m32TJlD_m-QvmN8WL3lCkRYtf9nV5-dHdovVsFQyn_BRWjRoidUe4c2xe0QEKE0lPg7GrBlEyw14NXTe5m2AHZ6ribZnwwMavppbQgGiB1PH8rGTuBUfSmf39tmR8utx5iOegg0zhf1SB6FZUW7f5E5S5xRA_Pw0BxnFGBDkre1Qo3Lm2-2bhVOAI2hxtKtinmRKq6VSbqLZdontsai8o"/>
+<div class="min-w-0 flex flex-col">
+<span class="font-title-sm text-title-sm text-on-surface truncate">Patek Philippe Nautilus 5711</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Audited Lot #882</span>
+<div class="flex items-center gap-space-xxs mt-0.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Bidding Active</span>
+</div>
+</div>
+</div>
+<div class="text-right whitespace-nowrap">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">$112,000</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">4 Bids</p>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<img class="w-14 h-14 rounded-lg object-cover bg-surface-container" data-alt="Rare vintage 1982 Bordeaux Grand Cru Premier Cru Classe bottle in wooden provenance cellar box, dramatic soft ambient cellar lighting, deep ruby and gold details" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpmDAj4siKFR2PVT9xbSEPHMSiBnsT1w6NozW2WOUGM-5rya_ue99hSoe_uiWduEHfOcDrgKLViDwxoHsDWWuRKmqsv4xEElajFrMvf8EyNX794b_zjv60vrHxt1xFHzutK2R9QvY_0mrlnRiGCCJjLDeL9fnAgpMsz1gQGTONCUnwdfA7hJt88mNE5yKjOWNaRrze_2RgpSVIu8zLMe6kIYDpskokhpjpAcyAnpvtrjLDdOCQmaK3"/>
+<div class="min-w-0 flex flex-col">
+<span class="font-title-sm text-title-sm text-on-surface truncate">Château Lafite Rothschild 1982</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Original Crate (Case of 6)</span>
+<div class="flex items-center gap-space-xxs mt-0.5">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Reserved</span>
+</div>
+</div>
+</div>
+<div class="text-right whitespace-nowrap">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">$34,500</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Buyout</p>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<img class="w-14 h-14 rounded-lg object-cover bg-surface-container" data-alt="Signed mid-century modern oil on canvas abstract composition, muted ochre and navy indigo geometric forms, gallery illumination with museum catalog label" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_6jnhlJX2OaLYMdri-iAcj488LxkLev6H5iOuOoazuIfHm3uLm6VSnruQOg1WM-CdgGchewpmPI-G-5cwfb4R8j37aK7Fo8JYq0Fib5wxqaGTXOzphmK9cFAEmGsolvAmS_8QpIMFqEaRtPD9ttiGyejGttp5NKbNHQhec5WkecFQuTsE_Dac3_kRfQ5Qj0YliwzlVwrVAuKanTRnhDClda4DHXgr6qtAQ4ToqXPeZfnSRS7iRK2Z"/>
+<div class="min-w-0 flex flex-col">
+<span class="font-title-sm text-title-sm text-on-surface truncate">Geometric Composition IV</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Provenanced Art Dossier</span>
+<div class="flex items-center gap-space-xxs mt-0.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-secondary font-medium">Under Review</span>
+</div>
+</div>
+</div>
+<div class="text-right whitespace-nowrap">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">$28,000</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Direct Offer</p>
+</div>
+</div>
+</div>
+<!-- Panel: Escrow Orders (Hidden by default) -->
+<div class="tab-panel hidden flex-col gap-space-sm" id="panel-escrow-orders">
+<div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">ESCROW-7821-CH</span>
+<span class="bg-secondary-container text-on-secondary-container px-space-xs py-0.5 rounded font-label-sm text-label-sm font-semibold">Funds In Vault</span>
+</div>
+<div class="flex justify-between items-center mt-space-xxs">
+<div>
+<h3 class="font-title-sm text-title-sm text-on-surface font-medium">Cartier Crash 1991 Paris Edition</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Counterparty: @geneva_vaults</p>
+</div>
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">$78,000</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden mt-space-xs">
+<div class="bg-primary-container h-full w-3/4"></div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant text-right mt-space-xxs">Physical Inspection Stage (32h remaining)</p>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-mono">ESCROW-6640-CH</span>
+<span class="bg-secondary-container text-on-secondary-container px-space-xs py-0.5 rounded font-label-sm text-label-sm font-semibold">Carrier In Transit</span>
+</div>
+<div class="flex justify-between items-center mt-space-xxs">
+<div>
+<h3 class="font-title-sm text-title-sm text-on-surface font-medium">1973 Porsche 911 Carrera RS Documentation</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Counterparty: @bavaria_heritage</p>
+</div>
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">$19,500</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden mt-space-xs">
+<div class="bg-primary-container h-full w-1/2"></div>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant text-right mt-space-xxs">Secured Courier Delivery</p>
+</div>
+</div>
+<!-- Panel: Saved & Watchlist (Hidden by default) -->
+<div class="tab-panel hidden flex-col gap-space-sm" id="panel-watchlist">
+<div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">diamond</span>
+</div>
+<div>
+<h3 class="font-title-sm text-title-sm text-on-surface">5.12ct Type IIa Unheated Sapphire</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">GIA Certified • Swiss Lab Dossier</p>
+</div>
+</div>
+<button aria-label="Remove item" class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface" type="button">
+<span class="material-symbols-outlined text-[18px]">bookmark_remove</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Institutional Settings & App Preferences -->
+<div class="flex flex-col gap-space-sm mt-space-xs">
+<h2 class="font-title-lg text-title-lg text-on-surface">Settings &amp; Security Policy</h2>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden divide-y divide-transparent flex flex-col">
+<!-- Security & KYC Row -->
+<div class="p-space-base flex items-center justify-between gap-space-sm hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-title-sm text-title-sm text-on-surface">Security &amp; Identity (KYC)</span>
+<span class="bg-secondary-container text-on-secondary-container px-space-xs py-0.5 rounded font-label-sm text-label-sm font-semibold">Tier 3 Verified</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Multi-Sig Hardware Key Configured (FIDO2)</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">chevron_right</span>
+</div>
+<!-- Appearance & Theme Selector -->
+<div class="p-space-base flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">palette</span>
+</div>
+<div>
+<span class="font-title-sm text-title-sm text-on-surface">Visual Appearance</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Calibrated high-contrast luxury UI</p>
+</div>
+</div>
+</div>
+<!-- Theme Chips -->
+<div class="grid grid-cols-3 gap-space-xs pt-space-xs">
+<button class="theme-chip h-9 px-space-xs rounded-lg font-label-md text-label-md flex items-center justify-center gap-space-xxs bg-surface-container text-on-surface-variant transition-colors hover:text-on-surface" type="button">
+<span class="material-symbols-outlined text-[14px]">settings_brightness</span>
+<span>System</span>
+</button>
+<button class="theme-chip active-theme h-9 px-space-xs rounded-lg font-label-md text-label-md flex items-center justify-center gap-space-xxs bg-primary-container text-on-primary font-semibold shadow-sm" type="button">
+<span class="material-symbols-outlined text-[14px]">light_mode</span>
+<span>Light Mode</span>
+</button>
+<button class="theme-chip h-9 px-space-xs rounded-lg font-label-md text-label-md flex items-center justify-center gap-space-xxs bg-surface-container text-on-surface-variant transition-colors hover:text-on-surface" type="button">
+<span class="material-symbols-outlined text-[14px]">dark_mode</span>
+<span>Dark Mode</span>
+</button>
+</div>
+</div>
+<!-- Push & WebSocket Row -->
+<div class="p-space-base flex items-center justify-between gap-space-sm hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">wifi_tethering</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-title-sm text-title-sm text-on-surface">Real-Time Streams</span>
+<span class="inline-flex items-center gap-1 bg-surface-container-high text-on-surface px-space-xs py-0.5 rounded font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Active
+                </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Low-latency order book &amp; escrow socket</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">chevron_right</span>
+</div>
+<!-- Escrow Inspection Default Row -->
+<div class="p-space-base flex items-center justify-between gap-space-sm hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">timer</span>
+</div>
+<div>
+<span class="font-title-sm text-title-sm text-on-surface">Default Escrow Window</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Inspection window for delivered assets</p>
+</div>
+</div>
+<div class="flex items-center gap-space-xxs">
+<span class="font-label-md text-label-md font-semibold text-primary-container bg-surface-container px-space-xs py-1 rounded">48 Hours</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Account Session Management -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<button class="w-full h-12 bg-surface-container-lowest text-error rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-space-xs shadow-sm transition-colors hover:bg-error-container/40 active:scale-[0.99]" type="button">
+<span class="material-symbols-outlined text-[18px]">logout</span>
+<span>Terminate Session &amp; Sign Out</span>
+</button>
+<p class="text-center font-label-sm text-label-sm text-on-surface-variant pb-space-md">
+        Choropia Node v4.19.2-rc • Encrypted Client Session VA-9042
+      </p>
+</div>
+</section>
+</div>
+<script>
+  // Segmented Content Tabs Micro-Interaction
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.getAttribute('data-tab');
+
+      // Update Tab Styles
+      document.querySelectorAll('.tab-btn').forEach(t => {
+        t.setAttribute('aria-selected', 'false');
+        t.classList.remove('bg-surface-container-lowest', 'text-on-surface', 'shadow-sm', 'font-semibold');
+        t.classList.add('text-on-surface-variant');
+      });
+
+      btn.setAttribute('aria-selected', 'true');
+      btn.classList.add('bg-surface-container-lowest', 'text-on-surface', 'shadow-sm', 'font-semibold');
+      btn.classList.remove('text-on-surface-variant');
+
+      // Update Tab Panels
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.add('hidden');
+        panel.classList.remove('flex');
+      });
+
+      const activePanel = document.getElementById('panel-' + targetTab);
+      if (activePanel) {
+        activePanel.classList.remove('hidden');
+        activePanel.classList.add('flex');
+      }
+    });
+  });
+
+  // Appearance Theme Chips Micro-Interaction
+  document.querySelectorAll('.theme-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.theme-chip').forEach(c => {
+        c.classList.remove('bg-primary-container', 'text-on-primary', 'font-semibold', 'shadow-sm');
+        c.classList.add('bg-surface-container', 'text-on-surface-variant');
+      });
+      chip.classList.add('bg-primary-container', 'text-on-primary', 'font-semibold', 'shadow-sm');
+      chip.classList.remove('bg-surface-container', 'text-on-surface-variant');
+    });
+  });
+
+  // Share Dossier Feedback Micro-Interaction
+  const shareBtn = document.getElementById('share-dossier-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      const icon = shareBtn.querySelector('.material-symbols-outlined');
+      const text = shareBtn.querySelector('span:not(.material-symbols-outlined)');
+      if (icon && text) {
+        const origIcon = icon.textContent;
+        const origText = text.textContent;
+        icon.textContent = 'check';
+        text.textContent = 'Copied Link';
+        setTimeout(() => {
+          icon.textContent = origIcon;
+          text.textContent = origText;
+        }, 1800);
+      }
+    });
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/95 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="text-primary-container font-semibold [&amp;_span.material-symbols-outlined]:bg-secondary-container [&amp;_span.material-symbols-outlined]:text-on-secondary-container"><div class="flex justify-around items-center h-20 px-space-xs"><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="feed" href="feed"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">dynamic_feed</span><span class="font-label-md text-label-md tracking-normal">Feed</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="reels" href="reels"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">play_circle</span><span class="font-label-md text-label-md tracking-normal">Reels</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="marketplace" href="marketplace"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">store</span><span class="font-label-md text-label-md tracking-normal">Market</span></a><a class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="messages" href="messages"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">chat_bubble_outline</span><span class="font-label-md text-label-md tracking-normal">Messages</span></a><a aria-current="page" class="flex flex-col items-center justify-center gap-space-xxs min-w-[56px] min-h-[48px] py-1 transition-all text-primary-container font-semibold [&amp;_span.material-symbols-outlined]:bg-secondary-container [&amp;_span.material-symbols-outlined]:text-on-secondary-container" data-path="profile" href="profile"><span class="material-symbols-outlined text-[24px] px-4 py-0.5 rounded-full transition-all">person</span><span class="font-label-md text-label-md tracking-normal">Profile</span></a></div></nav></body></html>

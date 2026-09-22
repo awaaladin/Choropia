@@ -1,0 +1,106 @@
+{% extends "core/base.html" %}
+{% block title %}Register — Choropia{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto grid lg:grid-cols-12 rounded-card overflow-hidden shadow-elevated bg-surface-container-lowest">
+  <!-- Brand panel -->
+  <div class="lg:col-span-5 bg-primary text-on-primary p-8 flex flex-col justify-between relative overflow-hidden">
+    <div class="absolute -right-16 -bottom-20 w-72 h-72 rounded-full bg-secondary opacity-30 blur-3xl pointer-events-none"></div>
+    <div class="absolute -left-14 -top-14 w-56 h-56 rounded-full bg-secondary-container opacity-10 blur-2xl pointer-events-none"></div>
+
+    <div class="relative z-10 flex items-center gap-2">
+      <span class="material-symbols-outlined">storefront</span>
+      <span class="text-lg font-semibold">Choropia</span>
+    </div>
+
+    <div class="relative z-10 space-y-4 py-8">
+      <span class="inline-block text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded bg-white/10 text-secondary-container">Uyo pilot</span>
+      <h2 class="text-2xl font-semibold leading-snug">Join a marketplace where every deal is escrow-protected.</h2>
+      <p class="text-sm text-white/70">
+        Post listings, follow storefronts, chat with buyers and sellers, and get paid safely.
+      </p>
+
+      <ul class="space-y-3 pt-4">
+        <li class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined !text-[18px] text-secondary-container">sell</span>
+          </span>
+          <span class="text-sm text-white/80">Post goods, services, or digital listings for free</span>
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined !text-[18px] text-secondary-container">favorite</span>
+          </span>
+          <span class="text-sm text-white/80">Like, comment, and follow the sellers you trust</span>
+        </li>
+        <li class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined !text-[18px] text-secondary-container">verified_user</span>
+          </span>
+          <span class="text-sm text-white/80">Get paid only once the buyer confirms delivery</span>
+        </li>
+      </ul>
+    </div>
+
+    <p class="relative z-10 text-xs text-white/50">Social buy-and-sell marketplace</p>
+  </div>
+
+  <!-- Form panel -->
+  <div class="lg:col-span-7 p-8 flex flex-col justify-center">
+    <h1 class="text-xl font-bold text-on-surface mb-1">Create your account</h1>
+    <p class="text-sm text-on-surface-variant mb-6">It only takes a minute.</p>
+
+    <form id="register-form" class="space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 !text-[18px] text-on-surface-variant">person</span>
+          <input type="text" name="first_name" placeholder="First name" class="input-field !pl-10" />
+        </div>
+        <input type="text" name="last_name" placeholder="Last name" class="input-field" />
+      </div>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 !text-[18px] text-on-surface-variant">alternate_email</span>
+        <input type="email" name="email" placeholder="Email" required class="input-field !pl-10" />
+      </div>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 !text-[18px] text-on-surface-variant">call</span>
+        <input type="text" name="phone_number" placeholder="Phone number (optional)" class="input-field !pl-10" />
+      </div>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 !text-[18px] text-on-surface-variant">lock</span>
+        <input type="password" name="password" placeholder="Password" required class="input-field !pl-10" />
+      </div>
+      <p id="register-error" class="text-sm text-red-500 hidden"></p>
+      <button type="submit" class="btn-primary w-full flex items-center justify-center gap-1">
+        <span class="material-symbols-outlined !text-base">person_add</span>
+        <span>Create account</span>
+      </button>
+    </form>
+    <p class="text-sm text-on-surface-variant mt-4">
+      Already have an account? <a href="{% url 'login' %}" class="text-secondary font-medium hover:underline">Log in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.getElementById("register-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById("register-error");
+    errorEl.classList.add("hidden");
+
+    const form = new FormData(e.target);
+    const payload = Object.fromEntries(form.entries());
+    if (!payload.phone_number) delete payload.phone_number;
+
+    try {
+      await Choropia.register(payload);
+      window.location.href = "{% url 'feed' %}";
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.classList.remove("hidden");
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Choropia{% endblock %}</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'core/img/favicon-32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'core/img/favicon-16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'core/img/favicon-180.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,-50..200" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'core/dist/output.css' %}">
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 20;
+      font-size: 20px;
+      line-height: 1;
+      vertical-align: middle;
+    }
+
+    /* Design tokens as RGB-channel CSS variables (see tailwind.config.js) — ported from the
+       Stitch "Midnight Ledger" design system's Light and Dark Mode sections. Toggling `.dark`
+       on <html> re-themes every element using these tokens, with no per-template changes. */
+    :root {
+      --color-surface: 245 247 250;
+      --color-surface-bright: 255 255 255;
+      --color-surface-container-lowest: 255 255 255;
+      --color-surface-container-low: 248 250 252;
+      --color-surface-container: 241 245 249;
+      --color-on-surface: 11 25 44;
+      --color-on-surface-variant: 51 65 85;
+      --color-outline: 148 163 184;
+      --color-outline-variant: 226 232 240;
+      --color-primary: 11 25 44;
+      --color-on-primary: 255 255 255;
+      --color-secondary: 66 96 134;
+      --color-on-secondary: 255 255 255;
+      --color-secondary-container: 211 228 255;
+      --color-on-secondary-container: 59 90 127;
+      --color-error: 186 26 26;
+      --color-on-error: 255 255 255;
+      --color-error-container: 255 218 214;
+    }
+
+    html.dark {
+      --color-surface: 7 15 27;
+      --color-surface-bright: 11 25 44;
+      --color-surface-container-lowest: 11 25 44;
+      --color-surface-container-low: 14 34 58;
+      --color-surface-container: 19 43 71;
+      --color-on-surface: 232 236 242;
+      --color-on-surface-variant: 174 184 196;
+      --color-outline: 90 107 128;
+      --color-outline-variant: 30 62 98;
+      --color-primary: 232 236 242;
+      --color-on-primary: 11 25 44;
+      --color-secondary: 108 147 201;
+      --color-on-secondary: 11 25 44;
+      --color-secondary-container: 30 62 98;
+      --color-on-secondary-container: 191 214 245;
+      --color-error: 255 180 171;
+      --color-on-error: 105 0 5;
+      --color-error-container: 147 0 10;
+    }
+  </style>
+  <script>
+    // Applied before first paint to avoid a flash of the wrong theme. Priority: an explicit
+    // choice made on this device (localStorage) beats the account's saved preference, which
+    // itself beats the light default. The account preference is reconciled once api.js loads.
+    (function () {
+      try {
+        const stored = localStorage.getItem("choropia_theme");
+        if (stored === "dark") document.documentElement.classList.add("dark");
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col font-sans">
+  <header class="sticky top-0 z-50 bg-surface-container-lowest/95 backdrop-blur border-b border-outline-variant">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
+      <a href="{% url 'feed' %}" class="flex items-center shrink-0">
+        <img src="{% static 'core/img/logo.png' %}" alt="Choropia Marketplace" class="h-7 w-auto dark:invert dark:opacity-90">
+      </a>
+
+      <nav class="hidden md:flex items-center gap-1 text-sm">
+        <a href="{% url 'feed' %}" class="{% if request.resolver_match.url_name == 'feed' %}nav-link-active{% else %}nav-link{% endif %}">Feed</a>
+        <a href="{% url 'marketplace' %}" class="{% if request.resolver_match.url_name == 'marketplace' %}nav-link-active{% else %}nav-link{% endif %}">Marketplace</a>
+        <a href="{% url 'conversations' %}" class="{% if request.resolver_match.url_name == 'conversations' or request.resolver_match.url_name == 'chat' %}nav-link-active{% else %}nav-link{% endif %}">Messages</a>
+        <a href="{% url 'orders' %}" class="{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'order-detail' %}nav-link-active{% else %}nav-link{% endif %}">Orders</a>
+      </nav>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="theme-toggle-btn" class="w-9 h-9 flex items-center justify-center rounded bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Toggle theme">
+          <span class="material-symbols-outlined" id="theme-toggle-icon">dark_mode</span>
+        </button>
+        <a href="{% url 'notifications' %}" class="w-9 h-9 flex items-center justify-center rounded bg-surface-container-low text-secondary hover:bg-secondary-container transition-colors" title="Notifications">
+          <span class="material-symbols-outlined">notifications</span>
+        </a>
+        <a href="{% url 'profile' %}" class="w-9 h-9 flex items-center justify-center rounded bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Profile">
+          <span class="material-symbols-outlined">account_circle</span>
+        </a>
+        <a href="{% url 'create-listing' %}" class="btn-primary !py-2 !px-3 hidden sm:inline-flex items-center gap-1">
+          <span class="material-symbols-outlined !text-base">add</span>
+          <span>Sell</span>
+        </a>
+        <button id="nav-auth-btn" class="btn-secondary !py-2 !px-3">Login</button>
+      </div>
+    </div>
+
+    <nav class="md:hidden flex items-center gap-1 px-2 pb-2 text-xs overflow-x-auto">
+      <a href="{% url 'feed' %}" class="{% if request.resolver_match.url_name == 'feed' %}nav-link-active{% else %}nav-link{% endif %} whitespace-nowrap">Feed</a>
+      <a href="{% url 'marketplace' %}" class="{% if request.resolver_match.url_name == 'marketplace' %}nav-link-active{% else %}nav-link{% endif %} whitespace-nowrap">Marketplace</a>
+      <a href="{% url 'conversations' %}" class="{% if request.resolver_match.url_name == 'conversations' or request.resolver_match.url_name == 'chat' %}nav-link-active{% else %}nav-link{% endif %} whitespace-nowrap">Messages</a>
+      <a href="{% url 'orders' %}" class="{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'order-detail' %}nav-link-active{% else %}nav-link{% endif %} whitespace-nowrap">Orders</a>
+    </nav>
+  </header>
+
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="text-center text-xs text-outline py-6 border-t border-outline-variant">
+    Choropia &mdash; social buy-and-sell marketplace (Uyo pilot)
+  </footer>
+
+  <script>
+    window.CHOROPIA_API_BASE_URL = "{{ CHOROPIA_API_BASE_URL }}";
+    window.CHOROPIA_WS_BASE_URL = "{{ CHOROPIA_WS_BASE_URL }}";
+  </script>
+  <script src="{% static 'core/js/api.js' %}"></script>
+  <script>
+    const authBtn = document.getElementById("nav-auth-btn");
+    function refreshAuthButton() {
+      if (Choropia.isAuthenticated()) {
+        authBtn.textContent = "Logout";
+        authBtn.onclick = async () => {
+          await Choropia.logout();
+          window.location.href = "{% url 'login' %}";
+        };
+      } else {
+        authBtn.textContent = "Login";
+        authBtn.onclick = () => (window.location.href = "{% url 'login' %}");
+      }
+    }
+    refreshAuthButton();
+
+    // --- Theme toggle ---
+    const themeIcon = document.getElementById("theme-toggle-icon");
+    function isDark() {
+      return document.documentElement.classList.contains("dark");
+    }
+    function refreshThemeIcon() {
+      themeIcon.textContent = isDark() ? "light_mode" : "dark_mode";
+    }
+    refreshThemeIcon();
+
+    document.getElementById("theme-toggle-btn").addEventListener("click", async () => {
+      const nowDark = !isDark();
+      document.documentElement.classList.toggle("dark", nowDark);
+      try {
+        localStorage.setItem("choropia_theme", nowDark ? "dark" : "light");
+      } catch (e) {}
+      refreshThemeIcon();
+
+      if (Choropia.isAuthenticated()) {
+        // Partial PATCH: only theme_preference is sent, so bio/location/etc are left untouched.
+        Choropia.updateProfile({ profile: { theme_preference: nowDark ? "dark" : "light" } }).catch(() => {});
+      }
+    });
+
+    // If this device has no explicit choice yet, fall back to the account's saved preference
+    // (set via the profile page or another device) rather than always defaulting to light.
+    (async () => {
+      let stored;
+      try {
+        stored = localStorage.getItem("choropia_theme");
+      } catch (e) {}
+      if (stored || !Choropia.isAuthenticated()) return;
+
+      try {
+        const me = await Choropia.me();
+        const preference = me.profile && me.profile.theme_preference;
+        if (preference === "dark") {
+          document.documentElement.classList.add("dark");
+          refreshThemeIcon();
+        }
+      } catch (e) {}
+    })();
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

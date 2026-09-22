@@ -1,0 +1,83 @@
+{% extends "core/base.html" %}
+{% block title %}Chat — Choropia{% endblock %}
+
+{% block content %}
+<a href="{% url 'conversations' %}" class="inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-on-surface mb-3">
+  <span class="material-symbols-outlined !text-[18px]">arrow_back</span>
+  <span>Messages</span>
+</a>
+<div class="card flex flex-col h-[70vh]">
+  <div id="messages-pane" class="flex-1 overflow-y-auto p-4 space-y-2 bg-surface">
+    <p class="text-outline">Loading&hellip;</p>
+  </div>
+  <form id="send-form" class="border-t border-outline-variant p-3 flex gap-2 bg-surface-container-lowest">
+    <input type="text" id="message-input" class="input-field" placeholder="Type a message" required />
+    <button type="submit" class="btn-primary flex items-center gap-1">
+      <span class="material-symbols-outlined !text-[18px]">send</span>
+    </button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const conversationId = {{ conversation_id }};
+  const pane = document.getElementById("messages-pane");
+  let socket = null;
+  let myUserId = null;
+
+  function renderMessage(message) {
+    const isMine = message.sender_id === myUserId;
+    const wrapper = document.createElement("div");
+    wrapper.className = `flex ${isMine ? "justify-end" : "justify-start"}`;
+    const bubble = document.createElement("div");
+    bubble.className = isMine
+      ? "max-w-[75%] bg-primary text-on-primary rounded-card px-3 py-2 text-sm"
+      : "max-w-[75%] bg-surface-container-low text-on-surface rounded-card px-3 py-2 text-sm";
+    bubble.textContent = message.body;
+    wrapper.appendChild(bubble);
+    pane.appendChild(wrapper);
+    pane.scrollTop = pane.scrollHeight;
+  }
+
+  async function loadHistory() {
+    if (!Choropia.isAuthenticated()) {
+      window.location.href = "{% url 'login' %}";
+      return;
+    }
+    try {
+      const me = await Choropia.me();
+      myUserId = me.id;
+      const data = await Choropia.getMessages(conversationId);
+      const results = data.results || data;
+      pane.innerHTML = "";
+      if (!results.length) {
+        pane.innerHTML = '<p class="text-outline text-sm">No messages yet — say hello.</p>';
+      } else {
+        results.forEach(renderMessage);
+      }
+    } catch (err) {
+      pane.innerHTML = `<p class="text-red-500">${err.message}</p>`;
+    }
+  }
+
+  function connectSocket() {
+    socket = new WebSocket(Choropia.wsUrl(`/ws/chat/${conversationId}/`));
+    socket.onmessage = (event) => renderMessage(JSON.parse(event.data));
+    socket.onclose = () => {
+      // Simple reconnect-on-drop; fine for a first pass.
+      setTimeout(connectSocket, 2000);
+    };
+  }
+
+  document.getElementById("send-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = document.getElementById("message-input");
+    if (!input.value.trim() || !socket || socket.readyState !== WebSocket.OPEN) return;
+    socket.send(JSON.stringify({ body: input.value }));
+    input.value = "";
+  });
+
+  loadHistory().then(connectSocket);
+</script>
+{% endblock %}

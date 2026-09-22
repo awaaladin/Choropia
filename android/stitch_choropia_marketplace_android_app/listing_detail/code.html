@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary-container": "#0e1c2f", "on-background": "#191c1e", "on-primary": "#ffffff", "on-tertiary-container": "#76859b", "surface-dim": "#d8dadd", "secondary-container": "#b3d1fd", "on-primary-fixed-variant": "#3a475c", "surface-container-highest": "#e0e3e6", "inverse-on-surface": "#eff1f4", "secondary-fixed": "#d3e4ff", "inverse-primary": "#bac7e1", "primary-fixed-dim": "#bac7e1", "on-tertiary": "#ffffff", "secondary": "#426086", "primary-fixed": "#d6e3fe", "surface-bright": "#f7f9fc", "on-surface": "#191c1e", "on-secondary-fixed": "#001c38", "on-secondary-fixed-variant": "#29486d", "on-error-container": "#93000a", "on-secondary-container": "#3b5a7f", "error-container": "#ffdad6", "inverse-surface": "#2d3133", "surface-container-lowest": "#ffffff", "tertiary": "#000000", "surface-variant": "#e0e3e6", "on-primary-container": "#77849c", "on-error": "#ffffff", "on-secondary": "#ffffff", "on-primary-fixed": "#0e1c2f", "error": "#ba1a1a", "background": "#f7f9fc", "secondary-fixed-dim": "#aac9f4", "on-surface-variant": "#44474c", "surface-container-high": "#e6e8eb", "surface-container": "#eceef1", "surface": "#f7f9fc", "on-tertiary-fixed": "#0d1c2f", "on-tertiary-fixed-variant": "#3a485c", "surface-tint": "#525f75", "tertiary-fixed-dim": "#b9c7e0", "primary": "#000000", "outline": "#75777d", "tertiary-container": "#0d1c2f", "surface-container-low": "#f2f4f7", "tertiary-fixed": "#d5e3fd", "outline-variant": "#c5c6cd" }, borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, spacing: { "space-3xl": "4rem", "space-sm": "0.5rem", "margin-expanded": "2rem", "gutter-medium": "1rem", "space-xl": "2rem", "space-xxs": "0.125rem", "margin-compact": "1rem", "space-base": "1rem", "space-lg": "1.5rem", "gutter-expanded": "1.5rem", "space-2xl": "3rem", "gutter-compact": "0.75rem", "margin-medium": "1.5rem", "space-xs": "0.25rem", "space-md": "0.75rem" }, fontFamily: { "body-lg": ["Inter"], "headline-lg": ["Inter"], "display-lg-mobile": ["Inter"], "label-lg": ["Inter"], "title-sm": ["Inter"], "body-sm": ["Inter"], "label-sm": ["Inter"], "title-md": ["Inter"], "headline-md": ["Inter"], "headline-sm": ["Inter"], "display-lg": ["Inter"], "label-md": ["Inter"], "body-md": ["Inter"], "numeric-metric": ["Inter"], "title-lg": ["Inter"] }, fontSize: { "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-lg": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "600" }], "title-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }], "label-sm": ["10px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "title-md": ["16px", { "lineHeight": "22px", "letterSpacing": "0.005em", "fontWeight": "500" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "display-lg": ["44px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-md": ["11px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }], "numeric-metric": ["32px", { "lineHeight": "38px", "letterSpacing": "-0.03em", "fontWeight": "500" }], "title-lg": ["18px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;min-height:100vh;}body{overscroll-behavior-y:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style></head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-margin-compact flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Back" class="w-11 h-11 -ml-2 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="Logo" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmKHLGmJpbvEwAzO60uOyvmnrzbOndYDruJ1Qxu7G60P2IPpk5ZFVzqM6kcn8q1JzG2gdVdx54X4N7VTcKzBs8UM2HMOW06F3zS0cx5nMGdIGAqT6mxorkYGw8cofqf0G2RGfDqHLV22zrqpytKBR2Hmb6O9Nas3m8qYUW88SDNxxvhmA2I17nC-gFxqMlNPtYwBhq8GMNI4pcFFz-QE7EDzR4OjyrUQNWyio0GVe4y6IGVZKA9bpD"/><h1 class="font-title-lg text-title-lg text-on-surface tracking-tight truncate max-w-[180px]">Product Detail</h1></div><div class="flex items-center gap-space-xs"><button class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[22px]">more_vert</span></button><div class="w-11 h-11 flex items-center justify-center"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWvKeTZtEDkbs-CzNvY3aew92fuU0doWTMQf7BN1HDEx9u_Mai2HQ8QmaFUzmUiF3KdFtz4KIYNUPaCTYS3gGjMTr148E0EWmPyfQk-IBNunYxqT_kui5qSVmDtADxn9CGjWECKGObdl9eObE4G59DuL4TW4UtN0sQ64Y_0y5Su-Dx3lxwgNnhWevYOu8pk9hPXAQO5XWy7kH-_WLfet_lrlIIHekrkTKywX9Qapah79lPn2QurxRS"/></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 bg-surface"><div class="flex flex-col w-full pb-32">
+<!-- Top Floating Action Toolbar Overlay for Quick Sharing & Saving -->
+<div class="px-margin-compact py-space-xs flex items-center justify-between">
+<div class="flex items-center gap-space-xs bg-surface-container-high px-3 py-1.5 rounded-lg shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
+<span class="font-label-md text-label-md text-on-surface">Escrow Protected Dossier #CH-9842</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button aria-label="Share listing" class="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors" id="btnShare">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+<button aria-label="Bookmark listing" class="w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors" id="btnBookmark">
+<span class="material-symbols-outlined text-[20px]" id="bookmarkIcon">bookmark_border</span>
+</button>
+</div>
+</div>
+<!-- Interactive Image Gallery Carousel with Dynamic Badges -->
+<div class="px-margin-compact mt-space-xs">
+<div class="relative w-full rounded-xl overflow-hidden bg-surface-container shadow-sm aspect-[4/3]">
+<div class="flex w-full h-full transition-transform duration-300 ease-out" id="carouselTrack">
+<div class="min-w-full h-full relative">
+<img class="w-full h-full object-cover" data-alt="Apple MacBook Pro 16 inch Space Black resting on an architectural brushed slate table in an executive private office, studio cinematic directional lighting, crisp metallic textures, subtle reflections, luxury corporate aesthetic, ultra sharp detailing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVpaNoos7I903fz7Cnajhyihtc3fVQB7rpA3Si39Jr5xaovSX3Pu8DDABgOkB7aMeSm3xNEV94UdwDTF1WBWF7ZKydihQImjxmrLac9XG9Zmp6o2fhogvGSeQj4NwlTHyRRroSnaOm0SUHZsKnPTFVDLm0-3oFSzjlNrDzG5lR193L5RBS3IMHrnXuVi-T6OD_WT3tw7N5LjI0v-dORhzcVdFHvFS322q9eu3MWr-_OEt1y500Gcsz"/>
+</div>
+<div class="min-w-full h-full relative">
+<img class="w-full h-full object-cover" data-alt="Close up architectural macro shot of the Apple MacBook Pro M3 Max keyboard and trackpad in flawless pristine condition, sleek matte Space Black aluminum, ambient cool executive lighting, premium tactile feel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2LVMnWdUoQgo26Ifbpe9MrJTl4b2AJNo1AFIBmGLJcW8D7ho1NI8ICL8S2Pg62zf4v7tBLbziqRgzZR9LQ0w2uRJo_0Glwty3bbOCzbVPjfC-zB-rVSJPCypYeEuE2B0hzTX5xHriRrESHPkF25F7bg7Wzh9ED73Bp9nynWiVbPwNWPtVb8JIi0x-3B5ycb1akxPw9UmuDwsweAeZhKyw2QvHU4_tnTSwW-Tt5PGj2FZywBUe3DKr"/>
+</div>
+<div class="min-w-full h-full relative">
+<img class="w-full h-full object-cover" data-alt="Apple MacBook Pro 16 inch display open showing an institutional trading interface with financial charts, luminous Liquid Retina XDR screen, muted dark minimalist background, photorealistic luxury hardware photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn_uz7ZyPv1p-duYIQDlycxyU3ZTQ9ZKPC7j12U24DqZNpn_r8edGy7T8r5pCa_f6w9bQa_GsJYI-ST9RCvVyLxL1pnQl_BAAPMOvM8tXpV_V9hBk8ZO_gusJOwUqWffsYVxM0lFIXu5v5-_csvGIcFHcABRo1WLdxyPmjpg7vqc0qVd6mHOgY4oHapddje8MICNBz4ZzBdrS-xHzYjwbCueRMDWXx4Obkx0E0M1_7gYa5aTmzegfT"/>
+</div>
+<div class="min-w-full h-full relative">
+<img class="w-full h-full object-cover" data-alt="Original luxury packaging and braided black MagSafe charging cable neatly boxed alongside Apple MacBook Pro Space Black, immaculate unboxing presentation, executive gift tier" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFfv3XbL_0dLEO-yAtairUp8gU6oahu6SqrCGUek_l5GJOstC0BBipu9sb3zptjuBOA59k9D_xJKTofzh_CLCwUT0qtcnfzufWgesQBS5EFJrRA5hM18MERTVvPk1in2pFIuWA4x-6yXY9x-ycE1UJlhy8z3M9OBjmK8qKpyg5Dv99ldoc41zT1Gfv_tqiwrOysaT8rgp7eV_pqTVsnReBwHwv9PRgM7-3W9zg4_i0w2zwOKaHdQZO"/>
+</div>
+</div>
+<!-- Verification Badge Pill -->
+<div class="absolute top-3 left-3 bg-primary-container/90 backdrop-blur-md px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary-fixed">verified</span>
+<span class="font-label-sm text-label-sm text-on-primary uppercase tracking-wider">Physical Inspection Passed</span>
+</div>
+<!-- Page Counter & Dots -->
+<div class="absolute bottom-3 right-3 bg-primary-container/85 backdrop-blur-md px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-on-primary-container">photo_library</span>
+<span class="font-label-md text-label-md text-on-primary" id="galleryCounter">1 / 4</span>
+</div>
+<!-- Pagination Mini Indicator -->
+<div class="absolute bottom-3 left-3 flex items-center gap-1.5 bg-primary-container/70 backdrop-blur-md px-2 py-1 rounded-full">
+<span class="gallery-dot w-2 h-2 rounded-full bg-on-primary transition-all duration-200"></span>
+<span class="gallery-dot w-1.5 h-1.5 rounded-full bg-on-primary/40 transition-all duration-200"></span>
+<span class="gallery-dot w-1.5 h-1.5 rounded-full bg-on-primary/40 transition-all duration-200"></span>
+<span class="gallery-dot w-1.5 h-1.5 rounded-full bg-on-primary/40 transition-all duration-200"></span>
+</div>
+</div>
+<!-- Thumbnail Strip -->
+<div class="grid grid-cols-4 gap-2 mt-2">
+<button class="thumb-btn h-14 rounded-lg overflow-hidden bg-surface-container opacity-100 transition-all" onclick="switchSlide(0)">
+<img class="w-full h-full object-cover" data-alt="Thumbnail 1 of Apple MacBook Pro Space Black front angle view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhUk1BL4Ar0HPgy4IBgCNRyd4RH-AxLVO48Dn6_l3jaxRKQKXQ4oiM5GlHnsFyjWXbajKiRy5f7JbYF3zD3K4UTpMnR1kzyg2UKmYNKa7GUsnFskCYpiwht1o14QnUb4gza9oe__Mfxvhne4pW3PRn_PbMpBr4d30BrY-XgiyBenHwDMwJVqy109BPZXFbGSu7vjoZa7HleziGi_i1qVCMIymgTTaxvqcTnHbvE3G41ZG5r89EgLzU"/>
+</button>
+<button class="thumb-btn h-14 rounded-lg overflow-hidden bg-surface-container opacity-60 hover:opacity-100 transition-all" onclick="switchSlide(1)">
+<img class="w-full h-full object-cover" data-alt="Thumbnail 2 of Apple MacBook Pro keyboard and trackpad" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBy-elWtsRUxQG0TFF9IjIDAnWe1iXV6viiQQH8qMcRXAnCZekYYxHeOCi6m36HVAk-2Bjh66otAPWBS0Rv4KYSDuTKq5ez3KAO_tA40BCqmBSBbAEBEFykFqTRMSfutmNZj9rnXznOIzahr6geeDnS1NyDieItqPz-ebYK5-ZvWTwCorVC4cCXyGuNp8pAlaxVfbr5WxmCedxXTnveak60l8MgWNRrm4T42a_CqdVv_fhGoIPwJAsq"/>
+</button>
+<button class="thumb-btn h-14 rounded-lg overflow-hidden bg-surface-container opacity-60 hover:opacity-100 transition-all" onclick="switchSlide(2)">
+<img class="w-full h-full object-cover" data-alt="Thumbnail 3 of Apple MacBook Pro screen display" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3ieV_L-YCoFoLFe4INvSAYAsmgStDK8aNruBnFcIYgAZUb7fYkJXmpjqHrkHgMqjZhoYjAtegATZqvbyf3mIVKOvvq_QAtv5DmJ_EMFMPczSVJB0D0GbqXMXDegvdfhdspFKN1lqV8eQKq_1pF6_kjw7T3_0KFLF1ctsfQGJiBJvv6cg6wfvyjqouUm0ubOxNK5X-vfN2z5Yl-dLPhfuBxA5JPwSa4CypIwQUPGVMhfwksGXaSFsI"/>
+</button>
+<button class="thumb-btn h-14 rounded-lg overflow-hidden bg-surface-container opacity-60 hover:opacity-100 transition-all" onclick="switchSlide(3)">
+<img class="w-full h-full object-cover" data-alt="Thumbnail 4 of Apple MacBook Pro complete packaging set" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCelzZCEYfQSDP-Hf0Nh66c65rTqD03GHMitRZoAyOwMZm9hpkxAh72sGOGKvKsERsQ6taZPfYJQ01FsgYrNgr1q063PcDg28VLC1MSnpVvAotTBhSwPnl8_4pNRgr47EFcS48XCm3VEUa1hrLWUQIQ22lEF0upIrAnrCxuWmjuPfNevowZy96Zd-5sXVA-b4vN9dvMC0PO79Ifno3esWPL7IREpioPwhN3E9fP4JiOXNUASQYXfucB"/>
+</button>
+</div>
+</div>
+<!-- Primary Pricing & Title Block -->
+<div class="px-margin-compact mt-space-lg flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-baseline gap-1.5">
+<span class="font-headline-lg text-headline-lg text-primary-container tracking-tight">$2,450.00</span>
+<span class="font-label-lg text-label-lg text-secondary">USD</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-container-high text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">shield_with_heart</span>
+<span class="font-label-md text-label-md">Price Protected</span>
+</div>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-tight mt-1 leading-snug">
+      Apple MacBook Pro M3 Max (36GB RAM, 1TB SSD) - Pristine Condition
+    </h2>
+<!-- Tags & Badges Row -->
+<div class="flex items-center flex-wrap gap-1.5 mt-2">
+<span class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">inventory_2</span> Goods
+      </span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">laptop_mac</span> Electronics
+      </span>
+<span class="px-2.5 py-1 rounded-lg bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[14px]">bolt</span> Instant Escrow
+      </span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface-variant font-label-md text-label-md">
+        Asset ID: MBP-16-M3X
+      </span>
+</div>
+</div>
+<!-- Escrow Assurance & Delivery Safeguard Banner -->
+<div class="px-margin-compact mt-space-lg">
+<div class="bg-surface-container-low rounded-xl p-space-base shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">lock_reset</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">Choropia Escrow Protocol</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-relaxed">
+            Funds are securely locked in institutional trust and released to the seller only after you inspect and officially approve the asset.
+          </p>
+</div>
+</div>
+<div class="h-[1px] bg-surface-container-highest w-full my-1"></div>
+<div class="flex items-start gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">timer</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">48-Hour Inspection Window</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-relaxed">
+            Full unconditional return guarantee. Return postage is pre-funded under policy #RT-48.
+          </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Verified Seller Profile Dossier -->
+<div class="px-margin-compact mt-space-lg">
+<div class="bg-surface-container-lowest rounded-xl p-space-base shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3 min-w-0">
+<div class="relative">
+<img class="w-12 h-12 rounded-xl object-cover" data-alt="Portrait of Sarah Jenkins, a professional tech merchant, wearing executive business casual, warm authentic smile, clean minimalist lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRkYqY7exKddN9iW-ircsUbm9cVGQJBCYcLelLzOvXD9OYi0gJyMT0HOALzfmZQ88onN9qIqHFWkyGYoJtOJ0ptz8NTF-DLu5N7Bk8ULyjXeJ6wO-qxgK3VRfemj1pGgUHKmJgYdi2Ej9xWaMVvzqtdKYSWQZZLK5h3THZcO2Sv6RW96j5VU87ghcSFir3XkaGVrVp-rUeER3GqFuWRzZNRbiy_NOXVDMUb8Xi-TWHhiBRGiO29gr-"/>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]">check</span>
+</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-title-md text-title-md text-on-surface truncate">Sarah Jenkins</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Verified Merchant Tier I</span>
+</div>
+</div>
+<button class="px-3 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors" id="btnMessageSeller">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span>
+<span>Message</span>
+</button>
+</div>
+<!-- Seller Performance Metrics Bento -->
+<div class="grid grid-cols-3 gap-2 pt-1">
+<div class="p-2.5 rounded-lg bg-surface-container-low flex flex-col items-center text-center">
+<div class="flex items-center gap-1 text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">star</span>
+<span class="font-title-sm text-title-sm font-semibold">4.9</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">128 Reviews</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-low flex flex-col items-center text-center">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">100%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">On-Time Dispatch</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-low flex flex-col items-center text-center">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">2022</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Member Since</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Specifications Table & Health Dossier -->
+<div class="px-margin-compact mt-space-lg flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<h3 class="font-title-lg text-title-lg text-on-surface">Hardware Dossier</h3>
+<span class="font-label-md text-label-md text-secondary">Benchmarked 3 days ago</span>
+</div>
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm">
+<div class="flex items-center justify-between px-space-base py-3 bg-surface-container-low">
+<span class="font-body-md text-body-md text-on-surface-variant">Processor Engine</span>
+<span class="font-title-sm text-title-sm text-on-surface font-medium">Apple M3 Max (14-core CPU, 30-core GPU)</span>
+</div>
+<div class="flex items-center justify-between px-space-base py-3 bg-surface-container-lowest">
+<span class="font-body-md text-body-md text-on-surface-variant">Unified Memory</span>
+<span class="font-title-sm text-title-sm text-on-surface font-medium">36 GB High-Bandwidth Unified</span>
+</div>
+<div class="flex items-center justify-between px-space-base py-3 bg-surface-container-low">
+<span class="font-body-md text-body-md text-on-surface-variant">Internal Storage</span>
+<span class="font-title-sm text-title-sm text-on-surface font-medium">1 TB PCIe Gen4 SSD</span>
+</div>
+<div class="flex items-center justify-between px-space-base py-3 bg-surface-container-lowest">
+<span class="font-body-md text-body-md text-on-surface-variant">Physical Condition</span>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-title-sm text-title-sm text-on-surface font-medium">Pristine (Grade A+)</span>
+</div>
+</div>
+<div class="flex items-center justify-between px-space-base py-3 bg-surface-container-low">
+<span class="font-body-md text-body-md text-on-surface-variant">Battery Capacity</span>
+<div class="flex items-center gap-2">
+<span class="font-title-sm text-title-sm text-on-surface font-medium">98% Maximum Health</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-secondary-fixed text-on-secondary-fixed">24 Cycles</span>
+</div>
+</div>
+<div class="flex items-center justify-between px-space-base py-3 bg-surface-container-lowest">
+<span class="font-body-md text-body-md text-on-surface-variant">AppleCare+ Status</span>
+<span class="font-title-sm text-title-sm text-on-surface font-medium">Active through Nov 2026</span>
+</div>
+</div>
+</div>
+<!-- Detailed Listing Description -->
+<div class="px-margin-compact mt-space-lg flex flex-col gap-space-sm">
+<h3 class="font-title-lg text-title-lg text-on-surface">Curator's Notes</h3>
+<div class="bg-surface-container-lowest rounded-xl p-space-base shadow-sm">
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+        Corporate demo unit deployed in a supervised workstation setup for 6 months. Zero cosmetic scuffs, dead pixels, or keyboard sheen. Factory reset and fully disassociated from enterprise MDM profiles and Apple ID.
+      </p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-sm leading-relaxed">
+        Ships in original serial-matched packaging with authentic 140W USB-C Power Adapter and Space Black MagSafe 3 braided cable. Fully insured and signature-required freight arranged via insured courier.
+      </p>
+</div>
+</div>
+<!-- Safe Delivery & Fulfillment Logistics -->
+<div class="px-margin-compact mt-space-lg">
+<div class="p-space-base rounded-xl bg-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[24px] text-secondary">local_shipping</span>
+<div class="flex flex-col">
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">Priority Armored Dispatch</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Estimated delivery: 2 business days</span>
+</div>
+</div>
+<span class="font-title-sm text-title-sm text-on-surface font-semibold">Free</span>
+</div>
+</div>
+<!-- Persistent Bottom Conversion Dock -->
+<div class="fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-xl shadow-lg pb-safe">
+<div class="px-margin-compact py-space-sm flex items-center gap-3 max-w-lg mx-auto">
+<!-- Add to Cart Secondary Action -->
+<button class="flex-1 h-12 rounded-lg bg-surface-container-highest hover:bg-surface-container text-on-surface font-title-sm text-title-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]" id="btnAddToCart">
+<span class="material-symbols-outlined text-[20px]">add_shopping_cart</span>
+<span>Add to Cart</span>
+</button>
+<!-- Instant Checkout Primary Action -->
+<button class="flex-[1.4] h-12 rounded-lg bg-primary text-on-primary font-title-sm text-title-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]" id="btnBuyNow">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+<span>Secure Buy Now</span>
+</button>
+</div>
+</div>
+<!-- Toast Notification Container for Micro-delight feedback -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform -translate-y-6 opacity-0 pointer-events-none" id="toastNotification">
+<div class="bg-primary-container text-on-primary px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary-fixed" id="toastIcon">check_circle</span>
+<span class="font-label-lg text-label-lg" id="toastMessage">Asset pinned to your watchlist</span>
+</div>
+</div>
+</div>
+<script>
+  let currentSlide = 0;
+  const totalSlides = 4;
+  const track = document.getElementById('carouselTrack');
+  const counter = document.getElementById('galleryCounter');
+  const dots = document.querySelectorAll('.gallery-dot');
+  const thumbs = document.querySelectorAll('.thumb-btn');
+
+  function updateGalleryUI(index) {
+    if (!track) return;
+    track.style.transform = `translateX(-${index * 100}%)`;
+    if (counter) counter.textContent = `${index + 1} / ${totalSlides}`;
+    
+    dots.forEach((d, idx) => {
+      if (idx === index) {
+        d.classList.remove('bg-on-primary/40');
+        d.classList.add('bg-on-primary', 'w-2', 'h-2');
+      } else {
+        d.classList.remove('bg-on-primary', 'w-2', 'h-2');
+        d.classList.add('bg-on-primary/40', 'w-1.5', 'h-1.5');
+      }
+    });
+
+    thumbs.forEach((t, idx) => {
+      if (idx === index) {
+        t.classList.remove('opacity-60');
+        t.classList.add('opacity-100');
+      } else {
+        t.classList.remove('opacity-100');
+        t.classList.add('opacity-60');
+      }
+    });
+  }
+
+  window.switchSlide = function(idx) {
+    currentSlide = idx;
+    updateGalleryUI(currentSlide);
+  };
+
+  // Touch Swipe Handler for Gallery
+  let touchStartX = 0;
+  let touchEndX = 0;
+  if (track) {
+    track.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    track.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchEndX < touchStartX - 40) {
+        currentSlide = (currentSlide + 1) % totalSlides;
+        updateGalleryUI(currentSlide);
+      }
+      if (touchEndX > touchStartX + 40) {
+        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+        updateGalleryUI(currentSlide);
+      }
+    }, { passive: true });
+  }
+
+  // Feedback Toast Helper
+  const toast = document.getElementById('toastNotification');
+  const toastMsg = document.getElementById('toastMessage');
+  const toastIcon = document.getElementById('toastIcon');
+
+  function showToast(message, icon = 'check_circle') {
+    if (!toast) return;
+    toastMsg.textContent = message;
+    toastIcon.textContent = icon;
+    toast.classList.remove('-translate-y-6', 'opacity-0', 'pointer-events-none');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(() => {
+      toast.classList.add('-translate-y-6', 'opacity-0', 'pointer-events-none');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }, 2400);
+  }
+
+  // Bookmark Toggle
+  const bookmarkBtn = document.getElementById('btnBookmark');
+  const bookmarkIcon = document.getElementById('bookmarkIcon');
+  let isBookmarked = false;
+  if (bookmarkBtn && bookmarkIcon) {
+    bookmarkBtn.addEventListener('click', () => {
+      isBookmarked = !isBookmarked;
+      if (isBookmarked) {
+        bookmarkIcon.textContent = 'bookmark';
+        bookmarkIcon.style.fontVariationSettings = "'FILL' 1";
+        bookmarkIcon.classList.add('text-secondary');
+        showToast('Saved to your private acquisitions list', 'bookmark_added');
+      } else {
+        bookmarkIcon.textContent = 'bookmark_border';
+        bookmarkIcon.style.fontVariationSettings = "'FILL' 0";
+        bookmarkIcon.classList.remove('text-secondary');
+        showToast('Removed from your watchlist', 'bookmark_remove');
+      }
+    });
+  }
+
+  // Share Action
+  const shareBtn = document.getElementById('btnShare');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: 'MacBook Pro M3 Max - Choropia Escrow',
+          text: 'Verified listing on Choropia marketplace with instant escrow guarantee.',
+          url: window.location.href,
+        }).catch(() => {});
+      } else {
+        showToast('Dossier link copied to clipboard', 'link');
+      }
+    });
+  }
+
+  // Message Seller
+  const msgBtn = document.getElementById('btnMessageSeller');
+  if (msgBtn) {
+    msgBtn.addEventListener('click', () => {
+      showToast('Opening secure channel with Sarah Jenkins...', 'forum');
+    });
+  }
+
+  // Cart & Buy Actions
+  const cartBtn = document.getElementById('btnAddToCart');
+  if (cartBtn) {
+    cartBtn.addEventListener('click', () => {
+      showToast('Added to cart. Escrow reserve locked for 15m.', 'shopping_bag');
+    });
+  }
+
+  const buyBtn = document.getElementById('btnBuyNow');
+  if (buyBtn) {
+    buyBtn.addEventListener('click', () => {
+      showToast('Initializing Choropia Escrow checkout...', 'lock');
+    });
+  }
+</script></main></body></html>

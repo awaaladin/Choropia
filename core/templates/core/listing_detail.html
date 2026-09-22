@@ -1,0 +1,191 @@
+{% extends "core/base.html" %}
+{% block title %}Listing — Choropia{% endblock %}
+
+{% block content %}
+<div id="breadcrumb" class="flex items-center gap-1 text-xs text-on-surface-variant mb-4"></div>
+<div id="listing-root" class="card p-6">
+  <p class="text-outline">Loading&hellip;</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const listingId = {{ listing_id }};
+
+  function renderComments(comments) {
+    if (!comments.length) return '<p class="text-sm text-outline">No comments yet.</p>';
+    return comments
+      .map(
+        (c) => `
+      <div class="text-sm border-b border-outline-variant py-2">
+        <span class="font-medium text-on-surface">User #${c.author_id}</span>
+        <span class="text-outline"> &middot; ${new Date(c.created_at).toLocaleString()}</span>
+        <p class="text-on-surface-variant">${c.body}</p>
+      </div>`
+      )
+      .join("");
+  }
+
+  async function loadListing() {
+    const root = document.getElementById("listing-root");
+    try {
+      const listing = await Choropia.getListing(listingId);
+      const photo = listing.photos && listing.photos[0];
+      const comments = await Choropia.listComments(listingId).catch(() => []);
+      const commentResults = comments.results || comments;
+
+      document.getElementById("breadcrumb").innerHTML = `
+        <a href="{% url 'marketplace' %}" class="hover:text-on-surface transition-colors">Marketplace</a>
+        <span class="material-symbols-outlined !text-[14px]">chevron_right</span>
+        <span class="text-on-surface font-medium truncate max-w-[240px]">${listing.title}</span>`;
+
+      root.innerHTML = `
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="aspect-square bg-surface-container rounded-card overflow-hidden flex items-center justify-center">
+            ${photo ? `<img src="${photo.image}" class="w-full h-full object-cover" />` : '<span class="text-outline">No photo</span>'}
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-start justify-between gap-3">
+              <h1 class="text-2xl font-bold text-on-surface">${listing.title}</h1>
+              <span class="font-mono text-2xl font-semibold text-on-surface shrink-0">&#8358;${Number(listing.price).toLocaleString()}</span>
+            </div>
+            <p class="text-sm text-on-surface-variant mt-1">${listing.condition} &middot; ${listing.location || "Uyo"}</p>
+            <p class="mt-4 text-on-surface-variant">${listing.description || ""}</p>
+
+            <!-- Seller trust box -->
+            <a href="${listing.merchant ? `/merchants/${listing.merchant}/` : '#'}" class="mt-6 p-4 rounded-card bg-surface-container-low flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                ${
+                  listing.seller_avatar
+                    ? `<img src="${listing.seller_avatar}" class="w-10 h-10 rounded-full object-cover shrink-0" />`
+                    : `<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center shrink-0"><span class="material-symbols-outlined !text-[20px] text-on-surface-variant">person</span></div>`
+                }
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1">
+                    <span class="font-semibold text-on-surface truncate">${listing.seller_name}</span>
+                    ${listing.merchant ? `<span class="material-symbols-outlined !text-[16px] text-secondary">verified</span>` : ""}
+                  </div>
+                  <span class="text-xs text-on-surface-variant">${listing.merchant ? "Storefront" : "Individual seller"}</span>
+                </div>
+              </div>
+              <span class="badge shrink-0">Escrow protected</span>
+            </a>
+
+            <div class="flex gap-3 mt-6">
+              <button id="buy-now-btn" class="btn-primary flex items-center gap-1">
+                <span class="material-symbols-outlined !text-base">lock</span>
+                <span>Buy with escrow</span>
+              </button>
+              <button id="message-seller-btn" class="btn-secondary">Message seller</button>
+            </div>
+            <p id="listing-action-error" class="text-sm text-red-500 mt-2 hidden"></p>
+
+            <div class="flex items-center gap-4 mt-4 text-sm text-on-surface-variant">
+              <button id="like-btn" class="flex items-center gap-1 ${listing.is_liked ? "text-error" : ""} font-medium">
+                <span class="material-symbols-outlined !text-[18px]">favorite</span>
+                <span id="like-count">${listing.likes_count}</span> like${listing.likes_count === 1 ? "" : "s"}
+              </button>
+              <span>${listing.comments_count} comment${listing.comments_count === 1 ? "" : "s"}</span>
+              <button id="report-btn" class="ml-auto hover:text-error transition-colors">Report</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 border-t border-outline-variant pt-4">
+          <h2 class="text-sm font-semibold text-on-surface mb-2">Comments</h2>
+          <div id="comments-list">${renderComments(commentResults)}</div>
+          <form id="comment-form" class="flex gap-2 mt-3">
+            <input type="text" name="body" placeholder="Add a comment" required class="input-field" />
+            <button type="submit" class="btn-secondary">Post</button>
+          </form>
+        </div>`;
+
+      const errorEl = document.getElementById("listing-action-error");
+      const showError = (err) => {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove("hidden");
+      };
+
+      document.getElementById("message-seller-btn").addEventListener("click", async () => {
+        if (!Choropia.isAuthenticated()) {
+          window.location.href = "{% url 'login' %}";
+          return;
+        }
+        try {
+          const conversation = await Choropia.startConversation(listingId);
+          window.location.href = `/messages/${conversation.id}/`;
+        } catch (err) {
+          showError(err);
+        }
+      });
+
+      document.getElementById("buy-now-btn").addEventListener("click", async () => {
+        if (!Choropia.isAuthenticated()) {
+          window.location.href = "{% url 'login' %}";
+          return;
+        }
+        try {
+          const order = await Choropia.createOrder(listingId);
+          window.location.href = `/orders/${order.id}/`;
+        } catch (err) {
+          showError(err);
+        }
+      });
+
+      document.getElementById("like-btn").addEventListener("click", async () => {
+        if (!Choropia.isAuthenticated()) {
+          window.location.href = "{% url 'login' %}";
+          return;
+        }
+        try {
+          if (listing.is_liked) {
+            const mine = await Choropia.listMyLikes();
+            const mineResults = mine.results || mine;
+            const existing = mineResults.find((l) => l.listing === listingId);
+            if (existing) await Choropia.unlikeListing(existing.id);
+          } else {
+            await Choropia.likeListing(listingId);
+          }
+          loadListing();
+        } catch (err) {
+          showError(err);
+        }
+      });
+
+      document.getElementById("report-btn").addEventListener("click", async () => {
+        if (!Choropia.isAuthenticated()) {
+          window.location.href = "{% url 'login' %}";
+          return;
+        }
+        const reason = window.prompt("Why are you reporting this listing?");
+        if (!reason) return;
+        try {
+          await Choropia.reportListing(listingId, reason);
+          window.alert("Thanks — this has been sent to our moderators.");
+        } catch (err) {
+          showError(err);
+        }
+      });
+
+      document.getElementById("comment-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!Choropia.isAuthenticated()) {
+          window.location.href = "{% url 'login' %}";
+          return;
+        }
+        const input = e.target.elements.body;
+        try {
+          await Choropia.createComment(listingId, input.value);
+          input.value = "";
+          loadListing();
+        } catch (err) {
+          showError(err);
+        }
+      });
+    } catch (err) {
+      root.innerHTML = `<p class="text-red-500">Could not load this listing: ${err.message}</p>`;
+    }
+  }
+  loadListing();
+</script>
+{% endblock %}

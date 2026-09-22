@@ -1,0 +1,225 @@
+{% extends "core/base.html" %}
+{% block title %}Order — Choropia{% endblock %}
+
+{% block content %}
+<div id="order-root" class="card p-6 max-w-xl mx-auto">
+  <p class="text-outline">Loading&hellip;</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const orderId = {{ order_id }};
+
+  const STATUS_LABELS = {
+    pending_payment: "Awaiting payment",
+    paid_escrow: "Paid — held in escrow",
+    courier_assigned: "Courier assigned",
+    in_transit: "In transit",
+    delivered: "Delivered",
+    confirmed: "Confirmed by buyer",
+    disputed: "Disputed",
+    completed: "Completed — escrow released",
+    refunded: "Refunded",
+  };
+
+  const STEPS = [
+    { key: "paid_escrow", label: "Paid", icon: "payments" },
+    { key: "courier_assigned", label: "Courier assigned", icon: "local_shipping" },
+    { key: "in_transit", label: "In transit", icon: "conveyor_belt" },
+    { key: "delivered", label: "Delivered", icon: "inventory_2" },
+    { key: "confirmed", label: "Confirmed", icon: "task_alt" },
+    { key: "completed", label: "Completed", icon: "verified" },
+  ];
+  const STEP_KEYS = STEPS.map((s) => s.key);
+
+  function renderStepper(status) {
+    if (status === "disputed" || status === "refunded") {
+      return `
+        <div class="flex items-center gap-2 p-3 rounded-card bg-error-container text-error">
+          <span class="material-symbols-outlined">gavel</span>
+          <span class="text-sm font-medium">${status === "disputed" ? "Under dispute — a moderator is reviewing this order." : "Refunded to buyer."}</span>
+        </div>`;
+    }
+
+    const currentIndex = STEP_KEYS.indexOf(status);
+    const progressPct = Math.max(0, currentIndex / (STEPS.length - 1)) * 100;
+
+    return `
+      <div class="relative mt-4 px-4">
+        <div class="absolute top-4 left-4 right-4 h-0.5 bg-outline-variant"></div>
+        <div class="absolute top-4 left-4 h-0.5 bg-secondary transition-all" style="width: calc((100% - 2rem) * ${progressPct / 100})"></div>
+        <div class="relative flex justify-between">
+          ${STEPS.map((step, i) => {
+            const done = currentIndex > i;
+            const active = currentIndex === i;
+            const circleClasses = done
+              ? "bg-secondary text-on-secondary"
+              : active
+              ? "bg-primary text-on-primary"
+              : "bg-surface-container text-on-surface-variant";
+            return `
+            <div class="flex flex-col items-center w-16 -mx-1">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${circleClasses}">
+                <span class="material-symbols-outlined !text-[16px]">${done ? "check" : step.icon}</span>
+              </div>
+              <span class="text-[10px] text-center mt-1 leading-tight ${active ? "text-on-surface font-semibold" : "text-on-surface-variant"}">${step.label}</span>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
+  function renderTimeline(history) {
+    if (!history.length) return '<p class="text-sm text-outline">No status changes yet.</p>';
+    return `<ol class="mt-2 space-y-3">${history
+      .map(
+        (h) => `
+      <li class="text-sm border-l-2 border-secondary pl-3">
+        <span class="font-medium text-on-surface">${STATUS_LABELS[h.to_status] || h.to_status}</span>
+        <span class="text-outline"> &middot; ${new Date(h.created_at).toLocaleString()}</span>
+        ${h.note ? `<p class="text-on-surface-variant">${h.note}</p>` : ""}
+      </li>`
+      )
+      .join("")}</ol>`;
+  }
+
+  async function loadOrder() {
+    const root = document.getElementById("order-root");
+    if (!Choropia.isAuthenticated()) {
+      window.location.href = "{% url 'login' %}";
+      return;
+    }
+    try {
+      const [order, me] = await Promise.all([Choropia.getOrder(orderId), Choropia.me()]);
+      const isBuyer = me.id === order.buyer;
+      const isSeller = me.id === order.seller;
+
+      let actions = "";
+      if (order.status === "pending_payment" && isBuyer) {
+        actions = `<button id="pay-btn" class="btn-primary mt-4 flex items-center gap-1"><span class="material-symbols-outlined !text-base">lock</span>Pay into escrow</button>`;
+      } else if (order.status === "paid_escrow" && isSeller) {
+        actions = `<button id="assign-courier-btn" class="btn-primary mt-4 flex items-center gap-1"><span class="material-symbols-outlined !text-base">local_shipping</span>Assign courier</button>`;
+      } else if (order.status === "delivered" && isBuyer) {
+        actions = `
+          <div class="flex gap-3 mt-4">
+            <button id="confirm-btn" class="btn-primary flex items-center gap-1"><span class="material-symbols-outlined !text-base">check_circle</span>Confirm receipt</button>
+            <button id="dispute-btn" class="btn-secondary !border-error !text-error">Report a problem</button>
+          </div>`;
+      }
+
+      let reviewSection = "";
+      if (order.status === "completed") {
+        const otherPartyId = isBuyer ? order.seller : order.buyer;
+        const existingReviews = await Choropia.listReviewsFor(otherPartyId).catch(() => []);
+        const existingResults = existingReviews.results || existingReviews;
+        const myReview = existingResults.find((r) => r.order === order.id && r.reviewer === me.id);
+
+        if (myReview) {
+          reviewSection = `
+            <h2 class="text-sm font-semibold text-on-surface mt-6">Your review</h2>
+            <p class="text-secondary">${"★".repeat(myReview.rating)}${"☆".repeat(5 - myReview.rating)}</p>
+            ${myReview.comment ? `<p class="text-on-surface-variant text-sm">${myReview.comment}</p>` : ""}`;
+        } else {
+          reviewSection = `
+            <h2 class="text-sm font-semibold text-on-surface mt-6">Leave a review</h2>
+            <form id="review-form" class="mt-2 space-y-2">
+              <select name="rating" class="input-field">
+                <option value="5">★★★★★</option>
+                <option value="4">★★★★☆</option>
+                <option value="3">★★★☆☆</option>
+                <option value="2">★★☆☆☆</option>
+                <option value="1">★☆☆☆☆</option>
+              </select>
+              <textarea name="comment" placeholder="How was this transaction?" rows="2" class="input-field"></textarea>
+              <button type="submit" class="btn-secondary">Submit review</button>
+            </form>`;
+        }
+      }
+
+      root.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-14 h-14 rounded bg-surface-container overflow-hidden shrink-0">
+            ${order.listing_cover_photo ? `<img src="${order.listing_cover_photo}" class="w-full h-full object-cover" />` : ""}
+          </div>
+          <div class="flex-1 min-w-0">
+            <h1 class="text-lg font-bold text-on-surface truncate">${order.listing_title || `Order #${order.id}`}</h1>
+            <span class="font-mono text-on-surface-variant">&#8358;${Number(order.price).toLocaleString()}</span>
+          </div>
+          <span class="badge shrink-0">${STATUS_LABELS[order.status] || order.status}</span>
+        </div>
+        ${order.dispute_reason ? `<p class="text-sm text-red-500 mt-3 flex items-center gap-1"><span class="material-symbols-outlined !text-[16px]">warning</span>Dispute: ${order.dispute_reason}</p>` : ""}
+
+        ${renderStepper(order.status)}
+
+        <h2 class="text-sm font-semibold text-on-surface mt-6 flex items-center gap-1">
+          <span class="material-symbols-outlined !text-[16px] text-secondary">encrypted</span>
+          Escrow timeline
+        </h2>
+        ${renderTimeline(order.history)}
+        <p id="order-action-error" class="text-sm text-red-500 mt-3 hidden"></p>
+        ${actions}
+        ${reviewSection}
+      `;
+
+      const errorEl = document.getElementById("order-action-error");
+      const showError = (err) => {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove("hidden");
+      };
+
+      document.getElementById("pay-btn")?.addEventListener("click", async () => {
+        try {
+          const payment = await Choropia.initializePayment(order.id);
+          window.location.href = payment.authorization_url;
+        } catch (err) {
+          showError(err);
+        }
+      });
+
+      document.getElementById("assign-courier-btn")?.addEventListener("click", async () => {
+        try {
+          await Choropia.assignCourier(order.id);
+          loadOrder();
+        } catch (err) {
+          showError(err);
+        }
+      });
+
+      document.getElementById("confirm-btn")?.addEventListener("click", async () => {
+        try {
+          await Choropia.confirmReceipt(order.id);
+          loadOrder();
+        } catch (err) {
+          showError(err);
+        }
+      });
+
+      document.getElementById("dispute-btn")?.addEventListener("click", async () => {
+        const reason = window.prompt("What went wrong with this order?");
+        if (!reason) return;
+        try {
+          await Choropia.openDispute(order.id, reason);
+          loadOrder();
+        } catch (err) {
+          showError(err);
+        }
+      });
+
+      document.getElementById("review-form")?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const form = new FormData(e.target);
+        try {
+          await Choropia.createReview(order.id, Number(form.get("rating")), form.get("comment"));
+          loadOrder();
+        } catch (err) {
+          showError(err);
+        }
+      });
+    } catch (err) {
+      root.innerHTML = `<p class="text-red-500">Could not load this order: ${err.message}</p>`;
+    }
+  }
+  loadOrder();
+</script>
+{% endblock %}

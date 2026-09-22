@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-error":"#ffffff","on-tertiary-container":"#497cff","surface-tint":"#525f75","secondary-fixed":"#d3e4ff","surface-bright":"#f8f9ff","surface-container-low":"#eff4ff","primary-fixed-dim":"#bac7e1","tertiary-fixed":"#dbe1ff","outline-variant":"#c5c6cd","on-background":"#0b1c30","on-error-container":"#93000a","tertiary":"#000000","secondary":"#426086","surface-container":"#e5eeff","secondary-fixed-dim":"#aac9f4","background":"#f8f9ff","on-primary":"#ffffff","error":"#ba1a1a","secondary-container":"#b3d1fd","tertiary-container":"#00174b","primary":"#000000","surface":"#f8f9ff","primary-container":"#0e1c2f","on-secondary-container":"#3b5a7f","on-secondary-fixed-variant":"#29486d","on-tertiary":"#ffffff","on-surface":"#0b1c30","inverse-on-surface":"#eaf1ff","primary-fixed":"#d6e3fe","on-secondary":"#ffffff","surface-container-high":"#dce9ff","on-tertiary-fixed":"#00174b","on-primary-container":"#77849c","on-primary-fixed-variant":"#3a475c","error-container":"#ffdad6","surface-container-highest":"#d3e4fe","inverse-surface":"#213145","outline":"#75777d","on-tertiary-fixed-variant":"#003ea8","surface-dim":"#cbdbf5","surface-container-lowest":"#ffffff","surface-variant":"#d3e4fe","on-surface-variant":"#44474c","on-primary-fixed":"#0e1c2f","on-secondary-fixed":"#001c38","tertiary-fixed-dim":"#b4c5ff","inverse-primary":"#bac7e1"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-sm":"0.5rem","margin-mobile":"1rem","gutter-mobile":"1rem","space-3xl":"4rem","space-xs":"0.25rem","space-lg":"1.5rem","space-md":"0.75rem","space-base":"1rem","space-xl":"2rem","space-xxs":"0.125rem","space-2xl":"3rem","gutter-desktop":"1.5rem","margin-tablet":"2rem","margin-desktop":"3rem"},"fontFamily":{"mono-financial":["Inter"],"headline-lg":["Inter"],"body-sm":["Inter"],"label-sm":["Inter"],"headline-md":["Inter"],"body-lg":["Inter"],"headline-lg-mobile":["Inter"],"display":["Inter"],"body-md":["Inter"],"headline-sm":["Inter"],"label-md":["Inter"]},"fontSize":{"mono-financial":["14px",{"lineHeight":"20px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.005em","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"400"}],"headline-lg-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.015em","fontWeight":"600"}],"display":["48px",{"lineHeight":"56px","letterSpacing":"-0.025em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"400"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"500"}]}}}};</script></head><body class="bg-surface font-body-md text-body-md text-on-surface min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(11,28,48,0.06)]"><div class="h-16 w-full max-w-[1440px] mx-auto px-gutter-desktop flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg flex-shrink-0"><a class="flex items-center gap-space-sm" data-path="marketplace" href="#"><img alt="Brand logo. - Primary color: #0b192c
+- Font: inter
+- Mode: light
+- Roundness: rounded-sm
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Wn1AE3fD0JkK-5zrBNMvgvZahYmE2k3v_ZX3hh-8dhe_tIkQfr5a482rocOhlnzev2eLKN79Wkz9UtFIAhE1rSHzwW5QS4bvDCQQ0zNCP1OzGodR7aVzMoKqtjCPo-qiuIOHnDMeGAAJqlp4Q6qGwsGv7z7oP5ZwXXQLNWuqp_AXGZ5wAkdIW58-t1h27HUsd84TuQYWQiMyFQT49kii0asv09LpzYIXbz8AEV__6So38FHjY0xXU5mTo"/><span class="font-headline-sm text-headline-sm tracking-tight text-on-surface hidden xl:inline-block">Choropia Market</span></a><div class="relative hidden lg:flex items-center"><span class="material-symbols-outlined absolute left-space-sm text-on-surface-variant text-[18px] pointer-events-none">search</span><input class="w-64 h-9 pl-8 pr-12 rounded bg-surface-container-lowest text-on-surface placeholder:text-outline text-body-sm font-body-sm border border-outline-variant/60 focus:border-secondary focus:outline-none transition-colors" placeholder="Search market, assets, listings..." type="text"/><kbd class="absolute right-space-xs px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant font-mono-financial text-label-sm border border-outline-variant/40">⌘K</kbd></div></div><nav class="flex items-center gap-space-xs xl:gap-space-sm" data-active-classes="bg-primary-container text-on-primary font-label-md text-label-md rounded"><a class="px-space-md py-space-xs rounded font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="feed" href="#">Feed</a><a class="px-space-md py-space-xs rounded font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="reels" href="#">Reels</a><a class="px-space-md py-space-xs rounded font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="marketplace" href="#">Marketplace</a><a class="px-space-md py-space-xs rounded font-label-md text-label-md text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="banking-wallet" href="#">Banking & Wallet</a></nav><div class="flex items-center gap-space-sm xl:gap-space-md flex-shrink-0"><div class="flex items-center gap-space-xs"><a class="relative p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors flex items-center justify-center" data-path="messages" href="#" title="Messages"><span class="material-symbols-outlined text-[20px]">chat_bubble</span><span class="absolute 0 top-0.5 right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-error text-on-error font-label-sm text-[10px] leading-none flex items-center justify-center font-bold">3</span></a><a class="relative p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors flex items-center justify-center" data-path="notifications" href="#" title="Notifications"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-error text-on-error font-label-sm text-[10px] leading-none flex items-center justify-center font-bold">4</span></a><button aria-label="Toggle Dark Mode" class="p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded transition-colors flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">dark_mode</span></button></div><a class="hidden sm:inline-flex items-center gap-space-xs px-space-md py-space-xs rounded bg-primary-container text-on-primary font-label-md text-label-md hover:bg-secondary transition-colors" data-path="create-post" href="#"><span class="material-symbols-outlined text-[16px]">add</span><span>Create Post</span></a><a class="flex items-center pl-space-xs" data-path="profile-settings" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/50" src="https://lh3.googleusercontent.com/aida/AEtjO1V-CnP6fF9TPT-XgfokBEAGXUmSH5hmsgPlsjVWVwZUs3_8SMlJdowZXJ0t7kbXi6mJwZshiLXzVq7xVBLwz_XC8PG0AuaXg2kIrS-cwkRt_Slckd2v7M4icI1IPOB-mCKTwrIQ0Yz_kfvciuJ-eM4yfLhnwRDgddubKDk8pVzwdvK3BLla___jRYOvSnf7Ct20TIRbTZ6Ye2Lo6ehkZzm9tqkS66KQvREwyrFcaPOV-O0Z9p2D9iBlR34"/></a></div></div></header><main class="w-full flex-1 pt-16 bg-surface"><div class="flex flex-col w-full">
+<!-- Studio Control Header -->
+<div class="w-full bg-surface-container-low py-space-md px-gutter-desktop shadow-sm">
+<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<a class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" data-path="reels" href="#">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</a>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-mono-financial text-label-sm text-secondary uppercase tracking-widest">Studio Terminal // Rev 3.4</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-mono-financial text-label-sm text-secondary">Escrow Direct V3</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface">Create Shoppable Reel</p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="hidden sm:flex items-center gap-space-xs px-space-md py-space-xs rounded bg-surface-container text-on-surface">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified_user</span>
+<span class="font-mono-financial text-body-sm">Bonded Escrow Ready</span>
+</div>
+<button class="px-space-md py-space-xs rounded bg-surface text-on-surface hover:bg-surface-container transition-colors font-label-md text-label-md" id="discardDraftBtn" type="button">
+          Discard
+        </button>
+<button class="px-space-md py-space-xs rounded bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors font-label-md text-label-md" id="quickSaveDraftBtn" type="button">
+          Save Draft
+        </button>
+</div>
+</div>
+</div>
+<!-- Studio Workflow Canvas -->
+<div class="max-w-[1440px] mx-auto w-full px-gutter-desktop py-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+<!-- LEFT COLUMN: 9:16 Vertical Preview & Timeline Controls (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- Live Vertical Viewport -->
+<div class="relative w-full aspect-[9/16] max-h-[760px] mx-auto bg-primary-container rounded-xl overflow-hidden shadow-xl flex flex-col justify-between p-space-base select-none">
+<!-- Background Simulated Video Stream -->
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="A master craftsman carefully carving a luxury dark walnut fountain pen on a precision metal lathe, dramatic side directional studio lighting, fine wood shavings suspended in crisp air, institutional cinematic aesthetic in deep navy and warm wood tones, 8k crisp details" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5iNV262Xx4jIIoOmvYPwwDxQu7sSL2cYcQnM-IEw5ydpl3XA5p7C0NvpQJ_CgHhJvIYhcOv2r8OrgGK1GWmaAvljAwDzUnUgtVWFCz0XzwMEi0pDGw9Y5lVNOmJQAtE0eGOGpojpbWbUg3be1qqKmiuds4ZiyR1_yGehYpwD3PLdLvAe4AWjDLI5OvBJajukIJtDnyjwMNVZKRFzmQOb6FmdIa2p3QRiqC8zkw2AWlXMFUn98YteD"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary-container via-transparent to-primary-container/60"></div>
+</div>
+<!-- Top Viewport Metadata Overlay -->
+<div class="relative z-10 flex items-center justify-between">
+<div class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-primary-container/80 backdrop-blur-md text-on-primary font-mono-financial text-label-sm">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span>REC // 00:14:28</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-1 rounded bg-primary-container/70 backdrop-blur-md text-on-primary font-mono-financial text-label-sm">4K 60FPS</span>
+<button class="p-1 rounded bg-primary-container/70 backdrop-blur-md text-on-primary hover:bg-primary-container" type="button">
+<span class="material-symbols-outlined text-[18px]">aspect_ratio</span>
+</button>
+</div>
+</div>
+<!-- Right Action Floating Stacks (Viewer Simulation) -->
+<div class="relative z-10 self-end flex flex-col items-center gap-space-md mb-space-base">
+<div class="flex flex-col items-center gap-0.5">
+<div class="w-10 h-10 rounded-full bg-primary-container/80 backdrop-blur-md text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</div>
+<span class="font-mono-financial text-[11px] text-on-primary drop-shadow">3.4k</span>
+</div>
+<div class="flex flex-col items-center gap-0.5">
+<div class="w-10 h-10 rounded-full bg-primary-container/80 backdrop-blur-md text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">chat</span>
+</div>
+<span class="font-mono-financial text-[11px] text-on-primary drop-shadow">182</span>
+</div>
+<div class="flex flex-col items-center gap-0.5">
+<div class="w-10 h-10 rounded-full bg-primary-container/80 backdrop-blur-md text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">bookmark</span>
+</div>
+<span class="font-mono-financial text-[11px] text-on-primary drop-shadow">894</span>
+</div>
+<div class="flex flex-col items-center gap-0.5">
+<div class="w-10 h-10 rounded-full bg-primary-container/80 backdrop-blur-md text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">send</span>
+</div>
+<span class="font-mono-financial text-[11px] text-on-primary drop-shadow">Share</span>
+</div>
+</div>
+<!-- Bottom Floating Shoppable Tag Simulation -->
+<div class="relative z-10 flex flex-col gap-space-xs">
+<div class="w-full bg-surface/95 backdrop-blur-md p-space-sm rounded-lg shadow-lg flex items-center justify-between gap-space-sm transform transition-all duration-200" id="previewCard">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-11 h-11 rounded bg-surface-container flex-shrink-0 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up macro photo of a hand-turned luxury walnut wood fountain pen with 18k gold nib resting on architect blue paper, minimal studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4x1TwyjL8H8GDHHHYp_2vGDUhJxMw-n90bBWk8ry6D-BKzXoFm9RKAyhUO64_qFinPzHV9XmgtzLL9K_ONl7NulueZP30ROiH93ZH1qT5ADFhpJFgmW3cxthp1P3MC1KzdTkDwBUYzkKMmFljqZcRUx-iBhXdeBe-MAn2ql2n2eBJGyBLmGlXCj5ixisET2SotUotu1vbApq6hSETSWUCwGQbyObf1p3NZYyZaWgBTRGIpJYC8f57"/>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1">
+<span class="px-1 py-0.2 rounded bg-surface-container-high text-on-surface font-label-sm text-[10px] uppercase">ESCROW PINNED</span>
+<span class="material-symbols-outlined text-[13px] text-secondary">verified</span>
+</div>
+<span class="font-headline-sm text-label-md text-on-surface truncate" id="previewTitle">Hand-turned Walnut Fountain Pen</span>
+<span class="font-mono-financial text-body-sm text-secondary font-bold" id="previewPrice">$180.00 USD</span>
+</div>
+</div>
+<button class="px-space-sm py-1.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm whitespace-nowrap shadow-sm hover:bg-secondary transition-colors" type="button">
+                Instant Lock
+              </button>
+</div>
+<!-- In-clip Creator Tagline -->
+<div class="px-space-xs">
+<p class="font-label-md text-label-md text-on-primary drop-shadow font-semibold">@alden_crafts</p>
+<p class="font-body-sm text-body-sm text-on-primary drop-shadow line-clamp-1" id="previewCaptionText">Lathe turn sequence. Custom fountain pen for archive release. Fully escrow insured.</p>
+</div>
+</div>
+</div>
+<!-- Media Suite Controls Card -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-base shadow-sm flex flex-col gap-space-base">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-secondary">tune</span>
+<span class="font-label-md text-label-md text-on-surface uppercase tracking-wider">Trimming & Scrub Sequence</span>
+</div>
+<span class="font-mono-financial text-body-sm text-on-surface-variant">00:04.2 / 00:15.0</span>
+</div>
+<!-- Visual Waveform & Filmstrip Scrub Track -->
+<div class="relative w-full h-14 bg-surface-container-high rounded flex items-center overflow-hidden px-1">
+<!-- Simulated Filmstrip Micro Thumbnails -->
+<div class="absolute inset-0 flex items-center opacity-40">
+<div class="flex-1 h-full bg-surface-variant mr-0.5"></div>
+<div class="flex-1 h-full bg-surface-container-highest mr-0.5"></div>
+<div class="flex-1 h-full bg-surface-variant mr-0.5"></div>
+<div class="flex-1 h-full bg-surface-container-highest mr-0.5"></div>
+<div class="flex-1 h-full bg-surface-variant mr-0.5"></div>
+<div class="flex-1 h-full bg-surface-container-highest"></div>
+</div>
+<!-- Mini Audio Waveform Overlay (SVG) -->
+<svg class="absolute inset-x-0 bottom-1 w-full h-6 text-secondary opacity-60 pointer-events-none" preserveaspectratio="none" viewbox="0 0 200 40">
+<path d="M0,20 Q10,5 20,20 T40,20 T60,5 T80,35 T100,10 T120,28 T140,8 T160,32 T180,18 T200,20 L200,40 L0,40 Z" fill="currentColor"></path>
+</svg>
+<!-- Trimming Active Range Selector -->
+<div class="absolute left-8 right-16 top-0 bottom-0 bg-secondary/15 rounded flex items-center justify-between pointer-events-none">
+<div class="w-2 h-full bg-primary flex items-center justify-center cursor-ew-resize pointer-events-auto">
+<span class="w-0.5 h-4 bg-on-primary"></span>
+</div>
+<div class="w-0.5 h-full bg-error pointer-events-none"></div>
+<div class="w-2 h-full bg-primary flex items-center justify-center cursor-ew-resize pointer-events-auto">
+<span class="w-0.5 h-4 bg-on-primary"></span>
+</div>
+</div>
+</div>
+<!-- Playback Actions & Audio Library Selector -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm pt-space-xs">
+<!-- Audio Track Module -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Audio Track</label>
+<button class="w-full h-10 px-space-sm bg-surface-container rounded flex items-center justify-between text-left hover:bg-surface-container-high transition-colors" type="button">
+<div class="flex items-center gap-space-xs truncate">
+<span class="material-symbols-outlined text-[18px] text-secondary">music_note</span>
+<span class="font-label-md text-label-md text-on-surface truncate">Choropia Deep Flow #04</span>
+</div>
+<span class="font-mono-financial text-label-sm text-secondary flex-shrink-0">PRO LIB</span>
+</button>
+</div>
+<!-- Playback Speed -->
+<div class="flex flex-col gap-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Scrub Velocity</label>
+<div class="grid grid-cols-4 h-10 bg-surface-container rounded p-0.5 text-center">
+<button class="speed-btn rounded font-mono-financial text-label-sm text-on-surface-variant hover:text-on-surface" type="button">0.5x</button>
+<button class="speed-btn rounded bg-surface-container-lowest shadow-sm font-mono-financial text-label-sm text-on-surface font-bold" type="button">1.0x</button>
+<button class="speed-btn rounded font-mono-financial text-label-sm text-on-surface-variant hover:text-on-surface" type="button">1.5x</button>
+<button class="speed-btn rounded font-mono-financial text-label-sm text-on-surface-variant hover:text-on-surface" type="button">2.0x</button>
+</div>
+</div>
+</div>
+<!-- Replace Footage Zone -->
+<div class="w-full p-space-sm bg-surface-container-low rounded flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">upload_file</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">lathe_master_cut_v2.mp4 (48.2 MB)</span>
+</div>
+<button class="font-label-sm text-label-sm text-secondary hover:underline" type="button">Swap Clip</button>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Studio Metadata & Escrow Tagging Config (7 Cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- SECTION 1: Caption & Description -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-secondary">description</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Reel Title & Narrative</span>
+</div>
+<span class="font-mono-financial text-label-sm text-on-surface-variant" id="charCount">118 / 500</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<textarea class="w-full p-space-md rounded bg-surface-container-low text-on-surface placeholder:text-outline font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none transition-colors" id="captionInput" placeholder="Detail the lineage, material specifications, or craft process behind this showcase clip..." rows="4">Lathe turn sequence. Custom fountain pen for archive release. Fully escrow insured and shipped via armored freight upon settlement inspection.</textarea>
+<!-- Dynamic Hashtag Pills -->
+<div class="flex flex-wrap items-center gap-space-xs mt-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant mr-1">Institutional Tags:</span>
+<button class="tag-pill px-space-sm py-0.5 rounded bg-surface-container text-on-surface hover:bg-secondary hover:text-on-secondary font-mono-financial text-label-sm transition-colors" type="button">#ArtisanCraft</button>
+<button class="tag-pill px-space-sm py-0.5 rounded bg-surface-container text-on-surface hover:bg-secondary hover:text-on-secondary font-mono-financial text-label-sm transition-colors" type="button">#EscrowProtected</button>
+<button class="tag-pill px-space-sm py-0.5 rounded bg-surface-container text-on-surface hover:bg-secondary hover:text-on-secondary font-mono-financial text-label-sm transition-colors" type="button">#MadeToOrder</button>
+<button class="tag-pill px-space-sm py-0.5 rounded bg-surface-container text-on-surface hover:bg-secondary hover:text-on-secondary font-mono-financial text-label-sm transition-colors" type="button">#WalnutTurned</button>
+</div>
+</div>
+<!-- Section Categorization -->
+<div class="flex flex-col gap-space-xs pt-space-xs">
+<label class="font-label-md text-label-md text-on-surface">Commerce Categorization</label>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="commerceCategory" type="radio" value="physical"/>
+<div class="p-space-sm rounded bg-surface-container-low peer-checked:bg-primary-container peer-checked:text-on-primary transition-all flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span class="font-mono-financial text-[10px] uppercase">Tier 1</span>
+</div>
+<span class="font-label-md text-label-md font-semibold">Physical Goods</span>
+<span class="font-body-sm text-body-sm opacity-80">Tracked Freight</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="commerceCategory" type="radio" value="services"/>
+<div class="p-space-sm rounded bg-surface-container-low peer-checked:bg-primary-container peer-checked:text-on-primary transition-all flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[18px]">handshake</span>
+<span class="font-mono-financial text-[10px] uppercase">Service</span>
+</div>
+<span class="font-label-md text-label-md font-semibold">Advisory & Bespoke</span>
+<span class="font-body-sm text-body-sm opacity-80">Milestone Settlement</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="commerceCategory" type="radio" value="info"/>
+<div class="p-space-sm rounded bg-surface-container-low peer-checked:bg-primary-container peer-checked:text-on-primary transition-all flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[18px]">data_object</span>
+<span class="font-mono-financial text-[10px] uppercase">Digital</span>
+</div>
+<span class="font-label-md text-label-md font-semibold">Digital & Code</span>
+<span class="font-body-sm text-body-sm opacity-80">Instant Hash Reveal</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+<!-- SECTION 2: Purchasable Escrow Item Configuration -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<!-- Master Escrow Toggle -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-secondary">lock_clock</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Attach Purchasable Escrow Item</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Pins a bonded smart transaction overlay to this reel for real-time acquisition.</p>
+</div>
+<!-- Toggle Component -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="escrowToggle" type="checkbox" value=""/>
+<div class="w-12 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-primary after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<!-- Escrow Fields Container -->
+<div class="flex flex-col gap-space-base pt-space-xs transition-opacity duration-150" id="escrowFieldsContainer">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Product Title -->
+<div class="flex flex-col gap-1 md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface">Listed Item Title</label>
+<div class="relative">
+<input class="w-full h-10 px-space-md rounded bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none" id="productTitleInput" type="text" value="Hand-turned Walnut Fountain Pen"/>
+<span class="material-symbols-outlined absolute right-space-sm top-2.5 text-[18px] text-secondary">verified</span>
+</div>
+</div>
+<!-- Price Input (Monetary Tabular) -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface">Escrow Price Locked</label>
+<div class="relative flex items-center">
+<input class="w-full h-10 pl-space-md pr-16 rounded bg-surface-container-low text-on-surface font-mono-financial text-mono-financial focus:bg-surface-container-lowest focus:outline-none" id="productPriceInput" type="text" value="180.00"/>
+<span class="absolute right-0 h-10 px-space-sm bg-surface-container-high rounded-r flex items-center font-mono-financial text-label-sm text-on-surface-variant">USD</span>
+</div>
+</div>
+<!-- Inventory Units -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface">Inventory Allocated</label>
+<div class="relative flex items-center">
+<input class="w-full h-10 px-space-md rounded bg-surface-container-low text-on-surface font-mono-financial text-mono-financial focus:bg-surface-container-lowest focus:outline-none" id="productStockInput" max="999" min="1" type="number" value="10"/>
+<span class="absolute right-space-sm font-mono-financial text-label-sm text-on-surface-variant">UNITS</span>
+</div>
+</div>
+</div>
+<!-- Escrow Protocol Customizations -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
+<!-- Inspection Window Selector -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface">Inspection Window</label>
+<span class="font-mono-financial text-[10px] text-secondary">ESCROW RULES</span>
+</div>
+<select class="w-full h-10 px-space-md rounded bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none cursor-pointer">
+<option selected="" value="48h">48h Standard Verification Window</option>
+<option value="7d">7-Day Extended Appraisal Window</option>
+<option value="14d">14-Day Institutional Custody Hold</option>
+<option value="instant">Instant Counterparty Release</option>
+</select>
+<p class="font-body-sm text-[11px] text-on-surface-variant">Buyer holds inspection period upon delivery before funds release.</p>
+</div>
+<!-- Shipping Protocol -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface">Logistics & Bond</label>
+<span class="font-mono-financial text-[10px] text-secondary">GPS BACKED</span>
+</div>
+<select class="w-full h-10 px-space-md rounded bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none cursor-pointer">
+<option selected="" value="freight">Insured Armored Freight (Tier 1)</option>
+<option value="express">Express Courier + Signature Token</option>
+<option value="local">Local Custody Safe-Exchange Node</option>
+</select>
+<p class="font-body-sm text-[11px] text-on-surface-variant">Automatic tracking number handshake with smart escrow vault.</p>
+</div>
+</div>
+<!-- Escrow Guarantee Notice Banner -->
+<div class="w-full p-space-sm rounded bg-surface-container flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-secondary flex-shrink-0">shield</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                Proceeds of <strong class="text-on-surface">$1,800.00 USD total yield</strong> are underwritten by Choropia Custody. Settlement fees: 1.25%.
+              </p>
+</div>
+</div>
+</div>
+<!-- SECTION 3: Governance, Audience & Direct Counter-Offers -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-secondary">security</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Audience Governance & Negotiation</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-base">
+<!-- Access Gate -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface">Access Eligibility</label>
+<div class="flex flex-col gap-space-xs">
+<label class="flex items-center gap-space-xs cursor-pointer">
+<input checked="" class="w-4 h-4 text-primary bg-surface-container focus:ring-0" name="accessLevel" type="radio"/>
+<span class="font-body-md text-body-md text-on-surface">Public Network (Universal View)</span>
+</label>
+<label class="flex items-center gap-space-xs cursor-pointer">
+<input class="w-4 h-4 text-primary bg-surface-container focus:ring-0" name="accessLevel" type="radio"/>
+<span class="font-body-md text-body-md text-on-surface">Tier 1 Verified Buyers Only</span>
+</label>
+</div>
+</div>
+<!-- Social Interactions & Escrow Bidding -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface">Interactions & Bidding</label>
+<div class="flex flex-col gap-space-xs">
+<label class="flex items-center gap-space-xs cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-primary bg-surface-container focus:ring-0" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Allow Public Comments</span>
+</label>
+<label class="flex items-center gap-space-xs cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-primary bg-surface-container focus:ring-0" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface">Allow Direct Escrow Counter-Offers</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 4: Sticky Action Terminal -->
+<div class="w-full bg-surface-container-high rounded-xl p-space-base flex flex-col sm:flex-row items-center justify-between gap-space-md shadow-md">
+<div class="flex items-center gap-space-sm w-full sm:w-auto">
+<button class="w-full sm:w-auto px-space-base py-space-sm rounded bg-surface-container-lowest text-on-surface font-label-md text-label-md hover:bg-surface transition-colors flex items-center justify-center gap-space-xs shadow-sm" id="previewModalToggle" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+<span>Test Shoppable Overlay</span>
+</button>
+</div>
+<div class="flex items-center gap-space-sm w-full sm:w-auto justify-end">
+<button class="w-full sm:w-auto px-space-xl py-space-sm rounded bg-primary-container text-on-primary font-label-md text-label-md hover:bg-secondary transition-all flex items-center justify-center gap-space-xs shadow-lg" id="publishReelBtn" type="button">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+<span>Cryptographic Sign & Publish</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Optional Micro Overlay Modal for testing Shoppable Overlay -->
+<div class="fixed inset-0 z-50 bg-primary-container/60 backdrop-blur-sm hidden items-center justify-center p-space-base" id="testOverlayModal">
+<div class="bg-surface rounded-xl max-w-sm w-full p-space-lg shadow-2xl flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface">Shoppable Preview</span>
+<button class="text-on-surface-variant hover:text-on-surface" id="closeModalBtn" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">When mobile viewers tap the in-reel badge, this instant checkout drawer is summoned over video playback.</p>
+<div class="p-space-base rounded bg-surface-container-lowest shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold" id="modalProductTitle">Hand-turned Walnut Fountain Pen</span>
+<span class="font-mono-financial text-headline-sm text-secondary" id="modalProductPrice">$180.00</span>
+</div>
+<div class="flex items-center justify-between font-mono-financial text-body-sm text-on-surface-variant">
+<span>Escrow Vault ID:</span>
+<span>#ESC-90812-US</span>
+</div>
+<div class="flex items-center justify-between font-mono-financial text-body-sm text-on-surface-variant">
+<span>Guaranteed Hold:</span>
+<span>48 Hours Post-Delivery</span>
+</div>
+<button class="mt-space-xs w-full py-2.5 rounded bg-primary-container text-on-primary font-label-md text-label-md text-center" type="button">
+          Authorize Escrow Hold ($180.00)
+        </button>
+</div>
+</div>
+</div>
+<!-- Interactive Terminal Scripts -->
+<script>
+    (function() {
+      // Dynamic Character Counter and Live Preview updates
+      const captionInput = document.getElementById('captionInput');
+      const charCount = document.getElementById('charCount');
+      const previewCaptionText = document.getElementById('previewCaptionText');
+      const productTitleInput = document.getElementById('productTitleInput');
+      const productPriceInput = document.getElementById('productPriceInput');
+      const previewTitle = document.getElementById('previewTitle');
+      const previewPrice = document.getElementById('previewPrice');
+      const escrowToggle = document.getElementById('escrowToggle');
+      const previewCard = document.getElementById('previewCard');
+      const escrowFieldsContainer = document.getElementById('escrowFieldsContainer');
+
+      if (captionInput && charCount && previewCaptionText) {
+        captionInput.addEventListener('input', (e) => {
+          const val = e.target.value;
+          charCount.textContent = `${val.length} / 500`;
+          previewCaptionText.textContent = val.length > 0 ? val : 'No narrative provided.';
+        });
+      }
+
+      if (productTitleInput && previewTitle) {
+        productTitleInput.addEventListener('input', (e) => {
+          previewTitle.textContent = e.target.value || 'Untitled Listing';
+          const modalTitle = document.getElementById('modalProductTitle');
+          if (modalTitle) modalTitle.textContent = e.target.value || 'Untitled Listing';
+        });
+      }
+
+      if (productPriceInput && previewPrice) {
+        productPriceInput.addEventListener('input', (e) => {
+          const cleanPrice = e.target.value.replace(/[^0-9.]/g, '');
+          previewPrice.textContent = `$${cleanPrice || '0.00'} USD`;
+          const modalPrice = document.getElementById('modalProductPrice');
+          if (modalPrice) modalPrice.textContent = `$${cleanPrice || '0.00'}`;
+        });
+      }
+
+      if (escrowToggle && previewCard && escrowFieldsContainer) {
+        escrowToggle.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            previewCard.classList.remove('opacity-0', 'pointer-events-none');
+            escrowFieldsContainer.classList.remove('opacity-30', 'pointer-events-none');
+          } else {
+            previewCard.classList.add('opacity-0', 'pointer-events-none');
+            escrowFieldsContainer.classList.add('opacity-30', 'pointer-events-none');
+          }
+        });
+      }
+
+      // Hashtag injection pills
+      const tagPills = document.querySelectorAll('.tag-pill');
+      tagPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          const tag = pill.textContent.trim();
+          if (captionInput && !captionInput.value.includes(tag)) {
+            captionInput.value = `${captionInput.value} ${tag}`.trim();
+            captionInput.dispatchEvent(new Event('input'));
+          }
+        });
+      });
+
+      // Playback speed toggles
+      const speedBtns = document.querySelectorAll('.speed-btn');
+      speedBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          speedBtns.forEach(b => {
+            b.classList.remove('bg-surface-container-lowest', 'shadow-sm', 'text-on-surface', 'font-bold');
+            b.classList.add('text-on-surface-variant');
+          });
+          btn.classList.add('bg-surface-container-lowest', 'shadow-sm', 'text-on-surface', 'font-bold');
+          btn.classList.remove('text-on-surface-variant');
+        });
+      });
+
+      // Test Modal controls
+      const previewModalToggle = document.getElementById('previewModalToggle');
+      const testOverlayModal = document.getElementById('testOverlayModal');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+
+      if (previewModalToggle && testOverlayModal && closeModalBtn) {
+        previewModalToggle.addEventListener('click', () => {
+          testOverlayModal.classList.remove('hidden');
+          testOverlayModal.classList.add('flex');
+        });
+        closeModalBtn.addEventListener('click', () => {
+          testOverlayModal.classList.add('hidden');
+          testOverlayModal.classList.remove('flex');
+        });
+      }
+
+      // Quick Publish & Save notification feedback
+      const publishReelBtn = document.getElementById('publishReelBtn');
+      if (publishReelBtn) {
+        publishReelBtn.addEventListener('click', () => {
+          const originalText = publishReelBtn.innerHTML;
+          publishReelBtn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Signing Ledger...</span>`;
+          setTimeout(() => {
+            publishReelBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check_circle</span><span>Published to Network</span>`;
+            publishReelBtn.classList.remove('bg-primary-container');
+            publishReelBtn.classList.add('bg-secondary');
+            setTimeout(() => {
+              publishReelBtn.innerHTML = originalText;
+              publishReelBtn.classList.add('bg-primary-container');
+              publishReelBtn.classList.remove('bg-secondary');
+            }, 2500);
+          }, 1200);
+        });
+      }
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-low border-t border-outline-variant/30 py-space-xl mt-auto"><div class="w-full max-w-[1440px] mx-auto px-gutter-desktop"><div class="grid grid-cols-1 md:grid-cols-4 gap-space-xl mb-space-xl"><div class="flex flex-col gap-space-sm"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-on-surface">Choropia Market</span></div><p class="font-body-sm text-body-sm text-on-surface-variant max-w-xs">Institutional social commerce exchange and secured escrow marketplace architecture.</p></div><div class="flex flex-col gap-space-xs"><span class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-space-xs">Platform</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="marketplace" href="#">Marketplace Exchange</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="feed" href="#">Institutional Feed</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="reels" href="#">Market Discovery</a></div><div class="flex flex-col gap-space-xs"><span class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-space-xs">Treasury</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="banking-wallet" href="#">Banking & Escrow</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="dispute-resolution" href="#">Dispute Resolution</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="merchant-verification" href="#">Tier 1 Verification</a></div><div class="flex flex-col gap-space-xs"><span class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-space-xs">Security & Compliance</span><p class="font-body-sm text-body-sm text-on-surface-variant">All counterparty assets bonded and custody-backed under institutional-grade escrow reserves.</p><div class="flex items-center gap-space-xs text-secondary font-mono-financial text-body-sm mt-space-xs"><span class="material-symbols-outlined text-[16px]">verified_user</span><span>256-Bit Escrow Vault</span></div></div></div><div class="border-t border-outline-variant/30 pt-space-base flex flex-col md:flex-row items-center justify-between gap-space-sm"><p class="font-body-sm text-body-sm text-on-surface-variant">© 2025 Choropia Financial Marketplace Ltd. All rights reserved.</p><div class="flex items-center gap-space-lg"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="terms-of-service" href="#">Terms of Custody</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="privacy-policy" href="#">Privacy Policy</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="system-status" href="#">Settlement Status</a></div></div></div></footer></body></html>

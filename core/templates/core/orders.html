@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% block title %}Orders — Choropia{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-4 text-on-surface">Your orders</h1>
+<div id="orders-list" class="card divide-y divide-outline-variant">
+  <p class="p-4 text-outline">Loading&hellip;</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const STATUS_LABELS = {
+    pending_payment: "Awaiting payment",
+    paid_escrow: "Paid — in escrow",
+    courier_assigned: "Courier assigned",
+    in_transit: "In transit",
+    delivered: "Delivered",
+    confirmed: "Confirmed",
+    disputed: "Disputed",
+    completed: "Completed",
+    refunded: "Refunded",
+  };
+
+  async function loadOrders() {
+    const list = document.getElementById("orders-list");
+    if (!Choropia.isAuthenticated()) {
+      window.location.href = "{% url 'login' %}";
+      return;
+    }
+    try {
+      const data = await Choropia.listOrders();
+      const results = data.results || data;
+      if (!results.length) {
+        list.innerHTML = '<p class="p-4 text-outline">No orders yet.</p>';
+        return;
+      }
+      list.innerHTML = results
+        .map(
+          (order) => `
+        <a href="/orders/${order.id}/" class="p-4 flex items-center gap-3 hover:bg-surface-container-low transition-colors">
+          <div class="w-12 h-12 rounded bg-surface-container overflow-hidden shrink-0">
+            ${order.listing_cover_photo ? `<img src="${order.listing_cover_photo}" class="w-full h-full object-cover" />` : ""}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-on-surface truncate">${order.listing_title || `Order #${order.id}`}</p>
+            <p class="text-sm text-on-surface-variant">&#8358;${Number(order.price).toLocaleString()}</p>
+          </div>
+          <span class="badge shrink-0">${STATUS_LABELS[order.status] || order.status}</span>
+        </a>`
+        )
+        .join("");
+    } catch (err) {
+      list.innerHTML = `<p class="p-4 text-red-500">${err.message}</p>`;
+    }
+  }
+  loadOrders();
+</script>
+{% endblock %}
