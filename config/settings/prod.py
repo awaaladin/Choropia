@@ -3,9 +3,9 @@ from .base import env, env_bool, env_int, env_list
 
 DEBUG = False
 
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "")
-if not ALLOWED_HOSTS:
-    raise RuntimeError("DJANGO_ALLOWED_HOSTS must be set in production")
+# The stable Vercel production domain works without extra configuration. Add
+# any custom domain or preview URL explicitly via DJANGO_ALLOWED_HOSTS.
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "choropia.vercel.app")
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
