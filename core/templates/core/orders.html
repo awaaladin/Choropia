@@ -2,7 +2,17 @@
 {% block title %}Orders — Choropia{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold mb-4 text-on-surface">Your orders</h1>
+<h1 class="text-2xl font-bold mb-4 text-on-surface">Orders</h1>
+
+<div class="flex items-center gap-1 mb-4">
+  <button id="role-buying-btn" class="chip chip-selected">Buying</button>
+  <button id="role-selling-btn" class="chip">Selling</button>
+</div>
+
+<div id="status-tabs" class="flex items-center gap-1 mb-4 overflow-x-auto"></div>
+
+<input id="orders-search" type="text" placeholder="Search by listing or person&hellip;" class="input-field mb-4" />
+
 <div id="orders-list" class="card divide-y divide-outline-variant">
   <p class="p-4 text-outline">Loading&hellip;</p>
 </div>
@@ -22,38 +32,133 @@
     refunded: "Refunded",
   };
 
-  async function loadOrders() {
+  let myUserId = null;
+  let allOrders = [];
+  let role = "buying";
+  let statusFilter = "all";
+
+  function ordersForRole() {
+    return allOrders.filter((o) => (role === "buying" ? o.buyer === myUserId : o.seller === myUserId));
+  }
+
+  function renderStatusTabs() {
+    const scoped = ordersForRole();
+    const tabsEl = document.getElementById("status-tabs");
+    const counts = { all: scoped.length };
+    scoped.forEach((o) => {
+      counts[o.status] = (counts[o.status] || 0) + 1;
+    });
+
+    const tabs = [{ key: "all", label: "All" }, ...Object.keys(STATUS_LABELS).map((k) => ({ key: k, label: STATUS_LABELS[k] }))].filter(
+      (t) => t.key === "all" || counts[t.key]
+    );
+
+    tabsEl.innerHTML = tabs
+      .map(
+        (t) => `
+      <button class="status-tab chip whitespace-nowrap ${statusFilter === t.key ? "chip-selected" : ""}" data-status="${t.key}">
+        ${t.label}${t.key !== "all" ? ` (${counts[t.key]})` : ""}
+      </button>`
+      )
+      .join("");
+
+    tabsEl.querySelectorAll(".status-tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        statusFilter = btn.dataset.status;
+        renderAll();
+      });
+    });
+  }
+
+  function renderList() {
     const list = document.getElementById("orders-list");
-    if (!Choropia.isAuthenticated()) {
-      window.location.href = "{% url 'login' %}";
+    const search = document.getElementById("orders-search").value.trim().toLowerCase();
+
+    let results = ordersForRole();
+    if (statusFilter !== "all") results = results.filter((o) => o.status === statusFilter);
+    if (search) {
+      results = results.filter((o) => {
+        const other = role === "buying" ? o.seller_name : o.buyer_name;
+        return (o.listing_title || "").toLowerCase().includes(search) || (other || "").toLowerCase().includes(search);
+      });
+    }
+
+    if (!results.length) {
+      list.innerHTML = '<p class="p-4 text-outline">No orders here.</p>';
       return;
     }
-    try {
-      const data = await Choropia.listOrders();
-      const results = data.results || data;
-      if (!results.length) {
-        list.innerHTML = '<p class="p-4 text-outline">No orders yet.</p>';
-        return;
-      }
-      list.innerHTML = results
-        .map(
-          (order) => `
-        <a href="/orders/${order.id}/" class="p-4 flex items-center gap-3 hover:bg-surface-container-low transition-colors">
-          <div class="w-12 h-12 rounded bg-surface-container overflow-hidden shrink-0">
-            ${order.listing_cover_photo ? `<img src="${order.listing_cover_photo}" class="w-full h-full object-cover" />` : ""}
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="font-medium text-on-surface truncate">${order.listing_title || `Order #${order.id}`}</p>
-            <p class="text-sm text-on-surface-variant">&#8358;${Number(order.price).toLocaleString()}</p>
-          </div>
+
+    list.innerHTML = results
+      .map((order) => {
+        const other = role === "buying" ? order.seller_name : order.buyer_name;
+        const canDispatch = role === "selling" && order.status === "paid_escrow";
+        return `
+        <div class="p-4 flex items-center gap-3">
+          <a href="/orders/${order.id}/" class="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+            <div class="w-12 h-12 rounded bg-surface-container overflow-hidden shrink-0">
+              ${order.listing_cover_photo ? `<img src="${order.listing_cover_photo}" class="w-full h-full object-cover" />` : ""}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-on-surface truncate">${order.listing_title || `Order #${order.id}`}</p>
+              <p class="text-sm text-on-surface-variant">${role === "buying" ? "Seller" : "Buyer"}: ${other || "—"} &middot; &#8358;${Number(order.price).toLocaleString()}</p>
+            </div>
+          </a>
           <span class="badge shrink-0">${STATUS_LABELS[order.status] || order.status}</span>
-        </a>`
-        )
-        .join("");
+          ${canDispatch ? `<button class="dispatch-btn btn-primary !py-1.5 !px-3 shrink-0 flex items-center gap-1" data-order-id="${order.id}"><span class="material-symbols-outlined !text-[16px]">local_shipping</span>Assign courier</button>` : ""}
+        </div>`;
+      })
+      .join("");
+
+    list.querySelectorAll(".dispatch-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        try {
+          await Choropia.assignCourier(Number(btn.dataset.orderId));
+          await loadOrders();
+        } catch (err) {
+          window.alert(err.message);
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  function renderAll() {
+    renderStatusTabs();
+    renderList();
+  }
+
+  async function loadOrders() {
+    try {
+      const [me, data] = await Promise.all([Choropia.me(), Choropia.listOrders()]);
+      myUserId = me.id;
+      allOrders = data.results || data;
+      renderAll();
     } catch (err) {
-      list.innerHTML = `<p class="p-4 text-red-500">${err.message}</p>`;
+      document.getElementById("orders-list").innerHTML = `<p class="p-4 text-red-500">${err.message}</p>`;
     }
   }
-  loadOrders();
+
+  document.getElementById("role-buying-btn").addEventListener("click", (e) => {
+    role = "buying";
+    statusFilter = "all";
+    document.getElementById("role-buying-btn").classList.add("chip-selected");
+    document.getElementById("role-selling-btn").classList.remove("chip-selected");
+    renderAll();
+  });
+  document.getElementById("role-selling-btn").addEventListener("click", (e) => {
+    role = "selling";
+    statusFilter = "all";
+    document.getElementById("role-selling-btn").classList.add("chip-selected");
+    document.getElementById("role-buying-btn").classList.remove("chip-selected");
+    renderAll();
+  });
+  document.getElementById("orders-search").addEventListener("input", renderList);
+
+  if (!Choropia.isAuthenticated()) {
+    window.location.href = "{% url 'login' %}";
+  } else {
+    loadOrders();
+  }
 </script>
 {% endblock %}

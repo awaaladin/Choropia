@@ -16,6 +16,8 @@ class OrderSerializer(serializers.ModelSerializer):
     history = OrderStatusHistorySerializer(many=True, read_only=True)
     listing_title = serializers.CharField(source="listing.title", read_only=True)
     listing_cover_photo = serializers.SerializerMethodField()
+    buyer_name = serializers.SerializerMethodField()
+    seller_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -25,7 +27,9 @@ class OrderSerializer(serializers.ModelSerializer):
             "listing_title",
             "listing_cover_photo",
             "buyer",
+            "buyer_name",
             "seller",
+            "seller_name",
             "price",
             "status",
             "delivered_at",
@@ -53,6 +57,12 @@ class OrderSerializer(serializers.ModelSerializer):
             return None
         request = self.context.get("request")
         return request.build_absolute_uri(photo.image.url) if request else photo.image.url
+
+    def get_buyer_name(self, obj):
+        return obj.buyer.get_full_name() or obj.buyer.email
+
+    def get_seller_name(self, obj):
+        return obj.seller.get_full_name() or obj.seller.email
 
 
 class OrderCreateSerializer(serializers.Serializer):
