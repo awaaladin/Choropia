@@ -3,9 +3,9 @@ from .base import env, env_bool, env_int, env_list
 
 DEBUG = False
 
-# The stable Vercel production domain works without extra configuration. Add
-# any custom domain or preview URL explicitly via DJANGO_ALLOWED_HOSTS.
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "choropia.vercel.app")
+# Always allow the stable production domain. Add custom domains or a specific
+# preview URL through DJANGO_ALLOWED_HOSTS without replacing the stable host.
+ALLOWED_HOSTS = ["choropia.vercel.app", *env_list("DJANGO_ALLOWED_HOSTS")]
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
