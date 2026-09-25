@@ -18,7 +18,15 @@
       font-size: 20px;
       line-height: 1;
       vertical-align: middle;
+      /* Until the icon font arrives the browser would render the ligature name ("storefront",
+         "dark_mode") as plain text — pin the box to one glyph and hide it until the font is ready. */
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      overflow: hidden;
+      white-space: nowrap;
     }
+    html:not(.icons-ready) .material-symbols-outlined { visibility: hidden; }
 
     /* Design tokens as RGB-channel CSS variables (see tailwind.config.js) — ported from the
        Stitch "Midnight Ledger" design system's Light and Dark Mode sections. Toggling `.dark`
@@ -74,6 +82,15 @@
         const stored = localStorage.getItem("choropia_theme");
         if (stored === "dark") document.documentElement.classList.add("dark");
       } catch (e) {}
+    })();
+
+    (function () {
+      var ready = function () { document.documentElement.classList.add("icons-ready"); };
+      if (document.fonts && document.fonts.load) {
+        document.fonts.load('20px "Material Symbols Outlined"', "home").then(ready, function () {});
+      } else {
+        ready();
+      }
     })();
   </script>
 </head>
