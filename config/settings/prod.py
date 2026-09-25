@@ -26,6 +26,14 @@ CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "")
 # (login, register, password reset) would 500. Only use Redis when it is actually configured.
 if not env("REDIS_URL"):
     CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+    # Same reason for the Channels layer: chat/notification pushes go through it. In-memory means
+    # nothing reaches WebSocket clients held by another process — set REDIS_URL (shared with the
+    # Docker realtime host) for cross-process delivery.
+    CHANNEL_LAYERS = {"default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}}
+
+# TLS is terminated by the host's proxy (Vercel, Caddy in docker-compose.prod.yml); without this
+# SECURE_SSL_REDIRECT sees every proxied request as plain http and redirects forever.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")

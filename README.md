@@ -44,27 +44,32 @@ login.
 - Gaxtron for payment collection (crypto/ETH, Sepolia testnet), with an escrow-style
   hold-then-release pattern
 
-## Local setup (Docker)
+## Realtime host (Docker)
+
+`docker-compose.yml` runs the parts Vercel can't: `web` (daphne/ASGI, holding the chat and
+notification WebSockets), `worker` (Celery) and `beat` (escrow auto-release, gaxtron payment
+polling). It uses the Supabase Postgres and the shared Upstash Redis from `.env`
+(`DATABASE_URL` / `REDIS_URL`) — the same ones the Vercel site uses, which is what lets a
+message sent through a Vercel request reach a WebSocket held here. There are no local db/redis
+containers, so `.env` must hold real values (`.env.example` lists them).
 
 ```bash
-cp .env.example .env        # fill in real values, especially DJANGO_SECRET_KEY
-docker-compose up --build
+docker compose up --build -d                 # http://localhost:8000
+docker compose run --rm web python manage.py migrate   # after model changes
 ```
 
-This starts `web` (the API, served over ASGI so WebSockets work), `worker` (Celery), `beat`
-(Celery Beat, runs the hourly escrow auto-release task), `db` (Postgres), and `redis`.
-
-Then, in another terminal:
+To serve the WebSockets to the Vercel site you need a public host with a domain, since browsers
+block `ws://` from an https page. On that host:
 
 ```bash
-docker-compose exec web python manage.py migrate
-docker-compose exec web python manage.py createsuperuser
-docker-compose exec web python manage.py seed_demo
+SITE_ADDRESS=realtime.example.com docker compose --profile tls up --build -d   # adds Caddy (auto-TLS)
 ```
 
-The API is now at `http://localhost:8000/api/v1/`, interactive docs at
-`http://localhost:8000/api/docs/`, and the raw OpenAPI schema at
-`http://localhost:8000/api/schema/`.
+Then in Vercel set `CHOROPIA_WS_BASE_URL=wss://realtime.example.com` and `REDIS_URL` (same value
+as this host), and add the domain to `DJANGO_ALLOWED_HOSTS` here.
+
+The API is at `/api/v1/`, interactive docs at `/api/docs/`, the OpenAPI schema at
+`/api/schema/`.
 
 ## Local setup (without Docker)
 

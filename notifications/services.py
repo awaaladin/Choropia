@@ -1,8 +1,12 @@
+import logging
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.contenttypes.models import ContentType
 
 from .models import Notification
+
+logger = logging.getLogger(__name__)
 
 
 def group_name_for(user_id):
@@ -29,17 +33,21 @@ def _push_realtime(notification):
     channel_layer = get_channel_layer()
     if channel_layer is None:
         return
-    async_to_sync(channel_layer.group_send)(
-        group_name_for(notification.recipient_id),
-        {
-            "type": "notification.new",
-            "notification": {
-                "id": notification.id,
-                "notification_type": notification.notification_type,
-                "verb": notification.verb,
-                "actor_id": notification.actor_id,
-                "is_read": notification.is_read,
-                "created_at": notification.created_at.isoformat(),
+    # The notification row is already saved; a Redis outage must not fail the request that caused it.
+    try:
+        async_to_sync(channel_layer.group_send)(
+            group_name_for(notification.recipient_id),
+            {
+                "type": "notification.new",
+                "notification": {
+                    "id": notification.id,
+                    "notification_type": notification.notification_type,
+                    "verb": notification.verb,
+                    "actor_id": notification.actor_id,
+                    "is_read": notification.is_read,
+                    "created_at": notification.created_at.isoformat(),
+                },
             },
-        },
-    )
+        )
+    except Exception:
+        logger.warning("Realtime push failed for notification %s", notification.id, exc_info=True)

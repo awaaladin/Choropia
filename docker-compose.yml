@@ -1,63 +1,60 @@
+# Realtime host: the long-running processes Vercel can't run — the ASGI server that holds the
+# chat/notification WebSockets, plus the Celery worker and beat (escrow auto-release, gaxtron
+# payment polling).
+#
+# It shares the Supabase Postgres and the gaxtron Upstash Redis from .env with the Vercel site
+# (DATABASE_URL / REDIS_URL), which is what lets a message sent through a Vercel request reach a
+# WebSocket held here. So there are deliberately no local db/redis containers.
+#
+#   docker compose up --build -d                 # http://localhost:8000
+#   docker compose --profile tls up --build -d   # + Caddy on 80/443 (set SITE_ADDRESS)
+#   docker compose run --rm web python manage.py migrate    # after model changes
+#
+# Then set CHOROPIA_WS_BASE_URL=wss://<SITE_ADDRESS> in Vercel so the site's chat connects here,
+# and add <SITE_ADDRESS> to DJANGO_ALLOWED_HOSTS.
+
+x-app: &app
+  build: .
+  env_file: .env
+  environment:
+    DJANGO_SETTINGS_MODULE: config.settings.prod
+    # Plain http on localhost would otherwise be redirected to https and never load.
+    DJANGO_SECURE_SSL_REDIRECT: ${DJANGO_SECURE_SSL_REDIRECT:-false}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  restart: unless-stopped
+
 services:
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: choropia
-      POSTGRES_PASSWORD: choropia
-      POSTGRES_DB: choropia
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-
   web:
-    build: .
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - .:/app
+    <<: *app
     ports:
       - "8000:8000"
-    env_file: .env
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.dev
-      DATABASE_URL: postgres://choropia:choropia@db:5432/choropia
-      REDIS_URL: redis://redis:6379/0
-    depends_on:
-      - db
-      - redis
 
   worker:
-    build: .
+    <<: *app
     command: celery -A config worker -l info
-    volumes:
-      - .:/app
-    env_file: .env
-    environment:
-      DJANGO_SETTINGS_MODULE: config.settings.dev
-      DATABASE_URL: postgres://choropia:choropia@db:5432/choropia
-      REDIS_URL: redis://redis:6379/0
-    depends_on:
-      - db
-      - redis
 
   beat:
-    build: .
+    <<: *app
     command: celery -A config beat -l info
-    volumes:
-      - .:/app
-    env_file: .env
+
+  # HTTPS/WSS in front of web. Browsers block ws:// from an https page, so the Vercel site can only
+  # reach the WebSockets over wss://. Caddy gets the certificate itself; SITE_ADDRESS must be a
+  # domain pointing at this machine.
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["tls"]
+    ports:
+      - "80:80"
+      - "443:443"
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.dev
-      DATABASE_URL: postgres://choropia:choropia@db:5432/choropia
-      REDIS_URL: redis://redis:6379/0
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
     depends_on:
-      - db
-      - redis
+      - web
+    restart: unless-stopped
 
 volumes:
-  postgres_data:
+  caddy_data:

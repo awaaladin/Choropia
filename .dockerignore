@@ -1,0 +1,11 @@
+.env
+.git
+.claude
+venv
+node_modules
+android
+db.sqlite3
+mediafiles
+staticfiles
+__pycache__
+*.pyc
