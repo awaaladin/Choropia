@@ -21,6 +21,12 @@ SECURE_BROWSER_XSS_FILTER = True
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "")
 
+# Rate limiting (DRF throttles) lives in the cache. base.py defaults REDIS_URL to
+# redis://localhost, which doesn't exist on serverless hosts, so every throttled endpoint
+# (login, register, password reset) would 500. Only use Redis when it is actually configured.
+if not env("REDIS_URL"):
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env_int("EMAIL_PORT", 587)
