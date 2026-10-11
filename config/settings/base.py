@@ -106,7 +106,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "core.context_processors.choropia_settings",
             ],
         },
     },
@@ -140,10 +139,18 @@ USE_TZ = True
 # --- Static / media -------------------------------------------------------
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-# Serves static files straight from each app's static/ dir (no collectstatic build step
-# required) — needed because Vercel's Python builder only runs `pip install`, not `npm run
-# build` + `collectstatic` the way the Dockerfile does.
+# Serves static files (Django admin's CSS/JS, drf-spectacular's Swagger UI) straight from each
+# app's static/ dir, with no collectstatic build step required — needed because Vercel's Python
+# builder only runs `pip install`, not `npm run build` + `collectstatic` the way Docker does.
 WHITENOISE_USE_FINDERS = True
+# Serves the built React app (frontend/dist/*) at the URL root — e.g. /assets/index-xxx.js,
+# /favicon-32.png — exactly matching how Vite's build references them. Paths that don't match a
+# real file here (actual app routes like /marketplace) fall through to core.views.SPAView,
+# which returns index.html so React Router can take over client-side. Requires `npm run build`
+# to have been run in frontend/ — see core/views.py.
+_frontend_dist = BASE_DIR / "frontend" / "dist"
+if _frontend_dist.is_dir():
+    WHITENOISE_ROOT = _frontend_dist
 
 USE_S3 = env_bool("USE_S3", False)
 

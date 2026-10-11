@@ -15,13 +15,14 @@ COPY requirements/ requirements/
 RUN pip install --upgrade pip \
     && pip install -r requirements/prod.txt
 
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY frontend/package.json frontend/package-lock.json frontend/
+RUN npm --prefix frontend ci
 
 COPY . .
 
-# Build the web frontend's CSS before collectstatic so the compiled output gets picked up.
-RUN npm run build
+# Build the React app before collectstatic so WhiteNoise picks up frontend/dist (see
+# config/settings/base.py's WHITENOISE_ROOT and core/views.py's SPAView).
+RUN npm --prefix frontend run build
 RUN python manage.py collectstatic --noinput --settings=config.settings.prod || true
 
 EXPOSE 8000

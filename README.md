@@ -4,26 +4,27 @@ Social buy-and-sell marketplace for Choropia (Uyo pilot). Users post listings, f
 and merchant storefronts, chat about listings, and complete purchases through an in-platform
 escrow payment + courier delivery flow.
 
-This repo is a monorepo with two parts:
+This repo is a monorepo with three parts:
 
-- **This directory (root)** — the backend *and* the web frontend, as one Django project served
-  from one process/port. `core/` is the web-frontend app (templates + static JS); every other
-  app (`accounts`, `listings`, `orders`, ...) is the token-authenticated (JWT) REST API, plus
-  WebSocket endpoints (Django Channels) for chat and live notifications. See below for setup.
+- **This directory (root)** — the Django backend: token-authenticated (JWT) REST API apps
+  (`accounts`, `listings`, `orders`, ...) plus WebSocket endpoints (Django Channels) for chat
+  and live notifications.
+- **`frontend/`** — the web app: a React + TypeScript SPA (Vite, Tailwind v4, React Router,
+  TanStack Query), built from the "fluid-ui-polish" redesign. See `frontend/` below.
 - **`android/`** — the Kotlin/Jetpack Compose Android app, built against the same API. See
   `android/README.md`.
 
-The web frontend (`core/`) is still a pure API client, even though it now lives in the same
-process as the API: its pages hold no database access of their own and every piece of data on
-them comes from the page's own JavaScript (`core/static/core/js/api.js`) calling
-`/api/v1/...` with a JWT bearer token — the exact same contract the Android app uses. That's a
-deliberate discipline, not automatic just because it's one project: nothing stops a future view
-from reaching for `request.user`/the ORM directly instead, so if you're adding a page, keep
-going through the API rather than querying models directly from a `core` view.
+The web frontend is a pure API client: it holds no database access of its own, and every piece
+of data comes from `frontend/src/lib/api.ts` calling `/api/v1/...` with a JWT bearer token — the
+exact same contract the Android app uses.
 
-Since everything is one process now, `/api/v1/` and the web pages share one origin — no CORS
-needed between them, and `CHOROPIA_API_BASE_URL` defaults to the relative `/api/v1` (see
-`config/settings/base.py`).
+In production (and in the Docker realtime host) Django serves the frontend's built output
+directly — `core/views.py`'s `SPAView` returns `frontend/dist/index.html` for any route that
+isn't `/api/`, `/admin/`, or a real static file (which WhiteNoise serves straight from
+`frontend/dist/`, see `WHITENOISE_ROOT` in `config/settings/base.py`) — so the API and the web
+app are one deployment, one origin, no CORS needed. In local dev they run as two processes
+instead (Vite's dev server for instant HMR, proxying `/api` and `/ws` to Django) — see
+`frontend/`'s setup below.
 
 Currently implemented: feed, marketplace browse/filter, listing detail,
 create listing, buy-now → escrow checkout, order status/escrow timeline (pay, assign courier,
@@ -35,6 +36,7 @@ login.
 ## Stack
 
 - Python 3.12, Django 5, Django REST Framework
+- React 19, TypeScript, Vite, Tailwind v4, React Router, TanStack Query (`frontend/`)
 - PostgreSQL, Redis (cache + Celery broker + Channels layer)
 - Celery + Celery Beat for background/scheduled work (escrow auto-release)
 - Django Channels for chat and notification WebSockets
@@ -43,6 +45,29 @@ login.
 - drf-spectacular for OpenAPI schema + Swagger UI
 - Gaxtron for payment collection (crypto/ETH, Sepolia testnet), with an escrow-style
   hold-then-release pattern
+
+## Web frontend (`frontend/`)
+
+```bash
+cd frontend
+npm install
+npm run dev          # http://localhost:5173 — proxies /api and /ws to Django on :8000
+```
+
+`npm run build` produces `frontend/dist/`, which **must be committed** — Vercel's Python
+builder only runs `pip install`, not `npm run build`, so the compiled app has to already be in
+the repo for the deployed site to have anything to serve. Rebuild and commit it whenever
+`frontend/src/` changes you want live. `npm run typecheck` runs `tsc --noEmit` on its own,
+faster than a full build, for catching type errors while iterating.
+
+Design tokens, fonts (Manrope/Sora) and motion (`frontend/src/styles.css`) are ported from the
+"fluid-ui-polish" redesign. `frontend/src/lib/prefs.tsx` holds the user's theme/layout/density/
+motion preferences (persisted to `localStorage`, synced to `profile.theme_preference` for
+logged-in users) — the Settings drawer in the header edits them. `frontend/src/components/
+BrandLoader.tsx` is the real-logo loading screen: a "full" variant (pulsing mark + reflection +
+the wordmark sliding in from the side and back out) on app boot and during login/signup, and a
+"simple" variant (the mark alone) on ordinary in-app navigation — see `AppBoot.tsx` and
+`AppShell.tsx`'s `useRouteTransition`.
 
 ## Realtime host (Docker)
 
@@ -86,14 +111,11 @@ python manage.py migrate
 python manage.py createsuperuser
 python manage.py seed_demo      # demo categories, users, a merchant, and listings
 
-npm install                     # Tailwind CLI, for building core/static/core/dist/output.css
-npm run build                   # one-off build; `npm run dev` instead to watch & rebuild on save
-
-python manage.py runserver
+python manage.py runserver      # :8000 — just the API now; see frontend/ for the web app
 ```
 
-Then visit `http://localhost:8000/` for the web app, `http://localhost:8000/api/docs/` for the
-API docs — both from the same server.
+Then, in another terminal, start the frontend (see "Web frontend" above) — visit
+`http://localhost:5173/` for the web app, `http://localhost:8000/api/docs/` for the API docs.
 
 Note: without Redis running, Channels/Celery-backed features (chat delivery, live
 notifications, escrow auto-release) won't work — the REST endpoints for those apps still work,
@@ -137,7 +159,7 @@ Each business area is its own Django app rather than one big app:
 | `notifications` | In-app notifications, delivered live over WebSocket |
 | `moderation` | Reporting listings/users, merchant application review |
 | `common` | Shared base models, pagination, permissions, the JWT WebSocket auth middleware |
-| `core` | The web frontend — Django templates + Tailwind, calling the API via `fetch()` |
+| `core` | `SPAView` — serves `frontend/dist/index.html` for every non-API route |
 
 Settings are split into `config/settings/{base,dev,prod,test}.py` — all secrets come from
 environment variables (`.env` locally, real env vars in production), never hardcoded.
@@ -177,9 +199,8 @@ forex feed wired in, so treat that rate as an approximation to update by hand.
   there. It's the web frontend + non-realtime API only; the Docker stack is what should be
   running the WebSocket/Celery pieces in production regardless of where else this is deployed.
   Vercel needs its own root-level `requirements.txt` (flattened, no `-r` includes — its
-  parser doesn't support them) kept in sync by hand with `requirements/base.txt`, and static
-  files are served by whitenoise directly from each app's `static/` dir
-  (`WHITENOISE_USE_FINDERS`) since there's no `npm run build` + `collectstatic` step in a
-  serverless build. That does mean `core/static/core/dist/output.css` has to be committed
-  (it's no longer gitignored) — rebuild and commit it (`npm run build`) whenever
-  `core/static/core/src/input.css` or `tailwind.config.js` change.
+  parser doesn't support them) kept in sync by hand with `requirements/base.txt`. Since
+  there's no `npm run build` step in a serverless build either, `frontend/dist/` has to already
+  be committed (see "Web frontend" above) — WhiteNoise serves it directly
+  (`WHITENOISE_ROOT`), and Django admin's own static files are served the same way
+  (`WHITENOISE_USE_FINDERS`), with no `collectstatic` step needed for either.

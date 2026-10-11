@@ -1,0 +1,344 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design tokens from the Choropia redesign (fluid-ui-polish). Colours are oklch; the @theme
+ * block maps them to Tailwind utilities (bg-primary, text-muted-foreground, ...).
+ */
+@theme inline {
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-display: "Sora", "Manrope", sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-popover: var(--popover);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-panel: var(--panel);
+  --color-success: var(--success);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-accent: var(--hero-accent);
+  --shadow-button: var(--button-shadow);
+  --animate-slide-in-right: slide-in-right 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  --animate-fade-in: fade-in 200ms ease-out both;
+  --animate-pop-in: pop-in 220ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.955 0.012 250);
+  --foreground: oklch(0.205 0.035 257);
+  --card: oklch(0.995 0.004 250 / 0.72);
+  --popover: oklch(1 0 0);
+  --primary: oklch(0.455 0.12 254);
+  --primary-hover: oklch(0.365 0.105 254);
+  --primary-foreground: oklch(0.985 0.004 250);
+  --secondary: oklch(0.968 0.007 247.896);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.48 0.045 255);
+  --accent: oklch(0.968 0.007 247.896);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.33 0.055 255 / 0.13);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.704 0.04 256.788);
+  --panel: oklch(0.995 0.004 250 / 0.68);
+  --success: oklch(0.59 0.13 171);
+  --button-shadow: 0 3px 10px oklch(0.25 0.06 255 / 0.14);
+  --hero-foreground: oklch(0.99 0.004 250);
+  --hero-accent: oklch(0.8 0.11 171);
+  --hero-shade: linear-gradient(90deg, oklch(0.13 0.015 250 / 0.85), oklch(0.13 0.015 250 / 0.3) 55%, transparent);
+  color-scheme: light;
+}
+
+.dark {
+  --background: oklch(0.145 0.032 255);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --popover: oklch(0.208 0.042 265.755);
+  --primary: oklch(0.68 0.11 250);
+  --primary-hover: oklch(0.74 0.095 250);
+  --primary-foreground: oklch(0.16 0.035 255);
+  --secondary: oklch(0.279 0.041 260.031);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --panel: oklch(0.22 0.04 255 / 0.78);
+  --success: oklch(0.72 0.12 171);
+  --button-shadow: 0 4px 14px oklch(0.05 0.02 255 / 0.32);
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+  button:not(:disabled),
+  [role="button"] {
+    cursor: pointer;
+  }
+}
+
+/* Glass surface used by every card/panel in the app. */
+@utility panel {
+  background-color: var(--panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 2px oklch(0.25 0.06 255 / 0.06);
+  backdrop-filter: blur(24px);
+}
+
+@keyframes editorial-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@utility editorial-enter {
+  animation: editorial-enter 500ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+@utility page-enter {
+  animation: editorial-enter 550ms cubic-bezier(0.22, 0.68, 0, 1) both;
+}
+
+/* Public marketing pages (landing, about, how-it-works, contact, privacy). */
+.public-hero {
+  height: min(760px, calc(100svh - 120px));
+  min-height: 610px;
+}
+.hero-shade {
+  background: var(--hero-shade);
+}
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+[data-reveal] {
+  opacity: 1;
+  transition:
+    opacity 650ms ease,
+    transform 650ms cubic-bezier(0.22, 0.68, 0, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="reduced"]) [data-reveal]:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+@media (max-width: 640px) {
+  .public-hero {
+    height: min(730px, calc(100svh - 110px));
+    min-height: 590px;
+  }
+  .hero-shade {
+    background: linear-gradient(90deg, oklch(0.13 0.015 250 / 0.82), oklch(0.13 0.015 250 / 0.3));
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@utility heart-pop {
+  animation: heart-pop 320ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Skeleton loading blocks: a soft sweep instead of "Loading…" text. */
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-accent);
+  border-radius: var(--radius-md);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.35), transparent);
+    animation: shimmer 1.4s infinite;
+  }
+}
+
+/* Page-to-page transition (React Router's viewTransition → the browser View Transitions API). */
+::view-transition-old(root) {
+  animation: 160ms ease-in both fade-out;
+}
+::view-transition-new(root) {
+  animation: 320ms cubic-bezier(0.32, 0.72, 0, 1) both editorial-enter;
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/*
+ * Brand loading screens — real logo, not text.
+ * - "full": app boot (hard refresh) and login/signup (anything that must round-trip the
+ *   backend before the next screen makes sense) — the mark pulses with a soft reflection
+ *   beneath it, and the "Choropia" wordmark slides out from the left, holds, and retreats
+ *   back the way it came, on a loop.
+ * - "simple": ordinary in-app navigation — just the mark pulsing, alone.
+ */
+@keyframes brand-pulse {
+  0%,
+  100% {
+    transform: scale(0.92);
+  }
+  50% {
+    transform: scale(1.07);
+  }
+}
+.brand-mark {
+  animation: brand-pulse 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes brand-pulse-reflect {
+  0%,
+  100% {
+    transform: scaleY(-1) scale(0.92);
+    opacity: 0.16;
+  }
+  50% {
+    transform: scaleY(-1) scale(1.07);
+    opacity: 0.26;
+  }
+}
+.brand-mark-reflection {
+  margin-top: -2px;
+  -webkit-mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.55), transparent 75%);
+  mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.55), transparent 75%);
+  animation: brand-pulse-reflect 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes brand-wordmark-peek {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  22%,
+  78% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+.brand-wordmark {
+  animation: brand-wordmark-peek 2.6s cubic-bezier(0.32, 0.72, 0, 1) infinite;
+}
+.brand-loading-full,
+.brand-loading-simple {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background-color: var(--color-background);
+  animation: fade-in 200ms ease-out both;
+}
+.brand-loading-simple {
+  background-color: oklch(from var(--color-background) l c h / 0.75);
+  backdrop-filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+[data-motion="reduced"] *,
+[data-motion="reduced"] *::before,
+[data-motion="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  transition-duration: 0.01ms !important;
+}
+[data-motion="reduced"]::view-transition-old(root),
+[data-motion="reduced"]::view-transition-new(root) {
+  animation: none;
+}

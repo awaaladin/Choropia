@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Choropia — Uyo's trusted marketplace</title>
+    <meta
+      name="description"
+      content="Discover local goods and verified sellers with escrow-protected payments across Uyo."
+    />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // Applied before first paint so a dark-mode or reduced-motion user never sees a flash.
+      (function () {
+        try {
+          var p = JSON.parse(localStorage.getItem("choropia-preferences") || "{}");
+          var root = document.documentElement;
+          if (p.theme === "dark") root.classList.add("dark");
+          if (p.motion === "reduced") root.dataset.motion = "reduced";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
