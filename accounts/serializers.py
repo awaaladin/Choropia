@@ -17,6 +17,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(read_only=True)
+    two_factor_enabled = serializers.SerializerMethodField()
+
+    def get_two_factor_enabled(self, obj):
+        device = getattr(obj, "totp_device", None)
+        return bool(device and device.confirmed)
 
     class Meta:
         model = User
@@ -28,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "date_joined",
             "profile",
+            "two_factor_enabled",
         )
         read_only_fields = ("id", "email", "date_joined")
 
@@ -120,9 +126,8 @@ class EmailOrPhoneTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.is_active:
             raise serializers.ValidationError("This account is inactive.")
 
-        refresh = RefreshToken.for_user(user)
-        return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": UserSerializer(user).data,
-        }
+        # Imported here: two_factor imports this module's UserSerializer.
+        from .two_factor import login_response
+
+        # Tokens normally; a {"two_factor_required": true, "challenge": ...} step when 2FA is on.
+        return login_response(user)

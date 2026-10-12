@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, ArrowUpRight, MapPin, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, ArrowUpRight, MapPin, MessageCircle, ShieldCheck, Smartphone } from "lucide-react";
 import community from "@/assets/choropia-community.jpg";
 import exchange from "@/assets/choropia-exchange.jpg";
 import { Link } from "@/components/AppLink";
 import { LinkButton } from "@/components/Button";
+import { DownloadHelp } from "@/components/DownloadHelp";
 import { PublicShell } from "@/components/PublicShell";
 import { Skeleton } from "@/components/ui";
 import { api, rows } from "@/lib/api";
@@ -169,6 +170,28 @@ export function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border bg-panel">
+        <div data-reveal className="mx-auto max-w-[1400px] px-5 py-12 lg:px-8">
+          <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+            <div className="flex items-start gap-4">
+              <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-accent text-primary">
+                <Smartphone size={20} />
+              </span>
+              <div>
+                <h2 className="text-lg font-semibold">Get the Choropia Android app</h2>
+                <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
+                  Requires Android 8.0+. Not on the Play Store yet — your phone will ask you to allow "Install unknown apps" the first time.
+                </p>
+              </div>
+            </div>
+            <a href="/downloads/choropia.apk" download className="inline-flex h-11 shrink-0 items-center gap-2 rounded-md border border-border bg-panel px-5 text-sm font-semibold transition-colors hover:bg-accent">
+              <Smartphone size={15} /> Download APK
+            </a>
+          </div>
+          <DownloadHelp className="mt-6 sm:ml-[3.75rem]" />
         </div>
       </section>
 

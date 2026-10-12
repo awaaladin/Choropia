@@ -142,3 +142,59 @@ export interface Review {
   rating: number;
   comment: string;
 }
+
+export interface Reel {
+  id: number;
+  owner: number;
+  merchant: number | null;
+  listing: number | null;
+  listing_title: string | null;
+  listing_price: string | null;
+  video: string;
+  caption: string;
+  views_count: number;
+  creator_id: number;
+  creator_name: string;
+  creator_avatar: string | null;
+  likes_count: number;
+  comments_count: number;
+  is_liked: boolean;
+  created_at: string;
+}
+
+export interface ReelComment {
+  id: number;
+  reel: number;
+  author_id: number;
+  author_name: string;
+  body: string;
+  created_at: string;
+}
+
+export interface ReelLike {
+  id: number;
+  reel: number;
+}
+
+export interface WalletSummary {
+  currency: string;
+  selling: { released_total: string; held_total: string };
+  buying: { held_total: string; spent_total: string };
+}
+
+export interface WalletTransaction {
+  id: number;
+  order: number;
+  listing_title: string | null;
+  role: "buying" | "selling";
+  other_party_name: string;
+  amount: string;
+  crypto_amount: string | null;
+  crypto_currency: string;
+  status: string;
+  tx_hash: string;
+  paid_at: string | null;
+  released_at: string | null;
+  refunded_at: string | null;
+  created_at: string;
+}

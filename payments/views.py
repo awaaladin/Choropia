@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 from django.conf import settings
+from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import permissions
+from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,6 +13,8 @@ from rest_framework.views import APIView
 from orders.models import Order
 
 from .gaxtron import GaxtronClient
+from .models import Payment
+from .serializers import WalletTransactionSerializer
 from .services import confirm_payment, initialize_payment
 
 
@@ -64,3 +69,47 @@ class GaxtronWebhookView(APIView):
             confirm_payment(payload["payment_id"], tx_hash=payload.get("tx_hash"), raw_payload=payload)
 
         return JsonResponse({"received": True})
+
+
+class WalletSummaryView(APIView):
+    """Real numbers only — no "available balance" fiction. Gaxtron has no payout endpoint, so
+    "released" here means Choropia has approved the seller to be paid, not that crypto has
+    actually left gaxtron's custody (see release_escrow() in services.py)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        def total(**filters):
+            return Payment.objects.filter(**filters).aggregate(total=Sum("amount"))["total"] or Decimal("0")
+
+        return Response(
+            {
+                "currency": "NGN",
+                "selling": {
+                    "released_total": str(total(order__seller=user, status=Payment.Status.RELEASED)),
+                    "held_total": str(total(order__seller=user, status=Payment.Status.PAID_HELD)),
+                },
+                "buying": {
+                    "held_total": str(total(order__buyer=user, status=Payment.Status.PAID_HELD)),
+                    "spent_total": str(
+                        total(order__buyer=user, status__in=[Payment.Status.RELEASED, Payment.Status.PAID_HELD])
+                    ),
+                },
+            }
+        )
+
+
+class WalletTransactionsView(generics.ListAPIView):
+    serializer_class = WalletTransactionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return (
+            Payment.objects.filter(Q(order__buyer=user) | Q(order__seller=user))
+            .exclude(status=Payment.Status.INITIALIZED)
+            .select_related("order", "order__listing", "order__buyer", "order__seller")
+            .order_by("-created_at")
+        )

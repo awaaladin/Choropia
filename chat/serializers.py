@@ -1,6 +1,18 @@
+from pathlib import PurePath
+
 from rest_framework import serializers
 
 from .models import Conversation, Message
+
+# Files go through the API as multipart. Vercel rejects request bodies over ~4.5 MB, so keep a
+# comfortable margin under that.
+MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024
+MAX_VOICE_SECONDS = 600
+ATTACHMENT_EXTENSIONS = {
+    Message.AttachmentType.IMAGE: {"jpg", "jpeg", "png", "webp", "gif"},
+    Message.AttachmentType.AUDIO: {"m4a", "aac", "mp3", "ogg", "oga", "wav", "webm", "3gp", "amr"},
+    Message.AttachmentType.FILE: {"pdf"},
+}
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -9,8 +21,46 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = ("id", "conversation", "sender", "sender_id", "body", "read_at", "created_at")
-        read_only_fields = ("id", "read_at", "created_at")
+        fields = (
+            "id",
+            "conversation",
+            "sender",
+            "sender_id",
+            "body",
+            "attachment",
+            "attachment_type",
+            "duration_seconds",
+            "read_at",
+            "created_at",
+        )
+        read_only_fields = ("id", "attachment_type", "read_at", "created_at")
+
+    def validate_duration_seconds(self, value):
+        if value is not None and value > MAX_VOICE_SECONDS:
+            raise serializers.ValidationError("Voice notes can be at most 10 minutes.")
+        return value
+
+    def validate(self, attrs):
+        attachment = attrs.get("attachment")
+        body = (attrs.get("body") or "").strip()
+        attrs["body"] = body
+
+        if not attachment and not body:
+            raise serializers.ValidationError("Send a message or an attachment.")
+
+        if attachment:
+            extension = PurePath(attachment.name).suffix.lower().lstrip(".")
+            kind = next((k for k, exts in ATTACHMENT_EXTENSIONS.items() if extension in exts), None)
+            if kind is None:
+                raise serializers.ValidationError({"attachment": "That file type isn't supported."})
+            if attachment.size > MAX_ATTACHMENT_BYTES:
+                raise serializers.ValidationError({"attachment": "Attachments can be at most 3 MB."})
+            attrs["attachment_type"] = kind
+            if kind != Message.AttachmentType.AUDIO:
+                attrs.pop("duration_seconds", None)
+        else:
+            attrs.pop("duration_seconds", None)
+        return attrs
 
 
 class ConversationSerializer(serializers.ModelSerializer):
@@ -39,7 +89,7 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def get_last_message(self, obj):
         message = obj.messages.last()
-        return MessageSerializer(message).data if message else None
+        return MessageSerializer(message, context=self.context).data if message else None
 
     def _other_party(self, obj):
         request = self.context.get("request")

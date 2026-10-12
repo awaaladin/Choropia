@@ -70,6 +70,7 @@ LOCAL_APPS = [
     "social",
     "listings",
     "merchants",
+    "reels",
     "chat",
     "orders",
     "payments",
@@ -161,7 +162,12 @@ if USE_S3:
     AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL")
     AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", "eu-west-1")
     AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", None)
-    AWS_DEFAULT_ACL = "public-read"
+    # Supabase Storage and Cloudflare R2 reject per-object ACLs and need path-style URLs: for those
+    # set AWS_DEFAULT_ACL=none and make the bucket public instead. Plain AWS keeps "public-read".
+    _acl = env("AWS_DEFAULT_ACL", "public-read")
+    AWS_DEFAULT_ACL = None if _acl.lower() in ("none", "private-bucket") else _acl
+    AWS_S3_ADDRESSING_STYLE = env("AWS_S3_ADDRESSING_STYLE", "auto")
+    AWS_S3_SIGNATURE_VERSION = "s3v4"
     AWS_S3_FILE_OVERWRITE = False
     AWS_QUERYSTRING_AUTH = False
 
@@ -179,6 +185,10 @@ else:
     MEDIA_ROOT = BASE_DIR / "mediafiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Sign in with Google: the OAuth *web* client id the app/web request ID tokens for. Blank = the
+# /auth/google/ endpoint answers 503 and the clients hide the button.
+GOOGLE_OAUTH_CLIENT_ID = env("GOOGLE_OAUTH_CLIENT_ID", "")
 
 # --- DRF ------------------------------------------------------------------
 REST_FRAMEWORK = {

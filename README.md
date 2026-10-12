@@ -151,6 +151,7 @@ Each business area is its own Django app rather than one big app:
 | `social` | Follows (User or Merchant), likes/comments on listings, the feed |
 | `listings` | Categories, Listings, photos, search/filter |
 | `merchants` | Merchant applications and approved storefronts |
+| `reels` | Short vertical videos, optionally tied to a Listing ("shoppable"); likes/comments |
 | `chat` | Per-listing buyer/seller conversations, over REST and WebSocket |
 | `orders` | The Order state machine — the core of the escrow flow |
 | `payments` | Gaxtron integration, escrow hold/release/refund, the auto-release + payment-polling Celery tasks |

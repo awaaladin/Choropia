@@ -34,7 +34,12 @@ class ListingViewSet(viewsets.ModelViewSet):
             "owner", "owner__profile", "merchant", "category"
         ).prefetch_related("photos")
         if self.action == "list":
-            qs = qs.filter(status=Listing.Status.ACTIVE)
+            wants_mine = self.request.query_params.get("mine", "").lower() in ("1", "true", "yes")
+            if wants_mine and self.request.user.is_authenticated:
+                # Owners see their own sold listings too (just not ones they removed).
+                qs = qs.exclude(status=Listing.Status.REMOVED)
+            else:
+                qs = qs.filter(status=Listing.Status.ACTIVE)
         return qs
 
     def get_serializer_class(self):

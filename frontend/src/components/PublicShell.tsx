@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Link, NavLink } from "./AppLink";
 import { Button, LinkButton } from "./Button";
+import { DownloadAppLink } from "./DownloadAppLink";
 import { SettingsDrawer } from "./SettingsDrawer";
 
 const PUBLIC_LINKS = [
@@ -39,6 +40,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
+            <DownloadAppLink compact className="hidden lg:inline-flex" />
             <Button variant="icon" aria-label="Display settings" title="Display settings" onClick={() => setSettingsOpen(true)} className="size-9 p-0">
               <Settings size={16} />
             </Button>
@@ -78,6 +80,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
             <Link to="/marketplace" onClick={() => setMobileOpen(false)} className="py-2 text-sm text-primary">
               Marketplace
             </Link>
+            <DownloadAppLink className="py-2" />
             {loggedIn ? (
               <Link to="/feed" onClick={() => setMobileOpen(false)} className="py-2 text-sm font-semibold text-primary">
                 Go to your feed
@@ -120,6 +123,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
             <Link to="/merchants/apply" className="text-muted-foreground transition-colors hover:text-primary">
               Become a merchant
             </Link>
+            <DownloadAppLink />
           </nav>
         </div>
         <div className="mx-auto flex max-w-[1400px] flex-wrap justify-between gap-3 border-t border-border px-5 py-5 text-xs text-muted-foreground lg:px-8">

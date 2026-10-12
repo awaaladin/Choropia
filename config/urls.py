@@ -14,6 +14,7 @@ import moderation.urls
 import notifications.urls
 import orders.urls
 import payments.urls
+import reels.urls
 import reviews.urls
 import social.urls
 
@@ -22,6 +23,7 @@ api_v1_patterns = (
     + social.urls.urlpatterns
     + listings.urls.urlpatterns
     + merchants.urls.urlpatterns
+    + reels.urls.urlpatterns
     + chat.urls.urlpatterns
     + orders.urls.urlpatterns
     + payments.urls.urlpatterns

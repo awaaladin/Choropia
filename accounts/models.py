@@ -58,3 +58,34 @@ class Profile(TimeStampedModel):
 
     def __str__(self):
         return f"Profile<{self.user.email}>"
+
+
+class SocialAccount(TimeStampedModel):
+    """Links a Choropia account to an identity at an external sign-in provider (Google)."""
+
+    class Provider(models.TextChoices):
+        GOOGLE = "google", "Google"
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="social_accounts")
+    provider = models.CharField(max_length=20, choices=Provider.choices)
+    uid = models.CharField(max_length=255, help_text="The provider's stable subject id for this person.")
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["provider", "uid"], name="unique_social_identity")]
+
+    def __str__(self):
+        return f"{self.provider}:{self.uid} -> {self.user_id}"
+
+
+class TOTPDevice(TimeStampedModel):
+    """An authenticator-app (RFC 6238 TOTP) second factor. One per user. Not active for login
+    until `confirmed` — the user must prove the app shows the right codes first."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="totp_device")
+    secret = models.CharField(max_length=64)  # base32
+    confirmed = models.BooleanField(default=False)
+    last_used_step = models.BigIntegerField(default=0, help_text="Blocks re-using a code within its window.")
+    recovery_hashes = models.JSONField(default=list, blank=True)  # sha256 of single-use recovery codes
+
+    def __str__(self):
+        return f"TOTPDevice<{self.user_id}> {'on' if self.confirmed else 'pending'}"

@@ -65,7 +65,7 @@ export function MerchantProfilePage() {
                 <p className="text-sm text-muted-foreground">{m.location}</p>
               </div>
             </div>
-            <FollowButton merchantId={m.id} className="shrink-0" />
+            <FollowButton targetId={m.id} className="shrink-0" />
           </div>
 
           <p className="mt-4 max-w-2xl text-muted-foreground">{m.description}</p>

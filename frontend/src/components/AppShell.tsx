@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, Home, MessageCircle, PlusCircle, Search, Settings, ShoppingBag, Store, Package } from "lucide-react";
+import { Bell, Clapperboard, Home, MessageCircle, PlusCircle, Search, Settings, ShoppingBag, Store, Package } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { Outlet, ScrollRestoration, useLocation, useNavigate } from "react-router";
 import { Toaster, toast } from "sonner";
@@ -17,13 +17,16 @@ import { Avatar } from "./ui";
 const NAV = [
   { to: "/feed", label: "Feed", end: true },
   { to: "/marketplace", label: "Marketplace" },
+  { to: "/reels", label: "Reels" },
   { to: "/orders", label: "Orders" },
+  { to: "/wallet", label: "Wallet" },
   { to: "/messages", label: "Messages" },
 ] as const;
 
 const TABS = [
   { to: "/feed", label: "Feed", icon: Home, end: true },
   { to: "/marketplace", label: "Market", icon: Store },
+  { to: "/reels", label: "Reels", icon: Clapperboard },
   { to: "/listings/new", label: "Sell", icon: PlusCircle },
   { to: "/orders", label: "Orders", icon: Package },
   { to: "/messages", label: "Messages", icon: MessageCircle },
@@ -209,7 +212,7 @@ export function AppShell() {
       </footer>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-panel pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden" aria-label="Primary">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-6">
           {TABS.map(({ to, label, icon: Icon, ...rest }) => (
             <NavLink
               key={to}

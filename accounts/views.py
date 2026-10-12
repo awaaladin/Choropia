@@ -8,6 +8,7 @@ from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -64,6 +65,23 @@ class LogoutView(APIView):
             token.blacklist()
         except TokenError:
             return Response({"detail": "Invalid or already-blacklisted token"}, status=400)
+        return Response(status=204)
+
+
+class LogoutAllView(APIView):
+    """Blacklists every refresh token ever issued to this account, so every signed-in device
+    (this one included) needs to log in again. There's no device/session list to revoke
+    individually — SimpleJWT's blacklist app tracks issued tokens, not sessions — so this is
+    all-or-nothing."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        outstanding = OutstandingToken.objects.filter(user=request.user)
+        BlacklistedToken.objects.bulk_create(
+            (BlacklistedToken(token=t) for t in outstanding),
+            ignore_conflicts=True,
+        )
         return Response(status=204)
 
 

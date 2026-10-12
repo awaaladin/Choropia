@@ -6,6 +6,7 @@ import { ApplyMerchantPage } from "@/pages/ApplyMerchant";
 import { ChatPage } from "@/pages/Chat";
 import { ContactPage } from "@/pages/Contact";
 import { CreateListingPage } from "@/pages/CreateListing";
+import { CreateReelPage } from "@/pages/CreateReel";
 import { FeedPage } from "@/pages/Feed";
 import { ForgotPasswordPage } from "@/pages/ForgotPassword";
 import { HowItWorksPage } from "@/pages/HowItWorks";
@@ -21,8 +22,10 @@ import { OrderDetailPage } from "@/pages/OrderDetail";
 import { OrdersPage } from "@/pages/Orders";
 import { PrivacyPage } from "@/pages/Privacy";
 import { ProfilePage } from "@/pages/Profile";
+import { ReelsPage } from "@/pages/Reels";
 import { RegisterPage } from "@/pages/Register";
 import { ResetPasswordPage } from "@/pages/ResetPassword";
+import { WalletPage } from "@/pages/Wallet";
 
 export const router = createBrowserRouter([
   // Public marketing pages — their own PublicShell, not the logged-in app chrome.
@@ -37,6 +40,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "feed", element: <FeedPage /> },
       { path: "marketplace", element: <MarketplacePage /> },
+      { path: "reels", element: <ReelsPage /> },
       { path: "listings/:id", element: <ListingDetailPage /> },
       { path: "merchants/:id", element: <MerchantProfilePage /> },
       { path: "login", element: <LoginPage /> },
@@ -47,8 +51,10 @@ export const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: "listings/new", element: <CreateListingPage /> },
+          { path: "reels/new", element: <CreateReelPage /> },
           { path: "orders", element: <OrdersPage /> },
           { path: "orders/:id", element: <OrderDetailPage /> },
+          { path: "wallet", element: <WalletPage /> },
           {
             path: "messages",
             element: <MessagesLayout />,

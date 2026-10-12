@@ -6,19 +6,25 @@ import { api, rows } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "./Button";
 
-export function FollowButton({ merchantId, className }: { merchantId: number; className?: string }) {
+interface FollowButtonProps {
+  targetId: number;
+  targetType?: "merchant" | "user";
+  className?: string;
+}
+
+export function FollowButton({ targetId, targetType = "merchant", className }: FollowButtonProps) {
   const { loggedIn } = useAuth();
   const ensureLogin = useEnsureLogin();
   const queryClient = useQueryClient();
 
   const follows = useQuery({ queryKey: ["follows"], queryFn: api.listMyFollows, enabled: loggedIn });
-  const existing = rows(follows.data).find((f) => f.target_type_display === "merchant" && f.object_id === merchantId);
+  const existing = rows(follows.data).find((f) => f.target_type_display === targetType && f.object_id === targetId);
 
   const toggle = useMutation({
-    mutationFn: () => (existing ? api.unfollow(existing.id) : api.follow("merchant", merchantId)),
+    mutationFn: () => (existing ? api.unfollow(existing.id) : api.follow(targetType, targetId)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["follows"] });
-      queryClient.invalidateQueries({ queryKey: ["merchant", merchantId] });
+      queryClient.invalidateQueries({ queryKey: [targetType, targetId] });
     },
     onError: (err) => toast.error(errorMessage(err)),
   });

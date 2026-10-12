@@ -33,8 +33,17 @@ class Conversation(TimeStampedModel):
 class Message(TimeStampedModel):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_messages")
-    body = models.TextField()
+    body = models.TextField(blank=True)  # may be empty when the message is only an attachment
     read_at = models.DateTimeField(null=True, blank=True)
+
+    class AttachmentType(models.TextChoices):
+        IMAGE = "image", "Image"
+        AUDIO = "audio", "Voice note / audio"
+        FILE = "file", "Document"
+
+    attachment = models.FileField(upload_to="chat/", null=True, blank=True)
+    attachment_type = models.CharField(max_length=10, choices=AttachmentType.choices, blank=True)
+    duration_seconds = models.PositiveSmallIntegerField(null=True, blank=True, help_text="Voice notes only.")
 
     class Meta:
         ordering = ["created_at"]

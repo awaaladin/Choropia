@@ -10,8 +10,13 @@ import type {
   Message,
   Order,
   Paginated,
+  Reel,
+  ReelComment,
+  ReelLike,
   Review,
   User,
+  WalletSummary,
+  WalletTransaction,
 } from "./types";
 
 /**
@@ -152,6 +157,10 @@ export const api = {
     if (refresh) await request("/auth/logout/", { method: "POST", body: { refresh } }).catch(() => {});
     tokens.clear();
   },
+  async logoutEverywhere() {
+    await request("/auth/logout-all/", { method: "POST" });
+    tokens.clear();
+  },
   requestPasswordReset: (email: string) =>
     request("/auth/password-reset/", { method: "POST", body: { email }, auth: false }),
   confirmPasswordReset: (uid: string, token: string, password: string) =>
@@ -216,6 +225,21 @@ export const api = {
   listNotifications: () => request<Paginated<AppNotification> | AppNotification[]>("/notifications/"),
   markNotificationRead: (id: number) => request(`/notifications/${id}/mark_read/`, { method: "POST" }),
   markAllNotificationsRead: () => request("/notifications/mark-all-read/", { method: "POST" }),
+
+  // --- reels ---
+  listReels: (params: Record<string, string | undefined> = {}) => request<Paginated<Reel> | Reel[]>(`/reels/${qs(params)}`, { auth: false }),
+  getReel: (id: number) => request<Reel>(`/reels/${id}/`),
+  createReel: (formData: FormData) => request<Reel>("/reels/", { method: "POST", body: formData, formData: true }),
+  deleteReel: (id: number) => request(`/reels/${id}/`, { method: "DELETE" }),
+  listMyReelLikes: () => request<Paginated<ReelLike> | ReelLike[]>("/reel-likes/"),
+  likeReel: (reelId: number) => request<ReelLike>("/reel-likes/", { method: "POST", body: { reel: reelId } }),
+  unlikeReel: (likeId: number) => request(`/reel-likes/${likeId}/`, { method: "DELETE" }),
+  listReelComments: (reelId: number) => request<Paginated<ReelComment> | ReelComment[]>(`/reel-comments/?reel=${reelId}`, { auth: false }),
+  createReelComment: (reelId: number, body: string) => request<ReelComment>("/reel-comments/", { method: "POST", body: { reel: reelId, body } }),
+
+  // --- wallet ---
+  getWalletSummary: () => request<WalletSummary>("/wallet/summary/"),
+  listWalletTransactions: () => request<Paginated<WalletTransaction> | WalletTransaction[]>("/wallet/transactions/"),
 };
 
 /**

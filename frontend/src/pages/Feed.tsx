@@ -225,7 +225,7 @@ export function FeedPage() {
                     <p className="text-xs text-muted-foreground">{m.followers_count} follower{m.followers_count === 1 ? "" : "s"}</p>
                   </div>
                 </Link>
-                <FollowButton merchantId={m.id} className="min-h-8 px-2 text-xs" />
+                <FollowButton targetId={m.id} className="min-h-8 px-2 text-xs" />
               </div>
             ))}
             {merchants.isSuccess && merchants.data.length === 0 && <p className="text-xs text-muted-foreground">No storefronts yet.</p>}
