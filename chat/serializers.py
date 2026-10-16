@@ -2,6 +2,8 @@ from pathlib import PurePath
 
 from rest_framework import serializers
 
+from accounts.demo import DEMO_LISTING_MESSAGE, is_demo_user
+
 from .models import Conversation, Message
 
 # Files go through the API as multipart. Vercel rejects request bodies over ~4.5 MB, so keep a
@@ -115,6 +117,8 @@ class ConversationSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         if listing.owner_id == request.user.id:
             raise serializers.ValidationError("You cannot start a conversation on your own listing.")
+        if is_demo_user(listing.owner):
+            raise serializers.ValidationError(DEMO_LISTING_MESSAGE)
         attrs["seller"] = listing.owner
         return attrs
 

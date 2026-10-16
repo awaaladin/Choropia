@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from .models import Category, Listing, ListingPhoto
@@ -108,9 +109,12 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
 
     def create(self, validated_data):
         photos = validated_data.pop("uploaded_photos", [])
-        listing = Listing.objects.create(**validated_data)
-        for index, image in enumerate(photos):
-            ListingPhoto.objects.create(listing=listing, image=image, order=index)
+        # Atomic: if saving a photo fails (storage outage), the listing row is rolled back too,
+        # instead of leaving a photo-less listing behind.
+        with transaction.atomic():
+            listing = Listing.objects.create(**validated_data)
+            for index, image in enumerate(photos):
+                ListingPhoto.objects.create(listing=listing, image=image, order=index)
         return listing
 
     def update(self, instance, validated_data):

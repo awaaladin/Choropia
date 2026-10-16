@@ -1,3 +1,5 @@
+import logging
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
@@ -22,6 +24,7 @@ from .serializers import (
 )
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -101,12 +104,17 @@ class PasswordResetRequestView(APIView):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             link = f"{settings.PASSWORD_RESET_URL_BASE}?uid={uid}&token={token}"
-            send_mail(
-                subject="Reset your Choropia password",
-                message=f"Use this link to choose a new password:\n\n{link}\n\nIf you didn't ask for this, ignore this email.",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-            )
+            try:
+                send_mail(
+                    subject="Reset your Choropia password",
+                    message=f"Use this link to choose a new password:\n\n{link}\n\nIf you didn't ask for this, ignore this email.",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                )
+            except Exception:
+                # Same answer either way so the endpoint can't be used to probe which emails exist;
+                # the failure is logged for the operator (check the EMAIL_* settings).
+                logger.exception("Password reset email could not be sent to user %s", user.pk)
         return Response({"detail": "If that email is registered, a reset link is on its way."})
 
 

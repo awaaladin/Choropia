@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from accounts.demo import DEMO_LISTING_MESSAGE, is_demo_user
 from listings.models import Listing
 from merchants.models import Merchant
 
@@ -72,6 +73,8 @@ class OrderCreateSerializer(serializers.Serializer):
         request = self.context["request"]
         if listing.owner_id == request.user.id:
             raise serializers.ValidationError("You cannot buy your own listing.")
+        if is_demo_user(listing.owner):
+            raise serializers.ValidationError(DEMO_LISTING_MESSAGE)
         return listing
 
     def create(self, validated_data):

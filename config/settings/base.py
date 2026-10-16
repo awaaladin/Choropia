@@ -155,6 +155,11 @@ if _frontend_dist.is_dir():
 
 USE_S3 = env_bool("USE_S3", False)
 
+# Vercel Blob: `vercel blob create-store` connects a store to the project and sets this token.
+# BLOB_PUBLIC_BASE_URL is the store's public host, e.g. https://<store-id>.public.blob.vercel-storage.com
+BLOB_READ_WRITE_TOKEN = env("BLOB_READ_WRITE_TOKEN", "")
+BLOB_PUBLIC_BASE_URL = env("BLOB_PUBLIC_BASE_URL", "")
+
 if USE_S3:
     AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
@@ -176,6 +181,12 @@ if USE_S3:
         "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
     }
     MEDIA_URL = env("MEDIA_URL", f"https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/")
+elif BLOB_READ_WRITE_TOKEN:
+    STORAGES = {
+        "default": {"BACKEND": "common.blob_storage.VercelBlobStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+    MEDIA_URL = (BLOB_PUBLIC_BASE_URL.rstrip("/") + "/") if BLOB_PUBLIC_BASE_URL else "media/"
 else:
     STORAGES = {
         "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -206,6 +217,7 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "EXCEPTION_HANDLER": "common.exceptions.api_exception_handler",
     "DEFAULT_THROTTLE_CLASSES": (
         "rest_framework.throttling.ScopedRateThrottle",
     ),

@@ -10,3 +10,6 @@ mediafiles/
 .coverage
 node_modules/
 .claude/
+
+.vercel
+.env.local
