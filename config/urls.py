@@ -17,6 +17,7 @@ import payments.urls
 import reels.urls
 import reviews.urls
 import social.urls
+from common import app_download
 
 api_v1_patterns = (
     accounts.urls.urlpatterns
@@ -38,6 +39,10 @@ urlpatterns = [
     path("api/v1/", include(api_v1_patterns)),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    # The Android app lives in object storage; this path (linked from the landing page) redirects to it.
+    # Must come before core.urls, whose catch-all would otherwise answer with the SPA shell.
+    path("downloads/choropia.apk", app_download.apk_redirect, name="android-apk"),
+    path("api/v1/app/android/", app_download.AndroidAppInfoView.as_view(), name="android-app-info"),
     path("", include(core.urls)),
 ]
 
