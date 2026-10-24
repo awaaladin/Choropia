@@ -224,6 +224,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "auth": "10/min",
         "listing-create": "20/hour",
+        "payout-account": "20/hour",
     },
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
@@ -289,6 +290,19 @@ PAYSTACK_BASE_URL = env("PAYSTACK_BASE_URL", "https://api.paystack.co")
 PAYMENT_PROVIDER = env("PAYMENT_PROVIDER", "paystack" if PAYSTACK_SECRET_KEY else "gaxtron")
 # Public web origin Paystack sends the buyer back to (to /orders/<id>) after checkout.
 CHOROPIA_SITE_URL = env("CHOROPIA_SITE_URL", "http://localhost:5173")
+
+# --- Seller payouts ----------------------------------------------------------
+# When an order's escrow is released the seller is paid by bank transfer (Paystack Transfers) and
+# Choropia keeps this commission. See payments/payouts.py.
+PLATFORM_COMMISSION_PERCENT = Decimal(env("PLATFORM_COMMISSION_PERCENT", "5"))
+# Kill switch: with this off, releases still create payout records but no transfer is sent.
+PAYOUTS_ENABLED = env_bool("PAYOUTS_ENABLED", True)
+# A single payout above this (NGN, after commission) is held for a person to approve.
+PAYOUT_MAX_NGN = Decimal(env("PAYOUT_MAX_NGN", "2000000"))
+# After this many failed transfer attempts a payout is flagged for a person instead of retried.
+PAYOUT_MAX_ATTEMPTS = int(env("PAYOUT_MAX_ATTEMPTS", "5"))
+# Shared secret for the scheduled-jobs endpoint (Vercel Cron sends it as a Bearer token).
+CRON_SECRET = env("CRON_SECRET", "")
 
 # --- Gaxtron (crypto escrow payments, the alternative to Paystack) --------
 # See payments/gaxtron.py for the full integration notes (currency conversion, the SSRF

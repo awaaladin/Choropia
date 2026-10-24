@@ -35,9 +35,8 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
-from .naming import APP_CODE as CHOROPIA, is_ours
+from .naming import APP_CODE as CHOROPIA
 from .paystack import PaystackClient
-from .services import confirm_paystack_payment
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +99,9 @@ def routes_from(environ):
 
 
 def _handle_choropia_event(payload):
-    data = payload.get("data") or {}
-    reference = data.get("reference", "")
-    if payload.get("event") == "charge.success" and is_ours(reference):
-        confirm_paystack_payment(reference, data, raw_payload=payload)
+    from .payouts import handle_choropia_event
+
+    handle_choropia_event(payload)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

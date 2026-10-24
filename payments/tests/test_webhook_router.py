@@ -154,5 +154,5 @@ class RouterViewTests(TestCase):
 
     def test_choropia_processing_failure_makes_paystack_retry(self):
         payload = {"event": "charge.success", "data": charge("CHOROPIA-ORDER-20261023-ABCDEF123456")}
-        with mock.patch("payments.webhook_router.confirm_paystack_payment", side_effect=RuntimeError("db down")):
+        with mock.patch("payments.services.confirm_paystack_payment", side_effect=RuntimeError("db down")):
             self.assertEqual(self.post(payload).status_code, 502)

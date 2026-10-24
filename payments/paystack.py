@@ -19,7 +19,9 @@ from django.conf import settings
 
 
 class PaystackError(Exception):
-    pass
+    def __init__(self, message, http_status=None):
+        super().__init__(message)
+        self.http_status = http_status  # None when Paystack could not be reached at all
 
 
 def to_kobo(amount) -> int:
@@ -35,7 +37,7 @@ class PaystackClient:
         self.secret_key = secret_key or settings.PAYSTACK_SECRET_KEY
         self.base_url = (base_url or settings.PAYSTACK_BASE_URL).rstrip("/")
 
-    def _request(self, method, path, **kwargs):
+    def _request(self, method, path, timeout=15, **kwargs):
         if not self.secret_key:
             raise PaystackError("PAYSTACK_SECRET_KEY is not set")
         try:
@@ -43,14 +45,17 @@ class PaystackClient:
                 method,
                 f"{self.base_url}{path}",
                 headers={"Authorization": f"Bearer {self.secret_key}"},
-                timeout=15,
+                timeout=timeout,
                 **kwargs,
             )
             data = response.json()
         except (requests.RequestException, ValueError) as exc:
             raise PaystackError(f"Paystack unreachable: {exc}") from exc
         if not response.ok or not data.get("status", False):
-            raise PaystackError(data.get("message", f"Paystack request to {path} failed ({response.status_code})"))
+            raise PaystackError(
+                data.get("message", f"Paystack request to {path} failed ({response.status_code})"),
+                http_status=response.status_code,
+            )
         return data["data"]
 
     def initialize_transaction(self, email, amount, reference, callback_url, metadata):
@@ -72,6 +77,60 @@ class PaystackClient:
 
     def refund(self, reference):
         return self._request("POST", "/refund", json={"transaction": reference})
+
+    # --- payouts (Paystack Transfers) -------------------------------------------------------
+
+    def list_banks(self, max_pages=6):
+        """Every Nigerian bank Paystack can pay out to. Paystack pages the list by cursor."""
+        banks, cursor = [], None
+        for _ in range(max_pages):
+            params = {"country": "nigeria", "currency": "NGN", "perPage": 100, "use_cursor": "true"}
+            if cursor:
+                params["next"] = cursor
+            try:
+                response = requests.get(
+                    f"{self.base_url}/bank", params=params, headers={"Authorization": f"Bearer {self.secret_key}"}, timeout=15
+                )
+                body = response.json()
+            except (requests.RequestException, ValueError) as exc:
+                raise PaystackError(f"Paystack unreachable: {exc}") from exc
+            if not response.ok or not body.get("status", False):
+                raise PaystackError(body.get("message", "Could not load banks"), http_status=response.status_code)
+            banks += [b for b in body.get("data", []) if b.get("active", True)]
+            cursor = (body.get("meta") or {}).get("next")
+            if not cursor:
+                break
+        return banks
+
+    def resolve_account(self, account_number, bank_code):
+        """Asks the bank who owns this account. Returns {account_number, account_name}."""
+        return self._request("GET", "/bank/resolve", params={"account_number": account_number, "bank_code": bank_code})
+
+    def create_recipient(self, name, account_number, bank_code):
+        return self._request(
+            "POST",
+            "/transferrecipient",
+            json={"type": "nuban", "name": name, "account_number": account_number, "bank_code": bank_code, "currency": "NGN"},
+        )
+
+    def initiate_transfer(self, amount, recipient_code, reference, reason):
+        """Pays `amount` NGN out of the Paystack balance. Short timeout: Vercel stops functions at 10 s."""
+        return self._request(
+            "POST",
+            "/transfer",
+            timeout=8,
+            json={
+                "source": "balance",
+                "amount": to_kobo(amount),
+                "currency": "NGN",
+                "recipient": recipient_code,
+                "reference": reference,
+                "reason": reason,
+            },
+        )
+
+    def verify_transfer(self, reference):
+        return self._request("GET", f"/transfer/verify/{reference}")
 
     def verify_webhook_signature(self, request_body: bytes, signature_header: str) -> bool:
         if not self.secret_key or not signature_header:

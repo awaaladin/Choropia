@@ -164,10 +164,9 @@ def release_escrow(order, auto=False):
     """Releases held funds to the seller. Only valid once the order itself has reached a
     completed state — this function does not change order status, it only settles the money.
 
-    Neither provider pays the seller automatically yet: Gaxtron has no payout endpoint at all,
-    and a Paystack transfer needs the seller's bank account as a transfer recipient, which
-    Choropia doesn't collect yet. So this records the release; the seller is paid out of the
-    Paystack balance by hand (the payment's reference is in the admin)."""
+    Paystack payments are paid out to the seller automatically (minus the platform commission) by
+    payments/payouts.py once this transaction commits. Gaxtron has no payout endpoint, so for
+    those the release is only recorded."""
     try:
         payment = order.payment
     except Payment.DoesNotExist:
@@ -182,6 +181,12 @@ def release_escrow(order, auto=False):
     payment.released_at = timezone.now()
     payment.auto_released = auto
     payment.save(update_fields=["status", "released_at", "auto_released"])
+
+    # Pay the seller (minus Choropia's commission). The transfer itself is only sent after the
+    # surrounding transaction commits; see payments/payouts.py.
+    from . import payouts
+
+    payouts.release_hook(payment)
     return payment
 
 

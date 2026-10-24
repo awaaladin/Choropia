@@ -128,8 +128,9 @@ class PaystackWebhookView(APIView):
         data = payload.get("data") or {}
         reference = data.get("reference", "")
 
-        if payload.get("event") == "charge.success" and is_ours(reference):
-            confirm_paystack_payment(reference, data, raw_payload=payload)
+        from .payouts import handle_choropia_event
+
+        handle_choropia_event(payload)
         # Anything else (another app's reference, an event we don't act on) is acknowledged so
         # Paystack doesn't keep retrying it.
         return JsonResponse({"received": True})
@@ -151,6 +152,7 @@ class WalletSummaryView(APIView):
         return Response(
             {
                 "currency": "NGN",
+                "commission_percent": str(settings.PLATFORM_COMMISSION_PERCENT),
                 "selling": {
                     "released_total": str(total(order__seller=user, status=Payment.Status.RELEASED)),
                     "held_total": str(total(order__seller=user, status=Payment.Status.PAID_HELD)),

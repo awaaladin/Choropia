@@ -66,6 +66,14 @@ def poll_paystack_payments_task():
 
 
 @shared_task
+def process_payouts_task():
+    """Sends queued seller payouts and reconciles transfers whose outcome we never heard."""
+    from .payouts import process_pending_payouts
+
+    return process_pending_payouts()
+
+
+@shared_task
 def auto_release_escrow_task():
     """Runs on a schedule (see config/celery.py beat schedule). Finds every order that has sat
     in DELIVERED for longer than ESCROW_AUTO_RELEASE_DAYS with no buyer action, and auto-confirms

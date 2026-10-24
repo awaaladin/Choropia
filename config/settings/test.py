@@ -33,5 +33,5 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 # failures (every test that logs in shares one in-memory counter). Production settings are untouched.
 REST_FRAMEWORK = {
     **REST_FRAMEWORK,  # noqa: F405
-    "DEFAULT_THROTTLE_RATES": {"auth": "10000/min", "listing-create": "10000/hour"},
+    "DEFAULT_THROTTLE_RATES": {"auth": "10000/min", "listing-create": "10000/hour", "payout-account": "10000/hour"},
 }

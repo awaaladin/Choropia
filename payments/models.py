@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from common.models import TimeStampedModel
@@ -44,3 +45,61 @@ class Payment(TimeStampedModel):
 
     def __str__(self):
         return f"Payment<{self.reference}> {self.status}"
+
+
+class PayoutAccount(TimeStampedModel):
+    """Where a seller is paid. Paystack keeps the full account number (as a "transfer recipient");
+    we store only the last four digits and the name the bank returned, which is all the app needs
+    to show "GTBank ••••1234, ADA OBI" back to the seller."""
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="payout_account")
+    bank_code = models.CharField(max_length=20)
+    bank_name = models.CharField(max_length=100)
+    account_last4 = models.CharField(max_length=4)
+    account_name = models.CharField(max_length=150)  # as resolved by the bank
+    recipient_code = models.CharField(max_length=50)  # Paystack's id for this account
+
+    def __str__(self):
+        return f"{self.bank_name} ••••{self.account_last4} ({self.user_id})"
+
+
+class Payout(TimeStampedModel):
+    """The seller's share of one released payment, and Choropia's commission on it.
+
+    gross_amount (what the buyer paid) = commission_amount (Choropia's cut) + net_amount (sent to
+    the seller). One payout per payment, so a release can never pay a seller twice."""
+
+    class Status(models.TextChoices):
+        AWAITING_ACCOUNT = "awaiting_account", "Waiting for seller's bank account"
+        PENDING = "pending", "Queued"
+        PROCESSING = "processing", "Transfer sent to the bank"
+        SUCCESS = "success", "Paid"
+        NEEDS_ATTENTION = "needs_attention", "Needs a person"
+
+    payment = models.OneToOneField(Payment, on_delete=models.PROTECT, related_name="payout")
+    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="payouts")
+
+    gross_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    commission_rate = models.DecimalField(max_digits=5, decimal_places=2)  # percent, as at release time
+    commission_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    net_amount = models.DecimalField(max_digits=12, decimal_places=2)
+
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING, db_index=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    failure_reason = models.TextField(blank=True)
+
+    # The reference of the current/last transfer, and every reference ever used (audit trail).
+    transfer_reference = models.CharField(max_length=60, unique=True, null=True, blank=True)
+    transfer_references = models.JSONField(default=list, blank=True)
+    paystack_transfer_code = models.CharField(max_length=40, blank=True)
+
+    # Snapshot of where it was sent, in case the seller later changes their account.
+    bank_name = models.CharField(max_length=100, blank=True)
+    account_last4 = models.CharField(max_length=4, blank=True)
+    account_name = models.CharField(max_length=150, blank=True)
+
+    initiated_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Payout<{self.payment_id}> {self.status} NGN {self.net_amount}"

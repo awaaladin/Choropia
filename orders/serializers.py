@@ -19,6 +19,7 @@ class OrderSerializer(serializers.ModelSerializer):
     listing_cover_photo = serializers.SerializerMethodField()
     buyer_name = serializers.SerializerMethodField()
     seller_name = serializers.SerializerMethodField()
+    payout = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -38,6 +39,7 @@ class OrderSerializer(serializers.ModelSerializer):
             "completed_at",
             "dispute_reason",
             "history",
+            "payout",
             "created_at",
         )
         read_only_fields = (
@@ -61,6 +63,27 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_buyer_name(self, obj):
         return obj.buyer.get_full_name() or obj.buyer.email
+
+    def get_payout(self, order):
+        """What the seller will be / was paid. Only the seller sees it (the buyer has no business with
+        the seller's commission or bank details)."""
+        request = self.context.get("request")
+        if request is None or request.user.id != order.seller_id:
+            return None
+        payment = getattr(order, "payment", None)
+        payout = getattr(payment, "payout", None) if payment is not None else None
+        if payout is None:
+            return None
+        return {
+            "status": payout.status,
+            "status_label": payout.get_status_display(),
+            "gross_amount": str(payout.gross_amount),
+            "commission_amount": str(payout.commission_amount),
+            "commission_rate": str(payout.commission_rate),
+            "net_amount": str(payout.net_amount),
+            "bank_name": payout.bank_name,
+            "account_last4": payout.account_last4,
+        }
 
     def get_seller_name(self, obj):
         return obj.seller.get_full_name() or obj.seller.email
