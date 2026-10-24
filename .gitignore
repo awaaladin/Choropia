@@ -15,3 +15,10 @@ node_modules/
 .env.local
 .env*
 !.env.example
+
+# Internal notes stay on this machine. Only docs that explain how to use/run the app are committed
+# (README.md, android/README.md). Hand-off, go-live and design-spec notes are local.
+GO_LIVE.md
+android/WEB_DOWNLOAD_HANDOFF.md
+**/DESIGN*.md
+*.internal.md
