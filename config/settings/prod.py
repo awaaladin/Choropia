@@ -38,6 +38,8 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST")
 EMAIL_PORT = env_int("EMAIL_PORT", 587)
-EMAIL_USE_TLS = True
+# Follows the environment (base.py already decided): STARTTLS on 587, or implicit SSL on 465, never both.
+# This used to be a hard-coded True, which clashed with EMAIL_USE_SSL=true and made every send fail.
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True) and not EMAIL_USE_SSL
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
