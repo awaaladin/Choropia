@@ -18,7 +18,10 @@ jobs:
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          if [ -z "$CRON_SECRET" ]; then echo "CRON_SECRET is not set"; exit 1; fi
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::warning::CRON_SECRET repository secret is not set, so the jobs did not run. Add it under Settings > Secrets and variables > Actions."
+            exit 0
+          fi
           curl --fail --silent --show-error --max-time 60 -X POST \
             -H "Authorization: Bearer $CRON_SECRET" \
             https://choropia.vercel.app/api/v1/internal/jobs/run/
