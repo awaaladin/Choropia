@@ -278,7 +278,19 @@ CACHES = {
     }
 }
 
-# --- Gaxtron (crypto escrow payments, replaces Paystack) -------------------
+# --- Payments ----------------------------------------------------------------
+# Which provider new checkouts use: "paystack" or "gaxtron". Defaults to Paystack once its key
+# is set, so a deployment without one keeps working on Gaxtron. The Paystack account is shared
+# with other apps; see payments/naming.py for how Choropia's payments are labelled on it.
+# PAYSTACK_API is accepted as an alias: the shared account's key is stored under that name in the
+# repo owner's local .env, and the webhook router calls it PAYSTACK_SECRET_KEY.
+PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY", "") or env("PAYSTACK_API", "")
+PAYSTACK_BASE_URL = env("PAYSTACK_BASE_URL", "https://api.paystack.co")
+PAYMENT_PROVIDER = env("PAYMENT_PROVIDER", "paystack" if PAYSTACK_SECRET_KEY else "gaxtron")
+# Public web origin Paystack sends the buyer back to (to /orders/<id>) after checkout.
+CHOROPIA_SITE_URL = env("CHOROPIA_SITE_URL", "http://localhost:5173")
+
+# --- Gaxtron (crypto escrow payments, the alternative to Paystack) --------
 # See payments/gaxtron.py for the full integration notes (currency conversion, the SSRF
 # constraint on webhook callbacks, and the escrow/payout gap this inherits from Paystack).
 GAXTRON_API_KEY = env("GAXTRON_API_KEY", "")

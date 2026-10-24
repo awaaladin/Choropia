@@ -43,8 +43,14 @@ login.
 - SimpleJWT for auth (access + refresh tokens, no sessions/cookies)
 - django-storages (S3-compatible) for listing photos / avatars
 - drf-spectacular for OpenAPI schema + Swagger UI
-- Gaxtron for payment collection (crypto/ETH, Sepolia testnet), with an escrow-style
-  hold-then-release pattern
+- Paystack for payment collection (used once `PAYSTACK_SECRET_KEY` is set; references start
+  `CHOROPIA-`, see `payments/naming.py`), with Gaxtron (crypto/ETH, Sepolia testnet) as the
+  alternative via `PAYMENT_PROVIDER=gaxtron`; both use an escrow-style hold-then-release pattern.
+  The Paystack account is shared with other apps (Mirror, NutriScan, SplitStay, VisionMirror,
+  Voice Verse), and Paystack allows only one webhook URL per account, so Choropia hosts it:
+  `POST /api/paystack-webhook` (`payments/webhook_router.py`) checks the signature, handles
+  Choropia's own events and forwards the others, unchanged, to the `ROUTE_<APP>` URLs set in the
+  environment. Choropia's own endpoint, `/api/v1/payments/webhook/paystack/`, also still works.
 
 ## Web frontend (`frontend/`)
 

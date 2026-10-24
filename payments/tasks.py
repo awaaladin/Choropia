@@ -10,7 +10,8 @@ from orders.state_machine import InvalidOrderTransition, OrderStatus
 
 from .gaxtron import GaxtronClient, GaxtronError
 from .models import Payment
-from .services import confirm_payment, release_escrow
+from .paystack import PaystackError
+from .services import confirm_payment, release_escrow, verify_paystack_payment
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,27 @@ def poll_gaxtron_payments_task():
             failed.append(payment.id)
 
     return {"confirmed": confirmed, "failed": failed}
+
+
+@shared_task
+def poll_paystack_payments_task():
+    """Safety net behind the Paystack webhook and the buyer's own verify call: re-checks recent
+    Paystack checkouts that are still waiting, in case both of those were missed."""
+    since = timezone.now() - timezone.timedelta(days=1)
+    pending = Payment.objects.filter(
+        provider=Payment.Provider.PAYSTACK, status=Payment.Status.INITIALIZED, created_at__gte=since
+    ).exclude(authorization_url="")
+
+    confirmed = []
+    for payment in pending:
+        try:
+            payment = verify_paystack_payment(payment)
+        except PaystackError:
+            logger.warning("Paystack status check failed for payment %s", payment.id)
+            continue
+        if payment.status == Payment.Status.PAID_HELD:
+            confirmed.append(payment.id)
+    return {"confirmed": confirmed}
 
 
 @shared_task

@@ -100,14 +100,19 @@ class OrderViewSet(
         serializer = DisputeResolutionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        from payments.paystack import PaystackError
         from payments.services import refund_escrow, release_escrow
 
-        with transaction.atomic():
-            if serializer.validated_data["resolution"] == "refund":
-                self._transition_or_400(order, OrderStatus.REFUNDED, actor=request.user)
-                refund_escrow(order)
-            else:
-                self._transition_or_400(order, OrderStatus.COMPLETED, actor=request.user)
-                release_escrow(order, auto=False)
+        try:
+            with transaction.atomic():
+                if serializer.validated_data["resolution"] == "refund":
+                    self._transition_or_400(order, OrderStatus.REFUNDED, actor=request.user)
+                    refund_escrow(order)
+                else:
+                    self._transition_or_400(order, OrderStatus.COMPLETED, actor=request.user)
+                    release_escrow(order, auto=False)
+        except PaystackError as exc:
+            # The refund didn't go through, so the order stays disputed (the transaction rolled back).
+            return Response({"detail": f"Paystack refund failed: {exc}"}, status=502)
 
         return Response(OrderSerializer(order).data)
