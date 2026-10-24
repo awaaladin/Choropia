@@ -2,7 +2,7 @@
 The one Paystack webhook for the whole shared account.
 
 Paystack allows a single webhook URL per account (per mode), but six products share this account:
-Choropia, Mirror, NutriScan, SplitStay, VisionMirror and Voice Verse. Paystack is pointed here
+Choropia, Mirror, NutriScan, SplitPay, VisionMirror and Voice Verse. Paystack is pointed here
 (`/api/paystack-webhook`); this checks Paystack's signature, works out which product an event
 belongs to, and either handles it (Choropia's own) or forwards the *exact same body and signature*
 to that product's webhook, which verifies the signature again with the same secret key.
@@ -15,7 +15,8 @@ Routing rules (unchanged from the original router):
   1. `metadata.app` wins (also when Paystack hands it back as a JSON string);
   2. otherwise the reference prefix: `NUTRISCAN-PROYEAR-...` -> NUTRISCAN. Refunds and disputes
      carry the original transaction's reference instead of their own;
-  3. SplitStay's older `CP-` / `cp-po-` references still go to SplitStay.
+  3. SplitPay's older `CP-` / `cp-po-` references, and `SPLITSTAY-` / `splitstay-` (its name before
+     the rename), still go to SplitPay.
 
 Where each product's webhook lives is configuration: `ROUTE_<APP>=https://...` environment
 variables. A product with no route is simply not forwarded to (the event is acknowledged and
@@ -41,10 +42,11 @@ from .services import confirm_paystack_payment
 logger = logging.getLogger(__name__)
 
 # Every product's code, as used at the start of its references and in metadata.app.
-APP_CODES = ["CHOROPIA", "MIRROR", "NUTRISCAN", "SPLITSTAY", "VISIONMIRROR", "VOICEVERSE"]
+APP_CODES = ["CHOROPIA", "MIRROR", "NUTRISCAN", "SPLITPAY", "VISIONMIRROR", "VOICEVERSE"]
 
-# Prefixes used before the shared naming scheme, still in flight for payments started earlier.
-LEGACY_PREFIXES = {"CP": "SPLITSTAY"}
+# Prefixes used before the shared naming scheme (CP-...) and before SplitStay became SplitPay,
+# still in flight for payments started earlier.
+LEGACY_PREFIXES = {"CP": "SPLITPAY", "SPLITSTAY": "SPLITPAY"}
 
 # Vercel's Hobby functions stop at 10 s; forwarding must give up before that so we can answer 502.
 FORWARD_TIMEOUT_SECONDS = 8
@@ -79,7 +81,8 @@ def app_for(payload):
         _code_from_reference(transaction.get("reference")),
     ]
     for candidate in candidates:
-        code = candidate.upper() if isinstance(candidate, str) else ""
+        upper = candidate.upper() if isinstance(candidate, str) else ""
+        code = LEGACY_PREFIXES.get(upper, upper)
         if code in APP_CODES:
             return code
     return ""
@@ -89,7 +92,8 @@ def routes_from(environ):
     """Reads ROUTE_<APP>=https://... for the other products. Choropia's own is handled in-process."""
     routes = {}
     for code in APP_CODES:
-        url = (environ.get(f"ROUTE_{code}") or "").strip()
+        # ROUTE_SPLITSTAY is still read as the old name of ROUTE_SPLITPAY.
+        url = (environ.get(f"ROUTE_{code}") or (environ.get("ROUTE_SPLITSTAY") if code == "SPLITPAY" else "") or "").strip()
         if url and code != CHOROPIA:
             routes[code] = url
     return routes

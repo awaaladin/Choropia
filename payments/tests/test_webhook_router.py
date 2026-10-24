@@ -27,7 +27,8 @@ class AppForTests(SimpleTestCase):
         self.assertEqual(app_for({"data": {"reference": "VISIONMIRROR-SUPPORT-20261023-ABC"}}), "VISIONMIRROR")
 
     def test_routes_lowercase_transfer_references(self):
-        self.assertEqual(app_for({"data": {"reference": "splitstay-payout-20261023-9c1e"}}), "SPLITSTAY")
+        self.assertEqual(app_for({"data": {"reference": "splitpay-payout-20261023-9c1e"}}), "SPLITPAY")
+        self.assertEqual(app_for({"data": {"reference": "SPLITPAY-CONTRIB-20261023-4F9A2C7B1E0D"}}), "SPLITPAY")
 
     def test_metadata_app_wins_even_as_a_string(self):
         self.assertEqual(app_for({"data": {"reference": "T123456", "metadata": {"app": "MIRROR"}}}), "MIRROR")
@@ -37,9 +38,17 @@ class AppForTests(SimpleTestCase):
         self.assertEqual(app_for({"data": {"transaction_reference": "CHOROPIA-ORDER-1-ABC"}}), "CHOROPIA")
         self.assertEqual(app_for({"data": {"transaction": {"reference": "MIRROR-PRO-1"}}}), "MIRROR")
 
-    def test_splitstay_references_from_before_the_naming_scheme(self):
-        self.assertEqual(app_for({"data": {"reference": "CP-0A1B2C3D4E5F60718293"}}), "SPLITSTAY")
-        self.assertEqual(app_for({"data": {"reference": "cp-po-0a1b2c3d4e5f607182930a1b"}}), "SPLITSTAY")
+    def test_splitpay_references_from_before_the_naming_scheme_and_the_rename(self):
+        self.assertEqual(app_for({"data": {"reference": "CP-0A1B2C3D4E5F60718293"}}), "SPLITPAY")
+        self.assertEqual(app_for({"data": {"reference": "cp-po-0a1b2c3d4e5f607182930a1b"}}), "SPLITPAY")
+        self.assertEqual(app_for({"data": {"reference": "SPLITSTAY-CONTRIB-20261023-4F9A2C7B1E0D"}}), "SPLITPAY")
+        self.assertEqual(app_for({"data": {"reference": "splitstay-payout-20261023-9c1e"}}), "SPLITPAY")
+        self.assertEqual(app_for({"data": {"reference": "T123456", "metadata": {"app": "SPLITPAY"}}}), "SPLITPAY")
+
+    def test_splitpay_route_with_old_splitstay_variable_as_fallback(self):
+        self.assertEqual(routes_from({"ROUTE_SPLITPAY": "https://sp/hook"}), {"SPLITPAY": "https://sp/hook"})
+        self.assertEqual(routes_from({"ROUTE_SPLITSTAY": "https://old/hook"}), {"SPLITPAY": "https://old/hook"})
+        self.assertEqual(routes_from({"ROUTE_SPLITPAY": "https://new", "ROUTE_SPLITSTAY": "https://old"}), {"SPLITPAY": "https://new"})
 
     def test_unknown_and_old_style_references_are_unclaimed(self):
         self.assertEqual(app_for({"data": {"reference": "order-12-abcdef"}}), "")  # old Gaxtron-era Choropia
