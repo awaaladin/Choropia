@@ -330,3 +330,25 @@ class PayoutEmailTests(TestCase):
         html = html_of(sent[0])
         for expected in ("₦200,000.00", "₦10,000.00", "₦190,000.00", "5%", "Guaranty Trust Bank", "1234"):
             self.assertIn(expected, html)
+
+
+class EmailSettingsTests(TestCase):
+    def test_ssl_wins_over_a_stale_tls_flag(self):
+        import importlib
+        import os
+
+        from config.settings import base
+
+        keep = {k: os.environ.get(k) for k in ("EMAIL_USE_SSL", "EMAIL_USE_TLS")}
+        try:
+            os.environ["EMAIL_USE_SSL"], os.environ["EMAIL_USE_TLS"] = "true", "true"
+            reloaded = importlib.reload(base)
+            self.assertTrue(reloaded.EMAIL_USE_SSL)
+            self.assertFalse(reloaded.EMAIL_USE_TLS)  # both true would make Django raise on every send
+        finally:
+            for k, v in keep.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
+            importlib.reload(base)
