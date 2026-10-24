@@ -1,8 +1,13 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+import logging
+
+from . import emails
 from .services import create_notification
 from .models import Notification
+
+logger = logging.getLogger(__name__)
 
 
 @receiver(post_save, sender="social.Follow")
@@ -70,3 +75,7 @@ def notify_on_order_status_change(sender, instance, created, **kwargs):
             verb=f"Order #{order.id} status changed to '{instance.to_status}'",
             target=order,
         )
+        try:
+            emails.send_order_update(order, instance.to_status, participant, actor=instance.actor)
+        except Exception:  # noqa: BLE001 - email must never break an order transition
+            logger.exception("Order email could not be prepared for order %s", order.id)

@@ -52,6 +52,9 @@ class Profile(TimeStampedModel):
         blank=True,
         help_text="Free-text area/campus within the pilot city, e.g. 'Uyo - Use of Ibom Campus'.",
     )
+    email_verified = models.BooleanField(
+        default=False, help_text="Set once the person enters the code we emailed (or signs in with Google)."
+    )
     theme_preference = models.CharField(
         max_length=10, choices=Theme.choices, default=Theme.LIGHT
     )
@@ -89,3 +92,17 @@ class TOTPDevice(TimeStampedModel):
 
     def __str__(self):
         return f"TOTPDevice<{self.user_id}> {'on' if self.confirmed else 'pending'}"
+
+
+class EmailOTP(TimeStampedModel):
+    """A one-time code emailed to a user. Only a keyed hash of the code is stored (see otp.py)."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="email_otps")
+    purpose = models.CharField(max_length=30, default="verify_email")
+    code_hash = models.CharField(max_length=64)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    consumed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "purpose", "-created_at"])]

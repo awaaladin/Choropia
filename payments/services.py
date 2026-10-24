@@ -101,6 +101,12 @@ def _mark_held(payment, note):
     payment.status = Payment.Status.PAID_HELD
     payment.paid_at = timezone.now()
     payment.order.transition_to(OrderStatus.PAID_ESCROW, note=note)
+    try:
+        from notifications import emails
+
+        emails.send_payment_received(payment)  # buyer receipt + seller "dispatch it"; sent after commit
+    except Exception:  # noqa: BLE001 - never block escrow on an email problem
+        logger.exception("Payment emails could not be prepared for payment %s", payment.pk)
 
 
 def confirm_payment(gaxtron_payment_id, tx_hash=None, raw_payload=None):

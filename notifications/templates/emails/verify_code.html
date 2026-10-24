@@ -1,0 +1,8 @@
+{% extends "emails/base.html" %}
+{% block preheader %}Your verification code is {{ code }}{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;">Your verification code</h1>
+<p style="margin:0 0 16px 0;">Hi {{ name }}, use this code to continue:</p>
+<p style="margin:0 0 16px 0;text-align:center;"><span style="display:inline-block;background:#f1f5f9;border-radius:12px;padding:14px 22px;font-size:30px;letter-spacing:8px;font-weight:bold;">{{ code }}</span></p>
+<p style="margin:0;color:#475569;">It works for {{ minutes }} minutes and only once. Choropia will never ask you to share it. If you did not ask for it, someone may have typed your email by mistake and you can ignore this message.</p>
+{% endblock %}

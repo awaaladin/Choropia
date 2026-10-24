@@ -29,6 +29,8 @@ from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 
+from notifications import emails
+
 from .models import Payment, Payout, PayoutAccount
 from .naming import is_ours, make_transfer_reference
 from .paystack import PaystackClient, PaystackError
@@ -44,6 +46,13 @@ RECONCILE_AFTER = timedelta(minutes=5)
 
 def _paystack():
     return PaystackClient()
+
+
+def _email_seller(send, payout):
+    try:
+        send(payout)
+    except Exception:  # noqa: BLE001 - a payout must never fail because an email could not be prepared
+        logger.exception("Payout email could not be prepared for payout %s", payout.pk)
 
 
 # --- money maths ----------------------------------------------------------------------------
@@ -70,7 +79,7 @@ def create_payout(payment):
     seller = payment.order.seller
     commission, net = commission_split(payment.amount)
     has_account = PayoutAccount.objects.filter(user=seller).exists()
-    return Payout.objects.create(
+    payout = Payout.objects.create(
         payment=payment,
         seller=seller,
         gross_amount=payment.amount,
@@ -79,6 +88,9 @@ def create_payout(payment):
         net_amount=net,
         status=Payout.Status.PENDING if has_account else Payout.Status.AWAITING_ACCOUNT,
     )
+    if not has_account:
+        _email_seller(emails.send_payout_needs_account, payout)
+    return payout
 
 
 def release_hook(payment):
@@ -115,6 +127,7 @@ def _retry_or_attention(payout, reason):
 
 
 def _succeed(payout, transfer_code=""):
+    first_time = payout.status != Payout.Status.SUCCESS
     payout.status = Payout.Status.SUCCESS
     payout.completed_at = payout.completed_at or timezone.now()
     payout.failure_reason = ""
@@ -123,6 +136,8 @@ def _succeed(payout, transfer_code=""):
     payout.save(update_fields=["status", "completed_at", "failure_reason", "paystack_transfer_code", "updated_at"])
     Payment.objects.filter(pk=payout.payment_id).update(transfer_reference=payout.transfer_reference or "")
     logger.info("Payout %s paid: NGN %s to %s", payout.pk, payout.net_amount, payout.account_name)
+    if first_time:
+        _email_seller(emails.send_payout_sent, payout)
     return payout
 
 

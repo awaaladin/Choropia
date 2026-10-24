@@ -11,6 +11,8 @@ from .two_factor import (
     TwoFactorVerifyView,
 )
 from .views import (
+    EmailOTPConfirmView,
+    EmailOTPRequestView,
     LoginView,
     LogoutAllView,
     LogoutView,
@@ -38,5 +40,7 @@ urlpatterns = [
     path("auth/2fa/confirm/", TwoFactorConfirmView.as_view(), name="2fa_confirm"),
     path("auth/2fa/disable/", TwoFactorDisableView.as_view(), name="2fa_disable"),
     path("auth/2fa/verify/", TwoFactorVerifyView.as_view(), name="2fa_verify"),
+    path("auth/email-otp/request/", EmailOTPRequestView.as_view(), name="email_otp_request"),
+    path("auth/email-otp/confirm/", EmailOTPConfirmView.as_view(), name="email_otp_confirm"),
     path("users/me/", MeView.as_view(), name="me"),
 ] + router.urls

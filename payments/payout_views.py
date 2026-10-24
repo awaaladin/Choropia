@@ -67,6 +67,11 @@ class PayoutAccountView(APIView):
         return Response({"configured": True, **PayoutAccountSerializer(account).data})
 
     def put(self, request):
+        if settings.REQUIRE_VERIFIED_EMAIL_FOR_PAYOUT and not request.user.profile.email_verified:
+            return Response(
+                {"detail": "Verify your email address before adding a payout account.", "code": "email_not_verified"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         data = PayoutAccountInputSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         try:

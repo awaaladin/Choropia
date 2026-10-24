@@ -12,7 +12,8 @@ User = get_user_model()
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ("bio", "avatar", "location", "theme_preference")
+        fields = ("bio", "avatar", "location", "theme_preference", "email_verified")
+        read_only_fields = ("email_verified",)
 
 
 class UserSerializer(serializers.ModelSerializer):

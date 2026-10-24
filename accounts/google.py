@@ -68,6 +68,9 @@ def user_for_google_claims(claims: dict) -> User:
         user.set_unusable_password()
         user.save()  # Profile is created by the accounts post_save signal
     SocialAccount.objects.create(user=user, provider="google", uid=uid)
+    # verify_google_id_token already required email_verified, so Google vouches for this address.
+    user.profile.email_verified = True
+    user.profile.save(update_fields=["email_verified", "updated_at"])
     return user
 
 

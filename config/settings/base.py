@@ -225,6 +225,7 @@ REST_FRAMEWORK = {
         "auth": "10/min",
         "listing-create": "20/hour",
         "payout-account": "20/hour",
+        "otp": "20/hour",
     },
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
@@ -334,7 +335,20 @@ EMAIL_PORT = env_int("EMAIL_PORT", 587)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+# Resend: smtp.resend.com on 465 with EMAIL_USE_SSL=true (and EMAIL_USE_TLS=false), user "resend",
+# password = the Resend API key. Some networks block 587; 465 is the dependable one.
+EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
+EMAIL_TIMEOUT = env_int("EMAIL_TIMEOUT", 10)  # Vercel stops a function at 10 s; never hang on SMTP
+# Must be on a domain verified with the email provider, or it will refuse to send.
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "Choropia <no-reply@choropia.local>")
+SUPPORT_EMAIL = env("SUPPORT_EMAIL", "") or DEFAULT_FROM_EMAIL.rpartition("<")[2].rstrip(">").strip()
+
+# Email one-time codes (accounts/otp.py)
+EMAIL_OTP_MINUTES = env_int("EMAIL_OTP_MINUTES", 10)
+EMAIL_OTP_MAX_ATTEMPTS = env_int("EMAIL_OTP_MAX_ATTEMPTS", 5)
+EMAIL_OTP_RESEND_SECONDS = env_int("EMAIL_OTP_RESEND_SECONDS", 60)
+# When true, a seller must have a verified email before saving a payout bank account.
+REQUIRE_VERIFIED_EMAIL_FOR_PAYOUT = env_bool("REQUIRE_VERIFIED_EMAIL_FOR_PAYOUT", False)
 # Where the emailed link points; the web page reads ?uid=&token= and posts them to the API.
 PASSWORD_RESET_URL_BASE = env("PASSWORD_RESET_URL_BASE", "http://localhost:8000/reset-password/")
 

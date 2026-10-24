@@ -81,7 +81,7 @@ class PasswordResetMailOutageTests(APITestCase):
 
     def test_smtp_failure_still_answers_200_and_does_not_leak_existence(self):
         broken = smtplib.SMTPServerDisconnected("please run connect() first")
-        with mock.patch("accounts.views.send_mail", side_effect=broken):
+        with mock.patch("django.core.mail.EmailMultiAlternatives.send", side_effect=broken):
             known = self.client.post("/api/v1/auth/password-reset/", {"email": "known@example.com"})
             unknown = self.client.post("/api/v1/auth/password-reset/", {"email": "nobody@example.com"})
         self.assertEqual(known.status_code, 200)

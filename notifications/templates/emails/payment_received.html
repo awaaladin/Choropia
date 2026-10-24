@@ -1,0 +1,13 @@
+{% extends "emails/base.html" %}
+{% block preheader %}We received {{ amount }} for order #{{ order_id }}{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;">Payment received</h1>
+<p style="margin:0 0 16px 0;">Hi {{ name }}, we received your payment. It is held safely in escrow, and {{ seller_name }} is paid only after you confirm you received the item.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;padding:6px 14px;margin:0 0 18px 0;font-size:14px;">
+  <tr><td style="padding:6px 0;color:#64748b;">Item</td><td style="padding:6px 0;text-align:right;">{{ listing_title }}</td></tr>
+  <tr><td style="padding:6px 0;color:#64748b;">Order</td><td style="padding:6px 0;text-align:right;">#{{ order_id }}</td></tr>
+  <tr><td style="padding:6px 0;color:#64748b;">Amount paid</td><td style="padding:6px 0;text-align:right;font-weight:bold;">{{ amount }}</td></tr>
+  <tr><td style="padding:6px 0;color:#64748b;">Reference</td><td style="padding:6px 0;text-align:right;">{{ reference }}</td></tr>
+</table>
+<p style="margin:0;"><a href="{{ site_url }}/orders/{{ order_id }}" style="color:#426086;">Track your order</a> ({{ site_url }}/orders/{{ order_id }})</p>
+{% endblock %}

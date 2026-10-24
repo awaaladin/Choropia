@@ -1,0 +1,12 @@
+{% extends "emails/base.html" %}
+{% block preheader %}{{ net }} is on its way to {{ bank }}{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;">Your money is on its way</h1>
+<p style="margin:0 0 16px 0;">Hi {{ name }}, the buyer confirmed order #{{ order_id }} and we have sent your payout to {{ bank }} (account ending {{ last4 }}). It usually arrives within minutes.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;padding:6px 14px;margin:0 0 18px 0;font-size:14px;">
+  <tr><td style="padding:6px 0;color:#64748b;">Buyer paid</td><td style="padding:6px 0;text-align:right;">{{ gross }}</td></tr>
+  <tr><td style="padding:6px 0;color:#64748b;">Choropia commission ({{ rate }}%)</td><td style="padding:6px 0;text-align:right;">- {{ commission }}</td></tr>
+  <tr><td style="padding:6px 0;color:#64748b;">You receive</td><td style="padding:6px 0;text-align:right;font-weight:bold;">{{ net }}</td></tr>
+</table>
+<p style="margin:0;"><a href="{{ site_url }}/orders/{{ order_id }}" style="color:#426086;">View the order</a> ({{ site_url }}/orders/{{ order_id }})</p>
+{% endblock %}

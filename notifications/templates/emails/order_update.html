@@ -1,0 +1,8 @@
+{% extends "emails/base.html" %}
+{% block preheader %}{{ headline }}: order #{{ order_id }}{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;">{{ headline }}</h1>
+<p style="margin:0 0 16px 0;">Hi {{ name }}, an update on <strong>{{ listing_title }}</strong> (order #{{ order_id }}).</p>
+<p style="margin:0 0 18px 0;">{{ body }}</p>
+<p style="margin:0;"><a href="{{ site_url }}/orders/{{ order_id }}" style="color:#426086;">View the order</a> ({{ site_url }}/orders/{{ order_id }})</p>
+{% endblock %}
