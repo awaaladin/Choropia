@@ -295,7 +295,25 @@ CHOROPIA_SITE_URL = env("CHOROPIA_SITE_URL", "http://localhost:5173")
 # --- Seller payouts ----------------------------------------------------------
 # When an order's escrow is released the seller is paid by bank transfer (Paystack Transfers) and
 # Choropia keeps this commission. See payments/payouts.py.
-PLATFORM_COMMISSION_PERCENT = Decimal(env("PLATFORM_COMMISSION_PERCENT", "5"))
+#
+# Tiered, so cheap items stay affordable and Paystack's flat fee never eats the margin:
+#   price below 10,000 pays 6%; up to and including 100,000 pays 5%; above that pays 4%.
+# COMMISSION_TIERS is "bound=percent,..." where a price BELOW the bound pays that percent; a price at or
+# above every bound pays PLATFORM_COMMISSION_PERCENT. For one flat rate, set COMMISSION_TIERS="" and
+# PLATFORM_COMMISSION_PERCENT=5.
+PLATFORM_COMMISSION_PERCENT = Decimal(env("PLATFORM_COMMISSION_PERCENT", "4"))
+
+
+def _parse_commission_tiers(raw):
+    tiers = []
+    for part in (p.strip() for p in raw.split(",")):
+        if part:
+            bound, _, percent = part.partition("=")
+            tiers.append((Decimal(bound), Decimal(percent)))
+    return sorted(tiers)
+
+
+COMMISSION_TIERS = _parse_commission_tiers(env("COMMISSION_TIERS", "10000=6,100000.01=5"))
 # Kill switch: with this off, releases still create payout records but no transfer is sent.
 PAYOUTS_ENABLED = env_bool("PAYOUTS_ENABLED", True)
 # A single payout above this (NGN, after commission) is held for a person to approve.
@@ -323,6 +341,8 @@ GAXTRON_CALLBACK_URL = env("GAXTRON_CALLBACK_URL", "https://httpbin.org/post")
 
 # --- Choropia business rules ------------------------------------------
 ESCROW_AUTO_RELEASE_DAYS = env_int("ESCROW_AUTO_RELEASE_DAYS", 3)
+# A paid order the seller has not dispatched within this many days is refunded to the buyer automatically.
+ESCROW_DISPATCH_DEADLINE_DAYS = env_int("ESCROW_DISPATCH_DEADLINE_DAYS", 7)
 PLATFORM_PILOT_CITY = env("PLATFORM_PILOT_CITY", "Uyo")
 
 DELIVERY_PROVIDER = env("DELIVERY_PROVIDER", "delivery.providers.mock.MockDeliveryProvider")

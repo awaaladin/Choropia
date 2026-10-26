@@ -58,10 +58,27 @@ def _email_seller(send, payout):
 # --- money maths ----------------------------------------------------------------------------
 
 
+def commission_percent_for(gross):
+    """The commission rate (percent) for an item price, from the tiers in settings."""
+    gross = Decimal(gross)
+    for below, percent in settings.COMMISSION_TIERS:
+        if gross < below:
+            return percent
+    return settings.PLATFORM_COMMISSION_PERCENT
+
+
+def commission_preview(gross):
+    """What a seller would be charged and receive for this price: shown while they write a listing."""
+    gross = Decimal(gross).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
+    percent = commission_percent_for(gross)
+    commission, net = commission_split(gross, percent)
+    return {"price": gross, "commission_percent": percent, "commission_amount": commission, "you_receive": net}
+
+
 def commission_split(gross, percent=None):
     """(commission, net) for a gross amount. Commission is rounded to the kobo (half up) and the
     seller gets exactly the remainder, so commission + net always equals gross."""
-    percent = settings.PLATFORM_COMMISSION_PERCENT if percent is None else Decimal(percent)
+    percent = commission_percent_for(gross) if percent is None else Decimal(percent)
     gross = Decimal(gross).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
     commission = (gross * percent / Decimal(100)).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
     return commission, gross - commission
@@ -77,13 +94,14 @@ def create_payout(payment):
         return existing
 
     seller = payment.order.seller
-    commission, net = commission_split(payment.amount)
+    rate = commission_percent_for(payment.amount)
+    commission, net = commission_split(payment.amount, rate)
     has_account = PayoutAccount.objects.filter(user=seller).exists()
     payout = Payout.objects.create(
         payment=payment,
         seller=seller,
         gross_amount=payment.amount,
-        commission_rate=settings.PLATFORM_COMMISSION_PERCENT,
+        commission_rate=rate,
         commission_amount=commission,
         net_amount=net,
         status=Payout.Status.PENDING if has_account else Payout.Status.AWAITING_ACCOUNT,

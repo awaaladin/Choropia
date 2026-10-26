@@ -66,6 +66,46 @@ def poll_paystack_payments_task():
 
 
 @shared_task
+def auto_refund_undispatched_task():
+    """A buyer's money must not sit in escrow forever because the seller vanished. A paid order that has
+    not been dispatched within ESCROW_DISPATCH_DEADLINE_DAYS is refunded to the buyer and the item goes
+    back on sale. Safe to run repeatedly: an order that moved on in the meantime is skipped, and a refund
+    Paystack cannot make right now rolls the order back so the next run tries again."""
+    from .services import refund_escrow, reopen_listing
+
+    cutoff = timezone.now() - timezone.timedelta(days=settings.ESCROW_DISPATCH_DEADLINE_DAYS)
+    order_ids = list(
+        Order.objects.filter(status=OrderStatus.PAID_ESCROW, payment__paid_at__lte=cutoff).values_list("id", flat=True)
+    )
+    refunded, skipped = [], []
+    for order_id in order_ids:
+        try:
+            with transaction.atomic():
+                order = Order.objects.select_for_update().get(id=order_id)
+                if order.status != OrderStatus.PAID_ESCROW:
+                    skipped.append(order_id)
+                    continue
+                order.transition_to(
+                    OrderStatus.REFUNDED,
+                    note=f"Refunded automatically: the seller did not dispatch within {settings.ESCROW_DISPATCH_DEADLINE_DAYS} days",
+                )
+                refund_escrow(order)
+                reopen_listing(order)
+                refunded.append(order_id)
+        except Exception as exc:  # noqa: BLE001 - one bad order must not stop the rest
+            logger.warning("Auto-refund skipped order %s: %s", order_id, exc)
+            skipped.append(order_id)
+    return {"refunded": refunded, "skipped": skipped}
+
+
+@shared_task
+def retry_pending_refunds_task():
+    from .services import retry_pending_refunds
+
+    return retry_pending_refunds()
+
+
+@shared_task
 def process_payouts_task():
     """Sends queued seller payouts and reconciles transfers whose outcome we never heard."""
     from .payouts import process_pending_payouts

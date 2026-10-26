@@ -17,6 +17,7 @@ class OrderStatus:
     DISPUTED = "disputed"
     COMPLETED = "completed"
     REFUNDED = "refunded"
+    CANCELLED = "cancelled"  # never paid for in the end, e.g. the item sold to someone else first
 
     CHOICES = (
         (PENDING_PAYMENT, "Pending payment"),
@@ -28,23 +29,27 @@ class OrderStatus:
         (DISPUTED, "Disputed"),
         (COMPLETED, "Completed"),
         (REFUNDED, "Refunded"),
+        (CANCELLED, "Cancelled"),
     )
 
-    TERMINAL = {COMPLETED, REFUNDED}
+    TERMINAL = {COMPLETED, REFUNDED, CANCELLED}
 
 
 # Explicit allow-list of transitions. Anything not listed here is rejected —
 # there is no default/fallback path.
 TRANSITIONS = {
-    OrderStatus.PENDING_PAYMENT: {OrderStatus.PAID_ESCROW},
-    OrderStatus.PAID_ESCROW: {OrderStatus.COURIER_ASSIGNED},
-    OrderStatus.COURIER_ASSIGNED: {OrderStatus.IN_TRANSIT},
-    OrderStatus.IN_TRANSIT: {OrderStatus.DELIVERED},
+    OrderStatus.PENDING_PAYMENT: {OrderStatus.PAID_ESCROW, OrderStatus.CANCELLED},
+    # REFUNDED from here: the seller never dispatched, so the buyer gets their money back.
+    OrderStatus.PAID_ESCROW: {OrderStatus.COURIER_ASSIGNED, OrderStatus.REFUNDED},
+    # DISPUTED from here too: "it never arrived" must not wait for the seller to say "delivered".
+    OrderStatus.COURIER_ASSIGNED: {OrderStatus.IN_TRANSIT, OrderStatus.DISPUTED},
+    OrderStatus.IN_TRANSIT: {OrderStatus.DELIVERED, OrderStatus.DISPUTED},
     OrderStatus.DELIVERED: {OrderStatus.CONFIRMED, OrderStatus.DISPUTED},
     OrderStatus.CONFIRMED: {OrderStatus.COMPLETED},
     OrderStatus.DISPUTED: {OrderStatus.REFUNDED, OrderStatus.COMPLETED},
     OrderStatus.COMPLETED: set(),
     OrderStatus.REFUNDED: set(),
+    OrderStatus.CANCELLED: set(),
 }
 
 

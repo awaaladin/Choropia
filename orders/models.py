@@ -8,6 +8,25 @@ from listings.models import Listing
 from .state_machine import OrderStatus, validate_transition
 
 
+# Orders whose money is (or was) held for the item: once one exists, nobody else can buy that listing.
+PAID_STATES = (
+    OrderStatus.PAID_ESCROW,
+    OrderStatus.COURIER_ASSIGNED,
+    OrderStatus.IN_TRANSIT,
+    OrderStatus.DELIVERED,
+    OrderStatus.CONFIRMED,
+    OrderStatus.DISPUTED,
+    OrderStatus.COMPLETED,
+)
+
+
+def listing_has_paid_order(listing, exclude_order_id=None):
+    qs = Order.objects.filter(listing=listing, status__in=PAID_STATES)
+    if exclude_order_id is not None:
+        qs = qs.exclude(pk=exclude_order_id)
+    return qs.exists()
+
+
 class Order(TimeStampedModel):
     Status = OrderStatus
 

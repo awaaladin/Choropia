@@ -60,6 +60,9 @@ def notify_on_order_status_change(sender, instance, created, **kwargs):
     if not created:
         return
 
+    if (instance.note or "").startswith("[auto]"):
+        return  # a stage skipped because the buyer confirmed in person; the final status says enough
+
     order = instance.order
     notification_type = (
         Notification.Type.DISPUTE if instance.to_status == "disputed" else Notification.Type.ORDER_STATUS

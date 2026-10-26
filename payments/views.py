@@ -12,7 +12,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from orders.models import Order
+from orders.models import Order, listing_has_paid_order
 
 from .gaxtron import GaxtronClient, GaxtronError
 from .models import Payment
@@ -39,6 +39,8 @@ class InitializePaymentView(APIView):
             raise PermissionDenied("Only the buyer can initialize payment for this order.")
         if order.status != Order.Status.PENDING_PAYMENT:
             raise ValidationError("This order is not awaiting payment.")
+        if order.listing.status != "active" or listing_has_paid_order(order.listing, exclude_order_id=order.pk):
+            raise ValidationError("This item is no longer available.")
 
         try:
             payment = initialize_payment(order, callback_url=request.data.get("callback_url"))
@@ -153,6 +155,10 @@ class WalletSummaryView(APIView):
             {
                 "currency": "NGN",
                 "commission_percent": str(settings.PLATFORM_COMMISSION_PERCENT),
+                "commission_tiers": [
+                    *({"below": str(below), "percent": str(percent)} for below, percent in settings.COMMISSION_TIERS),
+                    {"below": None, "percent": str(settings.PLATFORM_COMMISSION_PERCENT)},
+                ],
                 "selling": {
                     "released_total": str(total(order__seller=user, status=Payment.Status.RELEASED)),
                     "held_total": str(total(order__seller=user, status=Payment.Status.PAID_HELD)),

@@ -1,6 +1,7 @@
 """API for sellers' payout accounts and payout history, plus the scheduled-jobs endpoint."""
 import hmac
 import logging
+from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -89,6 +90,25 @@ class PayoutAccountView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class CommissionPreviewView(APIView):
+    """Public and read-only: what the seller would pay and receive for a price. The apps call it while a
+    seller types the price, so the rate lives in one place (the server)."""
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes: list = []
+    throttle_classes: list = []
+
+    def get(self, request):
+        try:
+            price = Decimal(str(request.query_params.get("price", "")).replace(",", "").strip())
+        except (InvalidOperation, ValueError):
+            return Response({"price": ["Enter a price in naira."]}, status=status.HTTP_400_BAD_REQUEST)
+        if not (Decimal("0") < price <= Decimal("1000000000")):
+            return Response({"price": ["Enter a price between 1 and 1,000,000,000."]}, status=status.HTTP_400_BAD_REQUEST)
+        preview = payouts.commission_preview(price)
+        return Response({key: str(value) for key, value in preview.items()})
+
+
 class MyPayoutsView(generics.ListAPIView):
     serializer_class = PayoutSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -125,12 +145,15 @@ class RunScheduledJobsView(View):
         return self.run()
 
     def run(self):
-        from .tasks import auto_release_escrow_task, poll_paystack_payments_task
+        from .services import retry_pending_refunds
+        from .tasks import auto_refund_undispatched_task, auto_release_escrow_task, poll_paystack_payments_task
 
         results = {}
         for name, job in (
             ("paystack_payments", poll_paystack_payments_task),
             ("auto_release", auto_release_escrow_task),
+            ("auto_refund_undispatched", auto_refund_undispatched_task),
+            ("pending_refunds", retry_pending_refunds),
             ("payouts", payouts.process_pending_payouts),
         ):
             try:

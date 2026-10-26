@@ -139,7 +139,8 @@ _ORDER_COPY = {
     "in_transit": ("buyer", "Your order is on its way", "Your courier is on the way with your item."),
     "delivered": ("buyer", "Your order was delivered", "Please check your item. If everything is as described, confirm receipt so the seller can be paid. If something is wrong, open a dispute from the order page."),
     "completed": ("both", "Order completed", "This order is complete. Thank you for using Choropia."),
-    "refunded": ("buyer", "Your order was refunded", "Your payment is being returned to you."),
+    "refunded": ("both", "Order refunded", {"buyer": "Your payment is being returned to you.", "seller": "This order was refunded to the buyer."}),
+    "cancelled": ("buyer", "Your order was cancelled", "This item was bought by someone else a moment before your payment arrived, so your payment is being refunded in full."),
     "disputed": ("both", "A dispute was opened", "A dispute was opened on this order. The payment stays safely in escrow while our team reviews it."),
 }
 
@@ -152,6 +153,8 @@ def send_order_update(order, to_status: str, recipient, actor=None) -> None:
     role = "buyer" if recipient.id == order.buyer_id else "seller"
     if audience != "both" and audience != role:
         return
+    if isinstance(body, dict):
+        body = body[role]
     send_email_after_commit(
         recipient.email,
         f"Order #{order.id}: {headline.lower()}",

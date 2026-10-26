@@ -9,7 +9,7 @@ from orders.state_machine import OrderStatus
 from .gaxtron import GaxtronClient
 from .models import Payment
 from .naming import make_reference, paystack_metadata
-from .paystack import PaystackClient, from_kobo
+from .paystack import PaystackClient, PaystackError, from_kobo
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +97,80 @@ def _initialize_gaxtron(payment):
     return payment
 
 
+def reserve_listing(order):
+    """Marks the item sold the moment money for it arrives. Returns False if the item is no longer
+    available (already sold, removed, or another buyer's payment got there first), in which case the
+    caller must hand this buyer's money back instead of holding it."""
+    from listings.models import Listing
+    from orders.models import listing_has_paid_order
+
+    listing = Listing.objects.select_for_update().get(pk=order.listing_id)
+    if listing.status != Listing.Status.ACTIVE or listing_has_paid_order(listing, exclude_order_id=order.pk):
+        return False
+    listing.status = Listing.Status.SOLD
+    listing.save(update_fields=["status", "updated_at"])
+    return True
+
+
+def reopen_listing(order):
+    """Puts an unsold item back on sale (the order was refunded before the item changed hands)."""
+    from listings.models import Listing
+    from orders.models import listing_has_paid_order
+
+    listing = Listing.objects.select_for_update().get(pk=order.listing_id)
+    if listing.status == Listing.Status.SOLD and not listing_has_paid_order(listing, exclude_order_id=order.pk):
+        listing.status = Listing.Status.ACTIVE
+        listing.save(update_fields=["status", "updated_at"])
+
+
+def _hold_for_refund(payment, data, raw_payload):
+    """A buyer paid for an item that sold to someone else a moment earlier. Cancel their order and
+    give the money straight back; a scheduler retries if Paystack is unavailable."""
+    payment.status = Payment.Status.REFUND_PENDING
+    payment.paid_at = timezone.now()
+    payment.paystack_transaction_id = str(data.get("id") or "")
+    payment.raw_webhook_payload = raw_payload or data
+    payment.save(update_fields=["status", "paid_at", "paystack_transaction_id", "raw_webhook_payload"])
+    payment.order.transition_to(OrderStatus.CANCELLED, note="Item no longer available; payment is being refunded")
+    transaction.on_commit(lambda pid=payment.pk: process_pending_refund(pid))
+    logger.warning("Payment %s arrived for an unavailable item; refunding", payment.reference)
+    return payment
+
+
+def _already_refunded(exc):
+    text = str(exc).lower()
+    return "already" in text and "refund" in text
+
+
+def process_pending_refund(payment_id):
+    """Refunds a REFUND_PENDING payment. Idempotent and safe to retry."""
+    try:
+        with transaction.atomic():
+            payment = Payment.objects.select_for_update().select_related("order").get(pk=payment_id)
+            if payment.status != Payment.Status.REFUND_PENDING:
+                return payment
+        try:
+            _paystack().refund(payment.reference)
+        except PaystackError as exc:
+            if not _already_refunded(exc):
+                logger.error("Refund for payment %s failed (will retry): %s", payment.reference, exc)
+                return payment
+        Payment.objects.filter(pk=payment.pk, status=Payment.Status.REFUND_PENDING).update(
+            status=Payment.Status.REFUNDED, refunded_at=timezone.now()
+        )
+        payment.refresh_from_db()
+        return payment
+    except Exception:  # noqa: BLE001 - never raise into a webhook or a scheduler
+        logger.exception("Unexpected error refunding payment %s", payment_id)
+        return None
+
+
+def retry_pending_refunds():
+    ids = list(Payment.objects.filter(status=Payment.Status.REFUND_PENDING).values_list("pk", flat=True)[:25])
+    done = [pid for pid in ids if (p := process_pending_refund(pid)) is not None and p.status == Payment.Status.REFUNDED]
+    return {"pending": len(ids), "refunded": done}
+
+
 def _mark_held(payment, note):
     payment.status = Payment.Status.PAID_HELD
     payment.paid_at = timezone.now()
@@ -150,6 +224,9 @@ def confirm_paystack_payment(reference, data, raw_payload=None):
         payment.raw_webhook_payload = raw_payload or data
         payment.save(update_fields=["status", "raw_webhook_payload"])
         return payment
+
+    if not reserve_listing(payment.order):
+        return _hold_for_refund(payment, data, raw_payload)
 
     _mark_held(payment, "Payment confirmed via Paystack")
     payment.paystack_transaction_id = str(data.get("id") or "")
@@ -211,7 +288,11 @@ def refund_escrow(order):
         raise ValueError(f"Cannot refund a payment in status '{payment.status}'.")
 
     if payment.provider == Payment.Provider.PAYSTACK:
-        _paystack().refund(payment.reference)  # raises PaystackError, rolling back the caller
+        try:
+            _paystack().refund(payment.reference)  # any other PaystackError rolls back the caller
+        except PaystackError as exc:
+            if not _already_refunded(exc):
+                raise
 
     payment.status = Payment.Status.REFUNDED
     payment.refunded_at = timezone.now()

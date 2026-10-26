@@ -23,7 +23,9 @@ class DeliveryViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
     def advance_status(self, request, pk=None):
         """Simulates (or, for a real provider, receives) a courier status callback."""
         delivery = self.get_object()
-        if request.user.id not in (delivery.order.buyer_id, delivery.order.seller_id):
+        # The buyer has confirm_receipt and open_dispute; letting them (or anyone but the seller or
+        # staff) push courier status would let a delivery be faked from the wrong side.
+        if request.user.id != delivery.order.seller_id and not request.user.is_staff:
             raise PermissionDenied()
 
         serializer = DeliveryStatusUpdateSerializer(data=request.data)

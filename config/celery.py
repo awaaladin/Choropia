@@ -18,6 +18,14 @@ app.conf.beat_schedule = {
         "task": "payments.tasks.poll_paystack_payments_task",
         "schedule": 300.0,
     },
+    "auto-refund-undispatched-hourly": {
+        "task": "payments.tasks.auto_refund_undispatched_task",
+        "schedule": crontab(minute=30),
+    },
+    "retry-pending-refunds-every-10-minutes": {
+        "task": "payments.tasks.retry_pending_refunds_task",
+        "schedule": 600.0,
+    },
     "process-payouts-every-5-minutes": {
         "task": "payments.tasks.process_payouts_task",
         "schedule": 300.0,

@@ -297,7 +297,7 @@ class OrderAndPaymentEmailTests(TestCase):
         self.assertEqual(self.order.status, OrderStatus.DELIVERED)
 
 
-@override_settings(**SETTINGS, PAYSTACK_SECRET_KEY="sk_test_unit", PAYOUTS_ENABLED=True, PAYOUT_MAX_NGN=Decimal("2000000"))
+@override_settings(**SETTINGS, PAYSTACK_SECRET_KEY="sk_test_unit", PAYOUTS_ENABLED=True, COMMISSION_TIERS=[], PLATFORM_COMMISSION_PERCENT=Decimal("5"), PAYOUT_MAX_NGN=Decimal("2000000"))
 class PayoutEmailTests(TestCase):
     def setUp(self):
         self.order = make_order()

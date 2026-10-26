@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from accounts.demo import DEMO_LISTING_MESSAGE, is_demo_user
+from .models import listing_has_paid_order
 from listings.models import Listing
 from merchants.models import Merchant
 
@@ -98,6 +99,8 @@ class OrderCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("You cannot buy your own listing.")
         if is_demo_user(listing.owner):
             raise serializers.ValidationError(DEMO_LISTING_MESSAGE)
+        if listing_has_paid_order(listing):
+            raise serializers.ValidationError("This item has just been bought by someone else.")
         return listing
 
     def create(self, validated_data):

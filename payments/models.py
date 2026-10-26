@@ -12,6 +12,7 @@ class Payment(TimeStampedModel):
         RELEASED = "released", "Released to seller"
         REFUNDED = "refunded", "Refunded to buyer"
         FAILED = "failed", "Failed"
+        REFUND_PENDING = "refund_pending", "Refund pending (item was no longer available)"
 
     class Provider(models.TextChoices):
         PAYSTACK = "paystack", "Paystack"

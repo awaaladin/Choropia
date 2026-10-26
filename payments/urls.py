@@ -1,6 +1,12 @@
 from django.urls import path
 
-from .payout_views import BanksView, MyPayoutsView, PayoutAccountView, RunScheduledJobsView
+from .payout_views import (
+    BanksView,
+    CommissionPreviewView,
+    MyPayoutsView,
+    PayoutAccountView,
+    RunScheduledJobsView,
+)
 from .views import (
     GaxtronWebhookView,
     InitializePaymentView,
@@ -15,6 +21,7 @@ urlpatterns = [
     path("payments/verify/", VerifyPaymentView.as_view(), name="payment-verify"),
     path("payments/webhook/gaxtron/", GaxtronWebhookView.as_view(), name="payment-webhook"),
     path("payments/webhook/paystack/", PaystackWebhookView.as_view(), name="payment-webhook-paystack"),
+    path("payouts/preview/", CommissionPreviewView.as_view(), name="payout-preview"),
     path("payouts/banks/", BanksView.as_view(), name="payout-banks"),
     path("payouts/account/", PayoutAccountView.as_view(), name="payout-account"),
     path("payouts/", MyPayoutsView.as_view(), name="payouts"),
