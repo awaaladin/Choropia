@@ -4,18 +4,18 @@ import com.choropia.app.BuildConfig
 import com.choropia.app.data.model.Message
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
-import okio.ByteString
 
-@Serializable private data class OutgoingChatMessage(val body: String)
-
-/** Thin wrapper around the /ws/chat/<id>/ endpoint. Auth is a query-string JWT, same contract
- * as the web frontend uses (see common/ws_auth.py on the backend). */
+/**
+ * Optional realtime channel for `/ws/chat/<id>/`. Vercel's serverless runtime can't hold
+ * WebSockets, so this only connects when `WS_BASE_URL` points at the Docker realtime host; the
+ * chat screen polls REST either way, so a missing/dropped socket only costs latency, never data.
+ */
 class ChatSocket(private val client: OkHttpClient = OkHttpClient()) {
     private val json = Json { ignoreUnknownKeys = true }
     private var webSocket: WebSocket? = null
@@ -23,8 +23,11 @@ class ChatSocket(private val client: OkHttpClient = OkHttpClient()) {
     private val _incoming = MutableSharedFlow<Message>(extraBufferCapacity = 64)
     val incoming = _incoming.asSharedFlow()
 
+    val isAvailable: Boolean get() = BuildConfig.WS_BASE_URL.isNotBlank()
+
     fun connect(conversationId: Int, accessToken: String) {
-        val url = "${BuildConfig.WS_BASE_URL}/ws/chat/$conversationId/?token=$accessToken"
+        if (!isAvailable || webSocket != null) return
+        val url = "${BuildConfig.WS_BASE_URL.trimEnd('/')}/ws/chat/$conversationId/?token=$accessToken"
         val request = Request.Builder().url(url).build()
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -32,16 +35,14 @@ class ChatSocket(private val client: OkHttpClient = OkHttpClient()) {
                     .onSuccess { _incoming.tryEmit(it) }
             }
 
-            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                onMessage(webSocket, bytes.utf8())
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                this@ChatSocket.webSocket = null
+            }
+
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                this@ChatSocket.webSocket = null
             }
         })
-    }
-
-    /** Returns false if there's no live socket to send on (caller should fall back to REST). */
-    fun send(body: String): Boolean {
-        val socket = webSocket ?: return false
-        return socket.send(json.encodeToString(OutgoingChatMessage.serializer(), OutgoingChatMessage(body)))
     }
 
     fun disconnect() {

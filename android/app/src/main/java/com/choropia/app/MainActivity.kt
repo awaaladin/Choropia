@@ -4,25 +4,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import com.choropia.app.navigation.ChoropiaNavHost
-import com.choropia.app.ui.theme.ChoropiaTheme
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.choropia.app.ui.ChoropiaRoot
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // The system splash (navy + mark) hands over to the animated in-app loader.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val repository = (application as ChoropiaApp).repository
-
+        val app = application as ChoropiaApp
         setContent {
-            ChoropiaTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    ChoropiaNavHost(repository = repository)
-                }
-            }
+            ChoropiaRoot(repository = app.repository, session = app.session)
         }
     }
 }

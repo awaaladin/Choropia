@@ -8,3 +8,17 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Signing material — never commit
+keystore.properties
+*.jks
+*.keystore
+
+# Build output anywhere in the tree (app/build was previously tracked by mistake)
+**/build/
+
+# Local APK backups (for reverting a test build on a device)
+local-builds/
+
+# CI artifacts pulled down with gh
+apk-output/
