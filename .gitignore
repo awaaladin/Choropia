@@ -22,3 +22,5 @@ GO_LIVE.md
 android/WEB_DOWNLOAD_HANDOFF.md
 **/DESIGN*.md
 *.internal.md
+
+apk-output/
