@@ -87,22 +87,43 @@ def commission_split(gross, percent=None):
 # --- creating a payout (called when escrow is released) -------------------------------------
 
 
+def _delivery_for(payment):
+    """The order's paid delivery job, if the buyer chose delivery (see the dispatch app)."""
+    delivery = getattr(payment.order, "dispatch_delivery", None)
+    if delivery is None or delivery.status == "cancelled" or delivery.fee <= 0:
+        return None
+    return delivery
+
+
 def create_payout(payment):
-    """Records what the seller is owed. Safe to call twice; the second call returns the first."""
-    existing = Payout.objects.filter(payment=payment).first()
+    """Records what the seller is owed. Safe to call twice; the second call returns the first.
+
+    The buyer's payment is item price + the buyer's share of any delivery fee. The seller's
+    commission is worked out on the item price alone, and the seller's share of the delivery fee
+    (if they agreed to pay some) is taken out of their money; both shares go to the driver."""
+    existing = Payout.objects.filter(payment=payment, kind=Payout.Kind.SELLER).first()
     if existing:
         return existing
 
     seller = payment.order.seller
-    rate = commission_percent_for(payment.amount)
-    commission, net = commission_split(payment.amount, rate)
+    delivery = _delivery_for(payment)
+    gross = Decimal(payment.amount) - (delivery.buyer_share if delivery else Decimal("0"))
+    # The seller only covers their share if a driver really did the job; otherwise nobody earned the fee.
+    deduction = delivery.seller_share if delivery is not None and delivery.driver_id else Decimal("0")
+    if delivery is not None and not delivery.driver_id:
+        logger.warning("Order %s was released with a delivery fee but no driver; the fee stays with Choropia for staff to settle", payment.order_id)
+    rate = commission_percent_for(gross)
+    commission, net = commission_split(gross, rate)
+    net -= deduction
     has_account = PayoutAccount.objects.filter(user=seller).exists()
     payout = Payout.objects.create(
         payment=payment,
+        kind=Payout.Kind.SELLER,
         seller=seller,
-        gross_amount=payment.amount,
+        gross_amount=gross,
         commission_rate=rate,
         commission_amount=commission,
+        delivery_deduction=deduction,
         net_amount=net,
         status=Payout.Status.PENDING if has_account else Payout.Status.AWAITING_ACCOUNT,
     )
@@ -111,12 +132,39 @@ def create_payout(payment):
     return payout
 
 
+def create_driver_payout(payment):
+    """The driver's pay for a delivery: the whole delivery fee minus Choropia's driver commission."""
+    delivery = _delivery_for(payment)
+    if delivery is None or delivery.driver_id is None:
+        return None
+    existing = Payout.objects.filter(payment=payment, kind=Payout.Kind.DRIVER).first()
+    if existing:
+        return existing
+    driver_user = delivery.driver.user
+    rate = settings.DRIVER_COMMISSION_PERCENT
+    commission, net = commission_split(delivery.fee, rate)
+    has_account = PayoutAccount.objects.filter(user=driver_user).exists()
+    return Payout.objects.create(
+        payment=payment,
+        kind=Payout.Kind.DRIVER,
+        seller=driver_user,
+        gross_amount=delivery.fee,
+        commission_rate=rate,
+        commission_amount=commission,
+        net_amount=net,
+        status=Payout.Status.PENDING if has_account else Payout.Status.AWAITING_ACCOUNT,
+    )
+
+
 def release_hook(payment):
-    """Called from release_escrow inside the caller's transaction. Records the payout, then sends
-    the transfer only once that transaction has committed (so a rollback can never leave money sent
+    """Called from release_escrow inside the caller's transaction. Records the payouts, then sends
+    the transfers only once that transaction has committed (so a rollback can never leave money sent
     for a release that didn't happen)."""
     payout = create_payout(payment)
     transaction.on_commit(lambda: process_payout_safely(payout.pk))
+    driver_payout = create_driver_payout(payment)
+    if driver_payout is not None:
+        transaction.on_commit(lambda: process_payout_safely(driver_payout.pk))
     return payout
 
 
@@ -154,7 +202,7 @@ def _succeed(payout, transfer_code=""):
     payout.save(update_fields=["status", "completed_at", "failure_reason", "paystack_transfer_code", "updated_at"])
     Payment.objects.filter(pk=payout.payment_id).update(transfer_reference=payout.transfer_reference or "")
     logger.info("Payout %s paid: NGN %s to %s", payout.pk, payout.net_amount, payout.account_name)
-    if first_time:
+    if first_time and payout.kind == Payout.Kind.SELLER:
         _email_seller(emails.send_payout_sent, payout)
     return payout
 
@@ -205,7 +253,7 @@ def process_payout(payout_id):
     # Outside the transaction: the network call.
     try:
         data = _paystack().initiate_transfer(
-            amount=amount, recipient_code=recipient_code, reference=reference, reason=f"Choropia order #{order_id} payout"
+            amount=amount, recipient_code=recipient_code, reference=reference, reason=f"Choropia order #{order_id} {'delivery ' if payout.kind == Payout.Kind.DRIVER else ''}payout"
         )
     except PaystackError as exc:
         return _after_transfer_error(payout.pk, exc)

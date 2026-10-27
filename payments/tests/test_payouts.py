@@ -500,7 +500,7 @@ class ScheduledJobsEndpointTests(TestCase):
             for method in (self.client.post, self.client.get):
                 response = method(self.URL, HTTP_AUTHORIZATION="Bearer s3cret")
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual(set(response.json()), {"paystack_payments", "auto_release", "auto_refund_undispatched", "pending_refunds", "payouts"})
+                self.assertEqual(set(response.json()), {"paystack_payments", "auto_release", "auto_refund_undispatched", "pending_refunds", "payouts", "dispatch_nudges"})
 
     @override_settings(CRON_SECRET="s3cret")
     def test_one_failing_job_does_not_stop_the_others(self):

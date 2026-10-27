@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 
 from django.conf import settings
 from django.db import transaction
@@ -26,11 +27,19 @@ def generate_reference(order):
     return make_reference("ORDER")
 
 
+def payable_amount(order):
+    """What the buyer is charged: the item price plus their share of the delivery fee (if they chose delivery)."""
+    delivery = getattr(order, "dispatch_delivery", None)
+    if delivery is not None and delivery.status != "cancelled":
+        return Decimal(order.price) + delivery.buyer_share
+    return Decimal(order.price)
+
+
 def initialize_payment(order, callback_url=None):
     provider = settings.PAYMENT_PROVIDER
     payment, created = Payment.objects.get_or_create(
         order=order,
-        defaults={"reference": generate_reference(order), "amount": order.price, "provider": provider},
+        defaults={"reference": generate_reference(order), "amount": payable_amount(order), "provider": provider},
     )
     if payment.status != Payment.Status.INITIALIZED:
         return payment
@@ -175,6 +184,12 @@ def _mark_held(payment, note):
     payment.status = Payment.Status.PAID_HELD
     payment.paid_at = timezone.now()
     payment.order.transition_to(OrderStatus.PAID_ESCROW, note=note)
+    try:
+        from dispatch import services as dispatch_services
+
+        dispatch_services.on_order_paid(payment.order)  # handover code + job alerts to the seller's drivers
+    except Exception:  # noqa: BLE001 - never block escrow on a dispatch problem; the nudge job catches it
+        logger.exception("Dispatch could not start for payment %s", payment.pk)
     try:
         from notifications import emails
 

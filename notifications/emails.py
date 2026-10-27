@@ -200,3 +200,16 @@ def send_payout_needs_account(payout) -> None:
         "payout_needs_account",
         {"name": _display_name(seller), "order_id": payout.payment.order_id, "net": naira(payout.net_amount)},
     )
+
+
+# --- dispatch (drivers) ---------------------------------------------------------------------
+
+
+def send_dispatch_notice(user, subject: str, headline: str, body: str, link: str = "") -> None:
+    """One plain notice about delivery: a job alert, an approval, a reminder. Sent after commit."""
+    send_email_after_commit(
+        user.email,
+        subject,
+        "dispatch_notice",
+        {"name": _display_name(user), "headline": headline, "body": body, "link": link},
+    )

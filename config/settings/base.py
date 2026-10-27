@@ -78,6 +78,8 @@ LOCAL_APPS = [
     "reviews",
     "notifications",
     "moderation",
+    "dispatch",
+    "legal",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -226,6 +228,9 @@ REST_FRAMEWORK = {
         "listing-create": "20/hour",
         "payout-account": "20/hour",
         "otp": "20/hour",
+        "dispatch-write": "60/hour",
+        "dispatch-documents": "20/hour",
+        "handover-code": "30/hour",
     },
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
@@ -318,6 +323,26 @@ COMMISSION_TIERS = _parse_commission_tiers(env("COMMISSION_TIERS", "10000=6,1000
 PAYOUTS_ENABLED = env_bool("PAYOUTS_ENABLED", True)
 # A single payout above this (NGN, after commission) is held for a person to approve.
 PAYOUT_MAX_NGN = Decimal(env("PAYOUT_MAX_NGN", "2000000"))
+
+ADMIN_URL = env("ADMIN_URL", "admin/").lstrip("/").rstrip("/") + "/"
+
+# --- Dispatch (delivery by independent drivers) ----------------------------------------------
+# Choropia keeps this percent of the delivery fee (the driver is paid the rest).
+DRIVER_COMMISSION_PERCENT = Decimal(env("DRIVER_COMMISSION_PERCENT", "2.5"))
+# If no driver has accepted a paid delivery after this long, the seller is nudged to add more drivers.
+DISPATCH_NUDGE_HOURS = env_int("DISPATCH_NUDGE_HOURS", 2)
+# Drivers' identity documents are encrypted with this key before they are stored (Fernet key; make one with
+# `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`). Keep a backup:
+# without it the documents cannot be read again. Multiple keys (comma separated) allow rotation: the first
+# encrypts, all can decrypt.
+DOCUMENT_ENCRYPTION_KEYS = env("DOCUMENT_ENCRYPTION_KEY", "")
+DOCUMENT_MAX_BYTES = env_int("DOCUMENT_MAX_BYTES", 3 * 1024 * 1024)
+PROOF_PHOTO_MAX_BYTES = env_int("PROOF_PHOTO_MAX_BYTES", 3 * 1024 * 1024)
+HANDOVER_MAX_ATTEMPTS = env_int("HANDOVER_MAX_ATTEMPTS", 5)
+# The current version of the Terms and Privacy Policy (see the legal app); bump when the text changes.
+LEGAL_VERSION = env("LEGAL_VERSION", "2026-10-27")
+LEGAL_COMPANY_NAME = env("LEGAL_COMPANY_NAME", "Choropia")
+LEGAL_CONTACT_EMAIL = env("LEGAL_CONTACT_EMAIL", "")  # shown in the legal pages when set
 # After this many failed transfer attempts a payout is flagged for a person instead of retried.
 PAYOUT_MAX_ATTEMPTS = int(env("PAYOUT_MAX_ATTEMPTS", "5"))
 # Shared secret for the scheduled-jobs endpoint (Vercel Cron sends it as a Bearer token).

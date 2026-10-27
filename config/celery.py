@@ -30,6 +30,10 @@ app.conf.beat_schedule = {
         "task": "payments.tasks.process_payouts_task",
         "schedule": 300.0,
     },
+    "dispatch-nudges-every-15-minutes": {
+        "task": "dispatch.tasks.nudge_stale_offers_task",
+        "schedule": 900.0,
+    },
     "poll-gaxtron-payments-every-2-minutes": {
         "task": "payments.tasks.poll_gaxtron_payments_task",
         "schedule": 120.0,

@@ -75,7 +75,9 @@ def auto_refund_undispatched_task():
 
     cutoff = timezone.now() - timezone.timedelta(days=settings.ESCROW_DISPATCH_DEADLINE_DAYS)
     order_ids = list(
-        Order.objects.filter(status=OrderStatus.PAID_ESCROW, payment__paid_at__lte=cutoff).values_list("id", flat=True)
+        Order.objects.filter(status=OrderStatus.PAID_ESCROW, payment__paid_at__lte=cutoff)
+        .exclude(dispatch_delivery__status__in=["accepted", "picked_up"])  # a driver is on it
+        .values_list("id", flat=True)
     )
     refunded, skipped = [], []
     for order_id in order_ids:

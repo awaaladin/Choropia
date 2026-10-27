@@ -36,6 +36,10 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        if str(request.data.get("accept_terms", "")).lower() in ("true", "1"):
+            from legal.services import record_acceptance
+
+            record_acceptance(user, ("terms", "privacy"), request)  # consent is recorded when the app/web sends it
         self._send_welcome(user)
         refresh = RefreshToken.for_user(user)
         return Response(

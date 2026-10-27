@@ -12,6 +12,7 @@ class Notification(TimeStampedModel):
         MESSAGE = "message", "New message"
         ORDER_STATUS = "order_status", "Order status changed"
         DISPUTE = "dispute", "Dispute opened"
+        DISPATCH = "dispatch", "Delivery update"
 
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"

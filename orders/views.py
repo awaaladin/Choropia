@@ -84,6 +84,12 @@ class OrderViewSet(
 
         with transaction.atomic():
             order = Order.objects.select_for_update().get(pk=order.pk)
+            delivery = getattr(order, "dispatch_delivery", None)
+            if delivery is not None and delivery.status == "offered":
+                raise ValidationError(
+                    "Your delivery is still waiting for a driver, so there is nothing to confirm yet. "
+                    "If no driver takes it you are refunded automatically."
+                )
             while order.status in self._NEXT_COURIER_STAGE:
                 self._transition_or_400(
                     order, self._NEXT_COURIER_STAGE[order.status], actor=request.user,

@@ -145,6 +145,8 @@ class RunScheduledJobsView(View):
         return self.run()
 
     def run(self):
+        from dispatch.services import nudge_stale_offers
+
         from .services import retry_pending_refunds
         from .tasks import auto_refund_undispatched_task, auto_release_escrow_task, poll_paystack_payments_task
 
@@ -155,6 +157,7 @@ class RunScheduledJobsView(View):
             ("auto_refund_undispatched", auto_refund_undispatched_task),
             ("pending_refunds", retry_pending_refunds),
             ("payouts", payouts.process_pending_payouts),
+            ("dispatch_nudges", nudge_stale_offers),
         ):
             try:
                 results[name] = job()

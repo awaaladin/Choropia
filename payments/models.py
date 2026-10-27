@@ -47,6 +47,15 @@ class Payment(TimeStampedModel):
     def __str__(self):
         return f"Payment<{self.reference}> {self.status}"
 
+    @property
+    def payout(self):
+        """The seller's payout (a delivery order also has a driver payout; see Payout.kind)."""
+        return self.payouts.filter(kind=Payout.Kind.SELLER).first()
+
+    @property
+    def driver_payout(self):
+        return self.payouts.filter(kind=Payout.Kind.DRIVER).first()
+
 
 class PayoutAccount(TimeStampedModel):
     """Where a seller is paid. Paystack keeps the full account number (as a "transfer recipient");
@@ -77,12 +86,23 @@ class Payout(TimeStampedModel):
         SUCCESS = "success", "Paid"
         NEEDS_ATTENTION = "needs_attention", "Needs a person"
 
-    payment = models.OneToOneField(Payment, on_delete=models.PROTECT, related_name="payout")
-    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="payouts")
+    class Kind(models.TextChoices):
+        SELLER = "seller", "Seller"
+        DRIVER = "driver", "Driver"
+
+    # One seller payout and at most one driver payout per payment (see Meta), so a release can
+    # never pay either of them twice.
+    payment = models.ForeignKey(Payment, on_delete=models.PROTECT, related_name="payouts")
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.SELLER)
+    seller = models.ForeignKey(  # the person paid: the seller, or the driver for kind=driver
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="payouts"
+    )
 
     gross_amount = models.DecimalField(max_digits=12, decimal_places=2)
     commission_rate = models.DecimalField(max_digits=5, decimal_places=2)  # percent, as at release time
     commission_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    # The seller's half of a delivery fee, taken out of their money and passed on to the driver.
+    delivery_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     net_amount = models.DecimalField(max_digits=12, decimal_places=2)
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING, db_index=True)
@@ -101,6 +121,9 @@ class Payout(TimeStampedModel):
 
     initiated_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["payment", "kind"], name="one_payout_per_payment_and_kind")]
 
     def __str__(self):
         return f"Payout<{self.payment_id}> {self.status} NGN {self.net_amount}"

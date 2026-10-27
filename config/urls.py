@@ -8,6 +8,8 @@ import accounts.urls
 import chat.urls
 import core.urls
 import delivery.urls
+import dispatch.urls
+import legal.urls
 import listings.urls
 import merchants.urls
 import moderation.urls
@@ -17,6 +19,7 @@ import payments.urls
 import reels.urls
 import reviews.urls
 import social.urls
+import legal.views
 from common import app_download
 from payments.webhook_router import PaystackRouterView
 
@@ -30,13 +33,16 @@ api_v1_patterns = (
     + orders.urls.urlpatterns
     + payments.urls.urlpatterns
     + delivery.urls.urlpatterns
+    + dispatch.urls.urlpatterns
+    + legal.urls.urlpatterns
     + reviews.urls.urlpatterns
     + notifications.urls.urlpatterns
     + moderation.urls.urlpatterns
 )
 
 urlpatterns = [
-
+    # Staff-only (approve drivers, resolve disputes). Move it off the default with ADMIN_URL, e.g. "staff-8f3k/".
+    path(settings.ADMIN_URL, admin.site.urls),
     path("api/v1/", include(api_v1_patterns)),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
@@ -46,6 +52,8 @@ urlpatterns = [
     path("api/v1/app/android/", app_download.AndroidAppInfoView.as_view(), name="android-app-info"),
     # The shared Paystack account's single webhook: handles Choropia's events and forwards the other
     # products' (see payments/webhook_router.py). Point the Paystack dashboard webhook URL here.
+    # Readable legal pages for the apps and website to link to (Terms, Privacy Policy, Driver Terms).
+    path("legal/<slug:slug>/", legal.views.page, name="legal-page"),
     re_path(r"^api/paystack-webhook/?$", PaystackRouterView.as_view(), name="paystack-router"),
     path("", include(core.urls)),
 ]
