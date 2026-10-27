@@ -1,5 +1,7 @@
 package com.choropia.app.navigation
 
+import com.choropia.app.ui.screens.DriverScreen
+import com.choropia.app.ui.screens.ListingDeliveryScreen
 import com.choropia.app.ui.screens.MyListingsScreen
 import com.choropia.app.ui.screens.PayoutAccountScreen
 import com.choropia.app.ui.screens.SecurityScreen
@@ -97,6 +99,8 @@ object Routes {
     const val MY_LISTINGS = "my-listings"
     const val SECURITY = "security"
     const val PAYOUT_ACCOUNT = "payout-account"
+    const val DRIVER = "driver"
+    const val LISTING_DELIVERY = "listing/{id}/delivery"
     const val LISTING = "listing/{id}"
     const val CHAT = "chat/{id}"
     const val ORDER = "order/{id}"
@@ -105,6 +109,7 @@ object Routes {
     fun listing(id: Int) = "listing/$id"
     fun chat(id: Int) = "chat/$id"
     fun order(id: Int) = "order/$id"
+    fun listingDelivery(id: Int) = "listing/$id/delivery"
     fun merchant(id: Int) = "merchant/$id"
 
     val tabs = setOf(FEED, REELS, MARKET, INBOX, ME)
@@ -251,6 +256,7 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                         onMyListings = { navController.navigate(Routes.MY_LISTINGS) },
                         onSecurity = { navController.navigate(Routes.SECURITY) },
                         onPayoutAccount = { navController.navigate(Routes.PAYOUT_ACCOUNT) },
+                        onDriver = { navController.navigate(Routes.DRIVER) },
                         onEditProfile = { navController.navigate(Routes.EDIT_PROFILE) },
                         onApplyMerchant = { navController.navigate(Routes.APPLY_MERCHANT) },
                         showMessage = showMessage,
@@ -329,7 +335,23 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onBack = { navController.popBackStack() },
                     onOpenListing = { navController.navigate(Routes.listing(it)) },
                     onSell = { openSell() },
+                    onDelivery = { navController.navigate(Routes.listingDelivery(it)) },
                 )
+            }
+            composable(Routes.DRIVER) {
+                if (loggedIn) {
+                    DriverScreen(
+                        onBack = { navController.popBackStack() },
+                        onPayoutAccount = { navController.navigate(Routes.PAYOUT_ACCOUNT) },
+                        showMessage = showMessage,
+                    )
+                } else {
+                    LoginGate("Deliver with Choropia", "Log in to apply as a delivery driver.", needsLogin) { navController.navigate(Routes.REGISTER) }
+                }
+            }
+            composable(Routes.LISTING_DELIVERY, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entry ->
+                val id = entry.arguments?.getInt("id") ?: return@composable
+                ListingDeliveryScreen(listingId = id, onBack = { navController.popBackStack() }, showMessage = showMessage)
             }
             composable(Routes.PAYOUT_ACCOUNT) { PayoutAccountScreen(onBack = { navController.popBackStack() }) }
             composable(Routes.SECURITY) {
@@ -348,6 +370,7 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onBack = { navController.popBackStack() },
                     onOpenChat = { navController.navigate(Routes.chat(it)) },
                     showMessage = showMessage,
+                    onEditDelivery = { navController.navigate(Routes.listingDelivery(it)) },
                 )
             }
             composable(Routes.NOTIFICATIONS) {

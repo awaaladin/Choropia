@@ -1,6 +1,14 @@
 package com.choropia.app.data.network
 
+import com.choropia.app.data.model.AddedArea
 import com.choropia.app.data.model.AppNotification
+import com.choropia.app.data.model.Area
+import com.choropia.app.data.model.DriverJobs
+import com.choropia.app.data.model.DriverMe
+import com.choropia.app.data.model.ListingDeliveryInfo
+import com.choropia.app.data.model.OrderDelivery
+import com.choropia.app.data.model.PublicDriver
+import com.choropia.app.data.model.RoutePrice
 import com.choropia.app.data.model.AuthResponse
 import com.choropia.app.data.model.Bank
 import com.choropia.app.data.model.CommissionPreview
@@ -51,6 +59,7 @@ data class RegisterRequest(
     val phone_number: String? = null,
     val first_name: String = "",
     val last_name: String = "",
+    val accept_terms: Boolean = false,
 )
 
 @Serializable data class RefreshRequest(val refresh: String)
@@ -93,7 +102,99 @@ data class CreateMerchantApplicationRequest(
 
 @Serializable data class PayoutAccountRequest(val bank_code: String, val account_number: String)
 
+@Serializable data class AddAreaRequest(val name: String)
+
+@Serializable
+data class DriverApplyRequest(
+    val full_name: String,
+    val phone: String,
+    val whatsapp: String,
+    val vehicle_type: String,
+    val plate_number: String,
+    val guarantor_name: String,
+    val guarantor_phone: String,
+    val accept_terms: Boolean,
+)
+
+@Serializable data class DriverAvailabilityRequest(val available: Boolean)
+@Serializable data class AddRouteRequest(val from_area: Int, val to_area: Int, val price: String)
+
+@Serializable
+data class ListingDeliveryRequest(val enabled: Boolean, val payer: String, val pickup_area: Int, val drivers: List<Int>)
+
+@Serializable data class ChooseDeliveryRequest(val dropoff_area: Int, val driver: Int, val dropoff_note: String = "")
+
 interface ChoropiaApi {
+    // --- dispatch (delivery drivers) -----------------------------------------------------------
+    @GET("dispatch/areas/")
+    suspend fun listAreas(): List<Area>
+
+    @POST("dispatch/areas/")
+    suspend fun addArea(@Body body: AddAreaRequest): AddedArea
+
+    @GET("dispatch/driver/me/")
+    suspend fun driverMe(): DriverMe?
+
+    @PUT("dispatch/driver/me/")
+    suspend fun driverApply(@Body body: DriverApplyRequest): DriverMe
+
+    @PUT("dispatch/driver/me/")
+    suspend fun driverAvailability(@Body body: DriverAvailabilityRequest): DriverMe
+
+    @Multipart
+    @POST("dispatch/driver/documents/")
+    suspend fun uploadDriverDocument(@Part("kind") kind: RequestBody, @Part file: MultipartBody.Part): DriverMe
+
+    @GET("dispatch/driver/routes/")
+    suspend fun driverRoutes(): List<RoutePrice>
+
+    @POST("dispatch/driver/routes/")
+    suspend fun addDriverRoute(@Body body: AddRouteRequest)
+
+    @DELETE("dispatch/driver/routes/{id}/")
+    suspend fun deleteDriverRoute(@Path("id") id: Int)
+
+    @GET("dispatch/driver/jobs/")
+    suspend fun driverJobs(): DriverJobs
+
+    @POST("dispatch/driver/jobs/{id}/accept/")
+    suspend fun acceptJob(@Path("id") id: Int): OrderDelivery
+
+    @POST("dispatch/driver/jobs/{id}/decline/")
+    suspend fun declineJob(@Path("id") id: Int)
+
+    @POST("dispatch/driver/jobs/{id}/pickup/")
+    suspend fun pickupJob(@Path("id") id: Int): OrderDelivery
+
+    @Multipart
+    @POST("dispatch/driver/jobs/{id}/deliver/")
+    suspend fun deliverJob(
+        @Path("id") id: Int,
+        @Part("code") code: RequestBody,
+        @Part photo: MultipartBody.Part,
+    ): OrderDelivery
+
+    @GET("dispatch/drivers/")
+    suspend fun browseDrivers(@Query("from") from: Int): List<PublicDriver>
+
+    @GET("dispatch/listings/{id}/delivery/")
+    suspend fun listingDelivery(@Path("id") id: Int, @Query("to") to: Int? = null): ListingDeliveryInfo
+
+    @PUT("dispatch/listings/{id}/delivery/")
+    suspend fun saveListingDelivery(@Path("id") id: Int, @Body body: ListingDeliveryRequest): ListingDeliveryInfo
+
+    @GET("dispatch/orders/{id}/delivery/")
+    suspend fun orderDelivery(@Path("id") id: Int): OrderDelivery?
+
+    @POST("dispatch/orders/{id}/delivery/")
+    suspend fun chooseDelivery(@Path("id") id: Int, @Body body: ChooseDeliveryRequest): OrderDelivery
+
+    @DELETE("dispatch/orders/{id}/delivery/")
+    suspend fun clearDelivery(@Path("id") id: Int)
+
+    @POST("dispatch/orders/{id}/delivery/reassign/")
+    suspend fun reassignDelivery(@Path("id") id: Int): OrderDelivery
+
     @GET("payouts/banks/")
     suspend fun listBanks(): List<Bank>
 

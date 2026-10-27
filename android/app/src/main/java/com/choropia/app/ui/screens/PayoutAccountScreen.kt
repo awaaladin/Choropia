@@ -139,7 +139,7 @@ fun PayoutAccountScreen(onBack: () -> Unit) {
             ) {
                 Text(
                     "When a buyer confirms they received an item, your money is sent to this account automatically. " +
-                        "Choropia keeps a 5% commission.",
+                        "Choropia keeps a small commission, which you see on every listing before you post it. Delivery drivers are paid here too.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

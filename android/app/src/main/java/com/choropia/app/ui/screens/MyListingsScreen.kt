@@ -79,7 +79,7 @@ class MyListingsViewModel(private val repo: ChoropiaRepository) : ViewModel() {
 }
 
 @Composable
-fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (Int) -> Unit, onSell: () -> Unit) {
+fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (Int) -> Unit, onSell: () -> Unit, onDelivery: (Int) -> Unit = {}) {
     val repo = LocalRepository.current
     val vm = rememberVm { MyListingsViewModel(repo) }
     val state by vm.state.collectAsState()
@@ -119,7 +119,12 @@ fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (Int) -> Unit, onSell: (
                         }
                     }
                     items(visible, key = { it.id }) { listing ->
-                        GridListingCard(listing, onClick = { onOpenListing(listing.id) })
+                        Column {
+                            GridListingCard(listing, onClick = { onOpenListing(listing.id) })
+                            if (listing.status == "active") {
+                                androidx.compose.material3.TextButton(onClick = { onDelivery(listing.id) }) { Text("Delivery options") }
+                            }
+                        }
                     }
                 }
             }

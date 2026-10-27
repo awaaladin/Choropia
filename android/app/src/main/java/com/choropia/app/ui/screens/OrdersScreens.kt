@@ -410,6 +410,7 @@ fun OrderDetailScreen(
     onBack: () -> Unit,
     onOpenChat: (Int) -> Unit,
     showMessage: (String) -> Unit,
+    onEditDelivery: (Int) -> Unit = {},
 ) {
     val repo = LocalRepository.current
     val session = LocalSession.current
@@ -439,6 +440,7 @@ fun OrderDetailScreen(
     var disputeOpen by remember { mutableStateOf(false) }
     var reviewOpen by remember { mutableStateOf(false) }
     var confirmReceipt by remember { mutableStateOf(false) }
+    var delivery by remember { mutableStateOf<com.choropia.app.data.model.OrderDelivery?>(null) }
 
     Box(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
@@ -476,6 +478,16 @@ fun OrderDetailScreen(
 
                             order.payout?.let { PayoutCard(it) }
 
+                            OrderDeliverySection(
+                                orderId = order.id,
+                                listingId = order.listing,
+                                orderStatus = order.status,
+                                isBuyer = isBuyer,
+                                isSeller = isSeller,
+                                onDelivery = { delivery = it },
+                                onEditDrivers = onEditDelivery,
+                            )
+
                             SectionTitle("Escrow timeline")
                             Timeline(order)
 
@@ -493,7 +505,7 @@ fun OrderDetailScreen(
                                 when (order.status) {
                                     "pending_payment" -> if (isBuyer) {
                                         PrimaryButton(
-                                            "Pay ${formatNaira(order.price)} into escrow",
+                                            "Pay ${formatNaira(orderTotal(order.price, delivery))} into escrow",
                                             {
                                                 vm.pay { url -> openExternal(context, url) }
                                             },
@@ -508,7 +520,9 @@ fun OrderDetailScreen(
                                     } else {
                                         InfoNote("Waiting for the buyer to pay into escrow.")
                                     }
-                                    "paid_escrow" -> if (isSeller) {
+                                    "paid_escrow" -> if (isSeller && delivery.isActive()) {
+                                        Note("A Choropia driver will collect this from you. Hand it over when they arrive; you're paid automatically once the buyer's handover code is confirmed.")
+                                    } else if (isSeller) {
                                         PrimaryButton("I've dispatched it", { vm.dispatch() }, enabled = !state.busy, icon = Icons.Outlined.LocalShipping)
                                         InfoNote("Dispatch within 7 days, or the buyer is refunded automatically. You're paid as soon as they confirm.")
                                     } else {
@@ -516,13 +530,17 @@ fun OrderDetailScreen(
                                         PrimaryButton("I received it", { confirmReceipt = true }, enabled = !state.busy, icon = Icons.Outlined.Check)
                                         InfoNote("Your payment is safe in escrow. Only tap this once the item is in your hands. If the seller doesn't dispatch within 7 days, you're refunded automatically.")
                                     }
-                                    "courier_assigned" -> if (isSeller) {
+                                    "courier_assigned" -> if (isSeller && delivery.isActive()) {
+                                        Note("Your driver has the item and is on the way.")
+                                    } else if (isSeller) {
                                         PrimaryButton("It's on its way", { vm.inTransit() }, enabled = !state.busy, icon = Icons.Outlined.LocalShipping)
                                     } else {
                                         PrimaryButton("I received it", { confirmReceipt = true }, enabled = !state.busy, icon = Icons.Outlined.Check)
                                         SecondaryButton("It hasn't arrived. Report a problem", { disputeOpen = true }, enabled = !state.busy, destructive = true)
                                     }
-                                    "in_transit" -> if (isSeller) {
+                                    "in_transit" -> if (isSeller && delivery.isActive()) {
+                                        Note("Your driver is delivering it. You're paid when the buyer's handover code is confirmed.")
+                                    } else if (isSeller) {
                                         PrimaryButton("Mark as delivered", { vm.delivered() }, enabled = !state.busy, icon = Icons.Outlined.Check)
                                         InfoNote("Marking it delivered starts the buyer's window to confirm or report a problem. If they do neither, you're paid automatically after 3 days.")
                                     } else {

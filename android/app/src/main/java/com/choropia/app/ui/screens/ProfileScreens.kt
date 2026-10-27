@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.ChevronRight
+import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Edit
@@ -83,6 +84,7 @@ fun ProfileScreen(
     onMyListings: () -> Unit,
     onSecurity: () -> Unit,
     onPayoutAccount: () -> Unit,
+    onDriver: () -> Unit,
     onEditProfile: () -> Unit,
     onApplyMerchant: () -> Unit,
     showMessage: (String) -> Unit,
@@ -133,7 +135,18 @@ fun ProfileScreen(
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 MenuRow(Icons.Outlined.Lock, "Security", "2-step verification", onSecurity)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                MenuRow(Icons.Outlined.LocalShipping, "Deliver with Choropia", "Earn as a delivery driver", onDriver)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 MenuRow(Icons.Outlined.Storefront, "Open a storefront", "Apply to sell as a verified merchant", onApplyMerchant)
+            }
+        }
+
+        val legalContext = androidx.compose.ui.platform.LocalContext.current
+        SurfaceCard(Modifier.fillMaxWidth(), padding = PaddingValues(vertical = 4.dp)) {
+            Column {
+                MenuRow(Icons.Outlined.Lock, "Terms and Conditions", "How Choropia works", { openWebPage(legalContext, legalUrl("terms")) })
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                MenuRow(Icons.Outlined.Lock, "Privacy Policy", "How we protect your data", { openWebPage(legalContext, legalUrl("privacy")) })
             }
         }
 

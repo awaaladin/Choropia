@@ -141,7 +141,7 @@ class ChoropiaRepository(
         lastName: String,
     ): User = apiCall {
         val response = api.register(
-            RegisterRequest(email.trim(), password, phone?.trim()?.ifBlank { null }, firstName.trim(), lastName.trim())
+            RegisterRequest(email.trim(), password, phone?.trim()?.ifBlank { null }, firstName.trim(), lastName.trim(), accept_terms = true)
         )
         tokenManager.saveTokens(response.access, response.refresh)
         clearCaches()
@@ -476,6 +476,66 @@ class ChoropiaRepository(
 
     suspend fun reportListing(listingId: Int, reason: String) =
         apiCall { api.report(CreateReportRequest("listing", listingId, reason.trim())) }
+
+    // --- dispatch (delivery drivers) -----------------------------------------------------------
+
+    suspend fun areas(): List<com.choropia.app.data.model.Area> = apiCall { api.listAreas() }
+
+    suspend fun addArea(name: String): com.choropia.app.data.model.Area = apiCall {
+        val added = api.addArea(com.choropia.app.data.network.AddAreaRequest(name.trim()))
+        com.choropia.app.data.model.Area(added.id, added.name)
+    }
+
+    suspend fun driverMe(): com.choropia.app.data.model.DriverMe? = apiCall { api.driverMe() }
+
+    suspend fun driverApply(request: com.choropia.app.data.network.DriverApplyRequest) = apiCall { api.driverApply(request) }
+
+    suspend fun driverAvailability(available: Boolean) =
+        apiCall { api.driverAvailability(com.choropia.app.data.network.DriverAvailabilityRequest(available)) }
+
+    /** Identity documents: photos are shrunk on the phone and sent over HTTPS; the server encrypts them before storing. */
+    suspend fun uploadDriverDocument(kind: String, uri: Uri): com.choropia.app.data.model.DriverMe {
+        val bytes = withContext(Dispatchers.IO) { compressImage(uri) }
+        val part = MultipartBody.Part.createFormData("file", "$kind.jpg", bytes.toRequestBody("image/jpeg".toMediaType()))
+        return apiCall { api.uploadDriverDocument(kind.toRequestBody("text/plain".toMediaType()), part) }
+    }
+
+    suspend fun driverRoutes() = apiCall { api.driverRoutes() }
+
+    suspend fun addDriverRoute(from: Int, to: Int, price: String) =
+        apiCall { api.addDriverRoute(com.choropia.app.data.network.AddRouteRequest(from, to, price.trim())) }
+
+    suspend fun deleteDriverRoute(id: Int) = apiCall { api.deleteDriverRoute(id) }
+
+    suspend fun driverJobs() = apiCall { api.driverJobs() }
+
+    suspend fun acceptJob(id: Int) = apiCall { api.acceptJob(id) }
+
+    suspend fun declineJob(id: Int) = apiCall { api.declineJob(id) }
+
+    suspend fun pickupJob(id: Int) = apiCall { api.pickupJob(id) }
+
+    suspend fun deliverJob(id: Int, code: String, photo: Uri): com.choropia.app.data.model.OrderDelivery {
+        val bytes = withContext(Dispatchers.IO) { compressImage(photo) }
+        val part = MultipartBody.Part.createFormData("photo", "proof.jpg", bytes.toRequestBody("image/jpeg".toMediaType()))
+        return apiCall { api.deliverJob(id, code.trim().toRequestBody("text/plain".toMediaType()), part) }
+    }
+
+    suspend fun browseDrivers(fromArea: Int) = apiCall { api.browseDrivers(fromArea) }
+
+    suspend fun listingDelivery(listingId: Int, to: Int? = null) = apiCall { api.listingDelivery(listingId, to) }
+
+    suspend fun saveListingDelivery(listingId: Int, enabled: Boolean, payer: String, pickupArea: Int, drivers: List<Int>) =
+        apiCall { api.saveListingDelivery(listingId, com.choropia.app.data.network.ListingDeliveryRequest(enabled, payer, pickupArea, drivers)) }
+
+    suspend fun orderDelivery(orderId: Int) = apiCall { api.orderDelivery(orderId) }
+
+    suspend fun chooseDelivery(orderId: Int, dropoffArea: Int, driver: Int, note: String) =
+        apiCall { api.chooseDelivery(orderId, com.choropia.app.data.network.ChooseDeliveryRequest(dropoffArea, driver, note.trim())) }
+
+    suspend fun clearDelivery(orderId: Int) = apiCall { api.clearDelivery(orderId) }
+
+    suspend fun reassignDelivery(orderId: Int) = apiCall { api.reassignDelivery(orderId) }
 
     private companion object {
         const val MAX_PHOTOS = 6

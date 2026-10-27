@@ -267,6 +267,8 @@ fun RegisterScreen(onRegistered: (wantsStorefront: Boolean) -> Unit, onLogin: ()
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var storefront by remember { mutableStateOf(false) }
+    var agreed by remember { mutableStateOf(false) }
+    val legalContext = androidx.compose.ui.platform.LocalContext.current
     val focus = LocalFocusManager.current
 
     AuthFrame("Create your account", "Join Uyo's trusted, escrow-protected marketplace.", vm.busy, onBack) {
@@ -311,10 +313,18 @@ fun RegisterScreen(onRegistered: (wantsStorefront: Boolean) -> Unit, onLogin: ()
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.material3.Checkbox(checked = agreed, onCheckedChange = { agreed = it })
+                Text("I agree to the Terms and Conditions and the Privacy Policy.", style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+            }
+            Row {
+                QuietButton("Terms", { openWebPage(legalContext, legalUrl("terms")) })
+                QuietButton("Privacy Policy", { openWebPage(legalContext, legalUrl("privacy")) })
+            }
             PrimaryButton(
                 "Create account",
                 { focus.clearFocus(); vm.register(first, last, email, phone, password) { onRegistered(storefront) } },
-                enabled = !vm.busy,
+                enabled = !vm.busy && agreed,
             )
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Text("Already have an account?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
