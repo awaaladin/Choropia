@@ -706,3 +706,11 @@ class SignupConsentTests(TestCase):
         self.assertEqual(r.status_code, 201, r.content)
         user = User.objects.get(email="new@example.com")
         self.assertEqual(set(Acceptance.objects.filter(user=user).values_list("document", flat=True)), {"terms", "privacy"})
+
+
+class NullBodiesAreJsonTests(TestCase):
+    def test_no_profile_and_no_delivery_answer_with_a_json_null(self):
+        user = make_user("nobody")
+        c = client_for(user)
+        r = c.get("/api/v1/dispatch/driver/me/")
+        self.assertEqual((r.status_code, r.content), (200, b"null"))

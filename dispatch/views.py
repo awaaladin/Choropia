@@ -3,7 +3,7 @@ import re
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -89,7 +89,9 @@ class DriverMeView(DispatchView):
 
     def get(self, request):
         profile = getattr(request.user, "driver_profile", None)
-        return Response(payloads.driver_me(profile) if profile else None)
+        if profile is None:
+            return JsonResponse(None, safe=False)  # a literal JSON null, which apps can parse (an empty body cannot be)
+        return Response(payloads.driver_me(profile))
 
     @transaction.atomic
     def put(self, request):
@@ -367,7 +369,9 @@ class OrderDeliveryView(DispatchView):
     def get(self, request, pk):
         order = _order_for(request, pk)
         delivery = OrderDelivery.objects.filter(order=order).select_related("pickup_area", "dropoff_area", "driver", "order__listing", "order__buyer", "order__seller").first()
-        return Response(payloads.delivery_payload(delivery, request.user) if delivery else None)
+        if delivery is None:
+            return JsonResponse(None, safe=False)
+        return Response(payloads.delivery_payload(delivery, request.user))
 
     def post(self, request, pk):
         """Buyer, before paying: pick where it goes and whose price."""
