@@ -12,6 +12,7 @@ import { ForgotPasswordPage } from "@/pages/ForgotPassword";
 import { VerifyEmailPage } from "@/pages/VerifyEmail";
 import { EditListingPage } from "@/pages/EditListing";
 import { DriverPage } from "@/pages/Driver";
+import { MyListingsPage } from "@/pages/MyListings";
 import { ListingDeliveryPage } from "@/pages/ListingDelivery";
 import { PayoutAccountPage } from "@/pages/PayoutAccount";
 import { HowItWorksPage } from "@/pages/HowItWorks";
@@ -59,6 +60,7 @@ export const router = createBrowserRouter([
           { path: "listings/:id/edit", element: <EditListingPage /> },
           { path: "listings/:id/delivery", element: <ListingDeliveryPage /> },
           { path: "driver", element: <DriverPage /> },
+          { path: "my-listings", element: <MyListingsPage /> },
           { path: "payout-account", element: <PayoutAccountPage /> },
           { path: "listings/new", element: <CreateListingPage /> },
           { path: "reels/new", element: <CreateReelPage /> },

@@ -249,6 +249,8 @@ export const api = {
   listMerchantListings: (merchantId: number) =>
     request<Paginated<Listing> | Listing[]>(`/listings/?merchant=${merchantId}`, { auth: false }),
   getListing: (id: number) => request<Listing>(`/listings/${id}/`),
+  myListings: () => request<Paginated<Listing> | Listing[]>("/listings/?mine=true"),
+  markSold: (id: number) => request<Listing>(`/listings/${id}/mark_sold/`, { method: "POST" }),
   getFeed: () => request<Paginated<Listing> | Listing[]>("/feed/"),
   updateListing: (id: number, data: unknown) => request<Listing>(`/listings/${id}/`, { method: "PATCH", body: data }),
   createListing: (formData: FormData) => request<Listing>("/listings/", { method: "POST", body: formData, formData: true }),

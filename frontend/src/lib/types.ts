@@ -44,6 +44,7 @@ export interface Listing {
   price: string;
   /** How many are left. Each paid order takes one; at zero the listing is sold. */
   quantity?: number;
+  status?: "active" | "sold" | "removed";
   /** Set when the seller chose to show a price change: the old price, to be shown crossed out. */
   previous_price?: string | null;
   condition: string;

@@ -18,6 +18,7 @@ const NAV = [
   { to: "/feed", label: "Feed", end: true },
   { to: "/marketplace", label: "Marketplace" },
   { to: "/reels", label: "Reels" },
+  { to: "/my-listings", label: "My listings" },
   { to: "/orders", label: "Orders" },
   { to: "/wallet", label: "Wallet" },
   { to: "/messages", label: "Messages" },
@@ -28,6 +29,7 @@ const TABS = [
   { to: "/marketplace", label: "Market", icon: Store },
   { to: "/reels", label: "Reels", icon: Clapperboard },
   { to: "/listings/new", label: "Sell", icon: PlusCircle },
+  { to: "/my-listings", label: "Mine", icon: ShoppingBag },
   { to: "/orders", label: "Orders", icon: Package },
   { to: "/messages", label: "Messages", icon: MessageCircle },
 ] as const;

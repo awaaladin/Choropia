@@ -17,6 +17,7 @@ const IN_PROGRESS = ["pending_payment", ...ESCROW_HELD];
 const NAV: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
   { to: "/feed", label: "Home feed", icon: Home, end: true },
   { to: "/marketplace", label: "Marketplace", icon: Store },
+  { to: "/my-listings", label: "My listings", icon: ShoppingBag },
   { to: "/orders", label: "My orders", icon: Package },
   { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/notifications", label: "Notifications", icon: Bell },
