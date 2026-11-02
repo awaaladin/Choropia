@@ -1,0 +1,10 @@
+{% extends "staff/base_bare.html" %}
+{% block title %}Sign in{% endblock %}
+{% block body %}
+<div style="min-height:100vh;display:grid;place-items:center;padding:20px">
+  <div style="width:100%;max-width:400px">
+    <div class="brand" style="color:var(--fg);justify-content:center;padding-bottom:20px"><img src="/logo.png" alt="">Choropia</div>
+    <div class="card" style="padding:26px">{% block form %}{% endblock %}</div>
+  </div>
+</div>
+{% endblock %}

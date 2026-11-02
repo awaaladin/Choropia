@@ -106,6 +106,10 @@ class PaystackClient:
         """Asks the bank who owns this account. Returns {account_number, account_name}."""
         return self._request("GET", "/bank/resolve", params={"account_number": account_number, "bank_code": bank_code})
 
+    def fetch_recipient(self, recipient_code):
+        """The saved payout recipient, including the full account number (used by staff to pay by hand)."""
+        return self._request("GET", f"/transferrecipient/{recipient_code}")
+
     def create_recipient(self, name, account_number, bank_code):
         return self._request(
             "POST",

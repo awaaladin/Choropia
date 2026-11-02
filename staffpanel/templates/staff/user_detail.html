@@ -1,0 +1,35 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}{{ person.get_full_name }}{% endblock %}
+{% block content %}
+<div class="top"><div><h1>{{ person.get_full_name }}</h1><p class="sub"><a href="{% url 'staff:user_list' %}">&larr; All people</a></p></div>
+  {% if person.is_active %}<span class="pill good" style="font-size:14px">Active</span>{% else %}<span class="pill bad" style="font-size:14px">Suspended</span>{% endif %}</div>
+<div class="grid two">
+  <div class="card">
+    <h2>Account</h2>
+    <dl>
+      <dt>Email</dt><dd>{{ person.email }} {% if person.profile.email_verified %}<span class="pill good">verified</span>{% else %}<span class="pill warn">not verified</span>{% endif %}</dd>
+      <dt>Phone</dt><dd>{{ person.phone_number|default:"none" }}</dd>
+      <dt>Joined</dt><dd>{{ person.date_joined }}</dd>
+      <dt>Role</dt><dd>{% if person.is_superuser %}Superuser{% elif person.is_staff %}Staff{% elif person.is_moderator %}Moderator{% else %}Member{% endif %}</dd>
+    </dl>
+    {% if request.user.is_superuser and not person.is_superuser and person.pk != request.user.pk %}
+    <form method="post" action="{% url 'staff:user_toggle' person.pk %}" style="margin-top:16px" onsubmit="return confirm('{% if person.is_active %}Suspend this account? They will not be able to sign in.{% else %}Let this person sign in again?{% endif %}');">{% csrf_token %}
+      <button class="btn {% if person.is_active %}danger{% else %}ghost{% endif %}" type="submit">{% if person.is_active %}Suspend this account{% else %}Reactivate this account{% endif %}</button>
+    </form>
+    {% endif %}
+  </div>
+  <div class="card">
+    <h2>Listings</h2>
+    <table><tbody>{% for l in listings %}<tr><td>{{ l.title|truncatechars:40 }}</td><td class="right mono">{{ l.price|naira }}</td><td><span class="pill {{ l.status|pill }}">{{ l.get_status_display }}</span></td></tr>{% empty %}<tr><td class="empty">No listings.</td></tr>{% endfor %}</tbody></table>
+  </div>
+  <div class="card">
+    <h2>Bought</h2>
+    <table><tbody>{% for o in purchases %}<tr><td><a href="{% url 'staff:order_detail' o.pk %}">#{{ o.pk }}</a> {{ o.listing.title|truncatechars:30 }}</td><td class="right mono">{{ o.price|naira }}</td><td><span class="pill {{ o.status|pill }}">{{ o.get_status_display }}</span></td></tr>{% empty %}<tr><td class="empty">Nothing bought.</td></tr>{% endfor %}</tbody></table>
+  </div>
+  <div class="card">
+    <h2>Sold</h2>
+    <table><tbody>{% for o in sales %}<tr><td><a href="{% url 'staff:order_detail' o.pk %}">#{{ o.pk }}</a> {{ o.listing.title|truncatechars:30 }}</td><td class="right mono">{{ o.price|naira }}</td><td><span class="pill {{ o.status|pill }}">{{ o.get_status_display }}</span></td></tr>{% empty %}<tr><td class="empty">Nothing sold.</td></tr>{% endfor %}</tbody></table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Order #{{ order.pk }}{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Order #{{ order.pk }}</h1><p class="sub"><a href="{% url 'staff:order_list' %}">&larr; All orders</a></p></div>
+  <span class="pill {{ order.status|pill }}" style="font-size:14px">{{ order.get_status_display }}</span></div>
+
+{% if order.status == 'disputed' %}
+<div class="card" style="border-color:oklch(0.577 0.245 27.3 / .5);margin-bottom:14px">
+  <h2>Dispute: decide who gets the money</h2>
+  <p>{{ order.dispute_reason|default:"No reason was written." }}</p>
+  {% if request.user.is_superuser %}
+  <form method="post" action="{% url 'staff:order_resolve' order.pk %}" onsubmit="return confirm('This moves real money and cannot be undone. Continue?');">{% csrf_token %}
+    <label for="note">Note for the record (optional)</label>
+    <textarea id="note" name="note" maxlength="200"></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn danger" name="resolution" value="refund" type="submit">Refund the buyer</button>
+      <button class="btn" name="resolution" value="release" type="submit">Pay the seller</button>
+    </div>
+  </form>
+  {% else %}<p class="small">Only a superuser can settle a dispute.</p>{% endif %}
+</div>
+{% endif %}
+
+<div class="grid two">
+  <div class="card">
+    <h2>The order</h2>
+    <dl>
+      <dt>Item</dt><dd>{{ order.listing.title }}</dd>
+      <dt>Price</dt><dd class="mono">{{ order.price|naira }}</dd>
+      <dt>Buyer</dt><dd><a href="{% url 'staff:user_detail' order.buyer_id %}">{{ order.buyer.get_full_name }}</a><div class="small">{{ order.buyer.email }}</div></dd>
+      <dt>Seller</dt><dd><a href="{% url 'staff:user_detail' order.seller_id %}">{{ order.seller.get_full_name }}</a><div class="small">{{ order.seller.email }}</div></dd>
+      <dt>Placed</dt><dd>{{ order.created_at }}</dd>
+      {% if payment %}<dt>Payment</dt><dd><span class="pill {{ payment.status|pill }}">{{ payment.get_status_display }}</span> <span class="mono">{{ payment.amount|naira }}</span><div class="small">{{ payment.reference }}</div></dd>{% endif %}
+      {% if delivery %}<dt>Delivery</dt><dd><span class="pill {{ delivery.status|pill }}">{{ delivery.get_status_display }}</span> {{ delivery.pickup_area }} to {{ delivery.dropoff_area }}, fee <span class="mono">{{ delivery.fee|naira }}</span>{% if delivery.driver %}<div class="small">Driver: <a href="{% url 'staff:driver_detail' delivery.driver_id %}">{{ delivery.driver.full_name }}</a></div>{% endif %}</dd>{% endif %}
+    </dl>
+  </div>
+  <div class="card">
+    <h2>Payouts for this order</h2>
+    {% if payouts %}
+    <table><tbody>
+      {% for p in payouts %}<tr><td><a href="{% url 'staff:payout_detail' p.pk %}">{{ p.seller.get_full_name }}</a><div class="small">{{ p.get_kind_display }}</div></td><td class="right mono">{{ p.net_amount|naira }}</td><td><span class="pill {{ p.status|pill }}">{{ p.get_status_display }}</span></td></tr>{% endfor %}
+    </tbody></table>
+    {% else %}<div class="empty">No payouts yet. They appear when the money is released.</div>{% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <h2>What happened</h2>
+  <ul class="timeline">
+    {% for h in history %}<li><strong>{{ h.to_status|label }}</strong> <span class="small">{{ h.created_at|date:"j M Y, H:i" }}{% if h.actor %} · {{ h.actor.get_full_name }}{% endif %}</span>{% if h.note %}<div class="small">{{ h.note }}</div>{% endif %}</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

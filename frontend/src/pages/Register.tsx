@@ -33,7 +33,7 @@ export function RegisterPage() {
     setLoading(true);
     try {
       await register(payload);
-      navigate("/feed", { viewTransition: true });
+      navigate("/verify-email", { viewTransition: true }); // the welcome email carries the 6-digit code
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {

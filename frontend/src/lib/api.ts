@@ -182,6 +182,10 @@ export const api = {
   confirmPasswordReset: (uid: string, token: string, password: string) =>
     request("/auth/password-reset/confirm/", { method: "POST", body: { uid, token, password }, auth: false }),
 
+  /** Emails a fresh 6-digit code to the signed-in person, to verify their address. */
+  requestEmailCode: () => request<{ detail: string }>("/auth/email-otp/request/", { method: "POST" }),
+  confirmEmailCode: (code: string) => request<{ email_verified: boolean }>("/auth/email-otp/confirm/", { method: "POST", body: { code } }),
+
   // --- profile ---
   me: () => request<User>("/users/me/"),
   updateProfile: (data: unknown) => request<User>("/users/me/", { method: "PATCH", body: data }),

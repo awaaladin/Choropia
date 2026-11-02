@@ -296,6 +296,76 @@ def _apply_transfer_data(payout_id, data):
     return _retry_or_attention(payout, f"Transfer {status or 'failed'}: {data.get('reason') or data.get('message') or ''}".strip())
 
 
+# --- paying by hand ---------------------------------------------------------------------------------
+
+
+class ManualPayoutError(Exception):
+    """A manual payment was refused; the message is safe to show to staff."""
+
+
+def recipient_details(payout):
+    """Where to send the money, for staff paying by hand: bank, full account number, account name.
+
+    Choropia stores only the last four digits; Paystack holds the full number as the transfer recipient, so it is fetched
+    on demand (and the panel records that staff looked)."""
+    account = PayoutAccount.objects.filter(user_id=payout.seller_id).first()
+    if account is None:
+        raise ManualPayoutError("This person has not added a bank account yet. Ask them to add one, or agree where to pay them.")
+    data = _paystack().fetch_recipient(account.recipient_code)
+    details = data.get("details") or {}
+    return {
+        "bank_name": details.get("bank_name") or account.bank_name,
+        "account_number": details.get("account_number") or "",
+        "account_name": details.get("account_name") or account.account_name,
+    }
+
+
+def mark_paid_manually(payout_id, staff, reference, note=""):
+    """Records that a person paid this payout by hand. Idempotent, and it can never double pay: a payout that is already
+    paid is returned untouched, and one whose bank transfer is still in flight is refused until that has finished."""
+    reference = (reference or "").strip()
+    if not reference:
+        raise ManualPayoutError("Enter the bank transfer reference (or a short note about how you paid).")
+    with transaction.atomic():
+        payout = Payout.objects.select_for_update().select_related("payment__order", "seller").get(pk=payout_id)
+        if payout.status == Payout.Status.SUCCESS:
+            return payout
+        if payout.status == Payout.Status.PROCESSING:
+            raise ManualPayoutError(
+                "A bank transfer for this payout is still in progress at Paystack. Wait until it succeeds or fails, then try again."
+            )
+        if payout.payment.status != Payment.Status.RELEASED:
+            raise ManualPayoutError("The money for this order has not been released yet, so there is nothing to pay.")
+        account = PayoutAccount.objects.filter(user_id=payout.seller_id).first()
+        if account is not None and not payout.bank_name:
+            payout.bank_name, payout.account_last4, payout.account_name = account.bank_name, account.account_last4, account.account_name
+        payout.status = Payout.Status.SUCCESS
+        payout.completed_at = timezone.now()
+        payout.failure_reason = ""
+        payout.manual_paid_by = staff
+        payout.manual_paid_at = payout.completed_at
+        payout.manual_reference = reference[:100]
+        payout.manual_note = (note or "")[:300]
+        payout.save()
+        Payment.objects.filter(pk=payout.payment_id).update(transfer_reference=f"manual:{reference[:80]}")
+    if payout.kind == Payout.Kind.SELLER:
+        _email_seller(emails.send_payout_sent, payout)
+    else:
+        try:
+            from notifications.models import Notification
+            from notifications.services import create_notification
+
+            create_notification(
+                payout.seller, Notification.Type.DISPATCH,
+                f"Your delivery pay of {emails.naira(payout.net_amount)} for order #{payout.payment.order_id} was paid.",
+                target=payout.payment.order,
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception("Could not notify the driver about manual payout %s", payout.pk)
+    logger.info("Payout %s marked as paid by hand by user %s", payout.pk, getattr(staff, "pk", None))
+    return payout
+
+
 # --- Paystack events and reconciliation -----------------------------------------------------
 
 

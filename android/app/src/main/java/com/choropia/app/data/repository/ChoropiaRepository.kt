@@ -155,6 +155,12 @@ class ChoropiaRepository(
         clearCaches()
     }
 
+    /** Emails a fresh 6-digit code to verify the signed-in person's address. */
+    suspend fun requestEmailCode() = apiCall { api.requestEmailCode() }
+
+    suspend fun confirmEmailCode(code: String) =
+        apiCall { api.confirmEmailCode(com.choropia.app.data.network.EmailCodeRequest(code.trim())) }
+
     suspend fun requestPasswordReset(email: String) = apiCall { api.requestPasswordReset(PasswordResetRequest(email.trim())) }
 
     suspend fun confirmPasswordReset(uid: String, token: String, password: String) =

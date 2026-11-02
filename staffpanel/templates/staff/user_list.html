@@ -1,0 +1,24 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}People{% endblock %}
+{% block content %}
+<div class="top"><div><h1>People</h1><p class="sub">Everyone with a Choropia account. Latest 100 shown.</p></div></div>
+<form class="search" method="get"><input type="search" name="q" value="{{ q }}" placeholder="Name, email or phone"><button class="btn ghost" type="submit">Search</button></form>
+<div class="card">
+{% if users %}
+<table>
+  <thead><tr><th>Person</th><th>Phone</th><th>Joined</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for u in users %}
+  <tr>
+    <td><a href="{% url 'staff:user_detail' u.pk %}">{{ u.get_full_name }}</a><div class="small">{{ u.email }}</div></td>
+    <td>{{ u.phone_number|default:"" }}</td>
+    <td class="small">{{ u.date_joined|date:"j M Y" }}</td>
+    <td>{% if u.is_active %}<span class="pill good">Active</span>{% else %}<span class="pill bad">Suspended</span>{% endif %}{% if u.is_staff %} <span class="pill plain">Staff</span>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">Nobody matches.</div>{% endif %}
+</div>
+{% endblock %}

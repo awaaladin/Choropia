@@ -86,6 +86,7 @@ fun ProfileScreen(
     onPayoutAccount: () -> Unit,
     onDriver: () -> Unit,
     onEditProfile: () -> Unit,
+    onVerifyEmail: () -> Unit = {},
     onApplyMerchant: () -> Unit,
     showMessage: (String) -> Unit,
 ) {
@@ -117,6 +118,11 @@ fun ProfileScreen(
                     }
                 }
                 IconButton(onClick = onEditProfile) { Icon(Icons.Outlined.Edit, "Edit profile") }
+            }
+        }
+        if (u != null && u.profile?.email_verified == false) {
+            SurfaceCard(Modifier.fillMaxWidth(), padding = PaddingValues(vertical = 4.dp)) {
+                MenuRow(Icons.Outlined.Lock, "Verify your email", "Enter the 6-digit code we emailed you. Needed to get paid.", onVerifyEmail)
             }
         }
         u?.profile?.bio?.takeIf { it.isNotBlank() }?.let {

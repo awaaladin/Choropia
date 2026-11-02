@@ -1,0 +1,23 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Money{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Money</h1><p class="sub">Profit and loss in plain numbers. Commission is shown before Paystack's own charges.</p></div>
+  <a class="btn ghost" href="{% url 'staff:payouts_csv' %}">Download payouts as spreadsheet</a></div>
+<div class="tabs">
+  <a class="{% if range == '7' %}on{% endif %}" href="?range=7">Last 7 days</a>
+  <a class="{% if range == '30' %}on{% endif %}" href="?range=30">Last 30 days</a>
+  <a class="{% if range == '90' %}on{% endif %}" href="?range=90">Last 90 days</a>
+  <a class="{% if range == 'all' %}on{% endif %}" href="?range=all">Everything</a>
+</div>
+<div class="card">
+  <table>
+    <tbody>
+    {% for label, amount, note in rows %}
+    <tr><td><strong>{{ label }}</strong><div class="small">{{ note }}</div></td><td class="right mono" style="font-size:18px;font-weight:700">{{ amount|naira }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="small" style="margin-top:14px">Payouts completed in this period: {{ auto_count }} automatic, {{ hand_count }} by hand.</p>
+{% endblock %}

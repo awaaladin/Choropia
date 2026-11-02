@@ -20,6 +20,7 @@ import reels.urls
 import reviews.urls
 import social.urls
 import legal.views
+import staffpanel.urls
 from common import app_download
 from payments.webhook_router import PaystackRouterView
 
@@ -43,6 +44,8 @@ api_v1_patterns = (
 urlpatterns = [
     # Staff-only (approve drivers, resolve disputes). Move it off the default with ADMIN_URL, e.g. "staff-8f3k/".
     path(settings.ADMIN_URL, admin.site.urls),
+    # The branded staff panel (money, disputes, drivers, people). The Django admin above stays for deep edits.
+    path("staff/", include("staffpanel.urls")),
     path("api/v1/", include(api_v1_patterns)),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

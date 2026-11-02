@@ -68,6 +68,9 @@ data class RegisterRequest(
 @Serializable data class TwoFactorCodeRequest(val code: String)
 @Serializable data class TwoFactorDisableRequest(val password: String, val code: String)
 @Serializable data class PasswordResetRequest(val email: String)
+@Serializable data class EmailCodeRequest(val code: String)
+@Serializable data class EmailCodeSent(val detail: String = "", val email_verified: Boolean = false)
+@Serializable data class EmailVerified(val email_verified: Boolean = false)
 @Serializable data class PasswordResetConfirmRequest(val uid: String, val token: String, val password: String)
 @Serializable data class CreateConversationRequest(val listing: Int)
 @Serializable data class SendMessageRequest(val conversation: Int, val body: String)
@@ -234,6 +237,12 @@ interface ChoropiaApi {
 
     @POST("auth/logout/")
     suspend fun logout(@Body body: LogoutRequest)
+
+    @POST("auth/email-otp/request/")
+    suspend fun requestEmailCode(): EmailCodeSent
+
+    @POST("auth/email-otp/confirm/")
+    suspend fun confirmEmailCode(@Body body: EmailCodeRequest): EmailVerified
 
     @POST("auth/password-reset/")
     suspend fun requestPasswordReset(@Body body: PasswordResetRequest)

@@ -1,0 +1,30 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Payouts{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Payouts</h1><p class="sub">What sellers and drivers are owed, and where each payment stands.</p></div>
+  <a class="btn ghost" href="{% url 'staff:payouts_csv' %}">Download all as spreadsheet</a></div>
+<div class="tabs">
+  {% for key, name, count in tabs %}<a class="{% if tab == key %}on{% endif %}" href="?tab={{ key }}">{{ name }} ({{ count }})</a>{% endfor %}
+</div>
+<form class="search" method="get"><input type="hidden" name="tab" value="{{ tab }}"><input type="search" name="q" value="{{ q }}" placeholder="Search by name, email or order number"><button class="btn ghost" type="submit">Search</button></form>
+<div class="card">
+{% if payouts %}
+<table>
+  <thead><tr><th>Paid to</th><th>Order</th><th>For</th><th class="right">Amount</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for p in payouts %}
+  <tr>
+    <td><a href="{% url 'staff:payout_detail' p.pk %}">{{ p.seller.get_full_name }}</a><div class="small">{{ p.seller.email }}</div></td>
+    <td><a href="{% url 'staff:order_detail' p.payment.order_id %}">#{{ p.payment.order_id }}</a></td>
+    <td>{{ p.get_kind_display }}</td>
+    <td class="right mono">{{ p.net_amount|naira }}</td>
+    <td><span class="pill {{ p.status|pill }}">{{ p.get_status_display }}</span>{% if p.manual_paid_at %} <span class="pill plain">by hand</span>{% endif %}</td>
+    <td class="right"><a class="btn small ghost" href="{% url 'staff:payout_detail' p.pk %}">Open</a></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">Nothing here.</div>{% endif %}
+</div>
+{% endblock %}

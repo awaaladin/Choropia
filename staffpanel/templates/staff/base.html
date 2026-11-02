@@ -1,0 +1,26 @@
+{% extends "staff/base_bare.html" %}
+{% load staff_extras %}
+{% block body %}
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><img src="/logo.png" alt="">Choropia</div>
+    <a class="nav {% if nav == 'dashboard' %}on{% endif %}" href="{% url 'staff:dashboard' %}">Overview</a>
+    <a class="nav {% if nav == 'payouts' %}on{% endif %}" href="{% url 'staff:payout_list' %}">Payouts</a>
+    <a class="nav {% if nav == 'money' %}on{% endif %}" href="{% url 'staff:money' %}">Money</a>
+    <a class="nav {% if nav == 'orders' %}on{% endif %}" href="{% url 'staff:order_list' %}">Orders</a>
+    <a class="nav {% if nav == 'drivers' %}on{% endif %}" href="{% url 'staff:driver_list' %}">Drivers</a>
+    <a class="nav {% if nav == 'people' %}on{% endif %}" href="{% url 'staff:user_list' %}">People</a>
+    <a class="nav {% if nav == 'listings' %}on{% endif %}" href="{% url 'staff:listing_list' %}">Listings</a>
+    <a class="nav {% if nav == 'audit' %}on{% endif %}" href="{% url 'staff:audit' %}">Activity log</a>
+    <div class="who">
+      {{ request.user.get_full_name }}<br>
+      <span class="small" style="color:inherit;opacity:.8">{% if request.user.is_superuser %}Superuser{% else %}Staff{% endif %}</span><br>
+      <form method="post" action="{% url 'staff:logout' %}">{% csrf_token %}<button type="submit">Sign out</button></form>
+    </div>
+  </aside>
+  <main>
+    {% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% endblock %}

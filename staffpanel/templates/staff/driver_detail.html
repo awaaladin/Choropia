@@ -1,0 +1,49 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}{{ driver.full_name }}{% endblock %}
+{% block content %}
+<div class="top"><div><h1>{{ driver.full_name }}</h1><p class="sub"><a href="{% url 'staff:driver_list' %}">&larr; All drivers</a></p></div>
+  <span class="pill {{ driver.status|pill }}" style="font-size:14px">{{ driver.get_status_display }}</span></div>
+
+<div class="grid two">
+  <div class="card">
+    <h2>Details</h2>
+    <dl>
+      <dt>Account</dt><dd><a href="{% url 'staff:user_detail' driver.user_id %}">{{ driver.user.email }}</a></dd>
+      <dt>Phone</dt><dd>{{ driver.phone }}</dd>
+      <dt>WhatsApp</dt><dd>{{ driver.whatsapp }}</dd>
+      <dt>Vehicle</dt><dd>{{ driver.get_vehicle_type_display }} {{ driver.plate_number }}</dd>
+      <dt>Guarantor</dt><dd>{{ driver.guarantor_name }}<div class="small">{{ driver.guarantor_phone }}</div></dd>
+      <dt>Agreed to terms</dt><dd>{{ driver.terms_accepted_version|default:"not recorded" }}</dd>
+      {% if driver.review_note %}<dt>Last note</dt><dd>{{ driver.review_note }}</dd>{% endif %}
+    </dl>
+  </div>
+  <div class="card">
+    <h2>Documents (opening one is logged)</h2>
+    <table><tbody>
+      {% for doc in documents %}<tr><td>{{ doc.get_kind_display }}<div class="small">{{ doc.content_type }} · {{ doc.size_bytes|filesizeformat }}</div></td><td class="right"><a class="btn small ghost" href="{% url 'staff:document_view' doc.pk %}" target="_blank" rel="noopener">Open</a></td></tr>{% empty %}<tr><td class="empty">Nothing uploaded yet.</td></tr>{% endfor %}
+    </tbody></table>
+    {% if not complete %}<p class="small" style="margin-top:10px">All four documents are needed before approval.</p>{% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <h2>Decision</h2>
+  <form method="post" action="{% url 'staff:driver_decide' driver.pk %}">{% csrf_token %}
+    <label for="note">Message to the driver (used if you reject or suspend)</label>
+    <textarea id="note" name="note" maxlength="300"></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn" name="decision" value="approve" type="submit" {% if not complete %}disabled style="opacity:.5"{% endif %}>Approve</button>
+      <button class="btn ghost" name="decision" value="reject" type="submit">Reject</button>
+      <button class="btn danger" name="decision" value="suspend" type="submit">Suspend</button>
+    </div>
+  </form>
+</div>
+
+<div class="grid two" style="margin-top:14px">
+  <div class="card"><h2>Prices</h2>
+    <table><tbody>{% for r in routes %}<tr><td>{{ r.from_area }} → {{ r.to_area }}</td><td class="right mono">{{ r.price|naira }}</td></tr>{% empty %}<tr><td class="empty">No prices published.</td></tr>{% endfor %}</tbody></table></div>
+  <div class="card"><h2>Recent jobs</h2>
+    <table><tbody>{% for j in jobs %}<tr><td><a href="{% url 'staff:order_detail' j.order_id %}">Order #{{ j.order_id }}</a><div class="small">{{ j.created_at|date:"j M" }}</div></td><td><span class="pill {{ j.status|pill }}">{{ j.get_status_display }}</span></td></tr>{% empty %}<tr><td class="empty">No jobs yet.</td></tr>{% endfor %}</tbody></table></div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Listings{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Listings</h1><p class="sub">Take down anything that breaks the rules. Latest 100 shown.</p></div></div>
+<form class="search" method="get"><input type="search" name="q" value="{{ q }}" placeholder="Title or seller email"><button class="btn ghost" type="submit">Search</button></form>
+<div class="card">
+{% if listings %}
+<table>
+  <thead><tr><th>Listing</th><th>Seller</th><th class="right">Price</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for l in listings %}
+  <tr>
+    <td>{{ l.title|truncatechars:46 }}<div class="small">{{ l.created_at|date:"j M Y" }}</div></td>
+    <td><a href="{% url 'staff:user_detail' l.owner_id %}">{{ l.owner.get_full_name }}</a></td>
+    <td class="right mono">{{ l.price|naira }}</td>
+    <td><span class="pill {{ l.status|pill }}">{{ l.get_status_display }}</span></td>
+    <td class="right">{% if l.status != 'sold' %}<form method="post" action="{% url 'staff:listing_toggle' l.pk %}">{% csrf_token %}<input type="hidden" name="back" value="{{ request.get_full_path }}"><button class="btn small {% if l.status == 'removed' %}ghost{% else %}danger{% endif %}" type="submit">{% if l.status == 'removed' %}Restore{% else %}Take down{% endif %}</button></form>{% endif %}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">No listings match.</div>{% endif %}
+</div>
+{% endblock %}

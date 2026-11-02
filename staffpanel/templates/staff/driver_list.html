@@ -1,0 +1,26 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Drivers{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Drivers</h1><p class="sub">Check each person's documents before they can take jobs.</p></div></div>
+<div class="tabs">{% for value, name, count in tabs %}<a class="{% if status == value %}on{% endif %}" href="?status={{ value }}">{{ name }} ({{ count }})</a>{% endfor %}</div>
+<div class="card">
+{% if drivers %}
+<table>
+  <thead><tr><th>Driver</th><th>Vehicle</th><th>Phone</th><th>Documents</th><th>Applied</th><th></th></tr></thead>
+  <tbody>
+  {% for d in drivers %}
+  <tr>
+    <td><a href="{% url 'staff:driver_detail' d.pk %}">{{ d.full_name }}</a><div class="small">{{ d.user.email }}</div></td>
+    <td>{{ d.get_vehicle_type_display }}{% if d.plate_number %}<div class="small">{{ d.plate_number }}</div>{% endif %}</td>
+    <td>{{ d.phone }}</td>
+    <td><span class="pill {% if d.doc_count >= 4 %}good{% else %}warn{% endif %}">{{ d.doc_count }} of 4</span></td>
+    <td class="small">{{ d.created_at|timesince }} ago</td>
+    <td class="right"><a class="btn small ghost" href="{% url 'staff:driver_detail' d.pk %}">Review</a></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">No drivers here.</div>{% endif %}
+</div>
+{% endblock %}

@@ -9,6 +9,7 @@ import { CreateListingPage } from "@/pages/CreateListing";
 import { CreateReelPage } from "@/pages/CreateReel";
 import { FeedPage } from "@/pages/Feed";
 import { ForgotPasswordPage } from "@/pages/ForgotPassword";
+import { VerifyEmailPage } from "@/pages/VerifyEmail";
 import { HowItWorksPage } from "@/pages/HowItWorks";
 import { LandingPage } from "@/pages/Landing";
 import { ListingDetailPage } from "@/pages/ListingDetail";
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
+          { path: "verify-email", element: <VerifyEmailPage /> },
           { path: "listings/new", element: <CreateListingPage /> },
           { path: "reels/new", element: <CreateReelPage /> },
           { path: "orders", element: <OrdersPage /> },

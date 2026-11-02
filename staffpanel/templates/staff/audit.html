@@ -1,0 +1,17 @@
+{% extends "staff/base.html" %}
+{% block title %}Activity log{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Activity log</h1><p class="sub">Everything staff did with money or private data. It cannot be edited here. Latest 200.</p></div></div>
+<div class="card">
+{% if entries %}
+<table>
+  <thead><tr><th>When</th><th>Who</th><th>What</th><th>About</th><th>Detail</th></tr></thead>
+  <tbody>
+  {% for e in entries %}
+  <tr><td class="small">{{ e.at|date:"j M Y, H:i" }}</td><td>{{ e.staff.get_full_name|default:"(removed)" }}</td><td><strong>{{ e.action }}</strong></td><td>{{ e.target }}</td><td class="small">{{ e.detail }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">Nothing yet.</div>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "staff/auth_base.html" %}
+{% block form %}
+<h1>Enter your code</h1>
+<p class="sub">Open your authenticator app and type the 6-digit code for Choropia (or a recovery code).</p>
+{% if error %}<div class="msg error" style="margin-top:14px">{{ error }}</div>{% endif %}
+<form method="post">{% csrf_token %}
+  <label for="code">Code</label>
+  <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" required autofocus>
+  <button class="btn" style="width:100%;margin-top:18px" type="submit">Continue</button>
+</form>
+{% endblock %}

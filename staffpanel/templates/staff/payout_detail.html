@@ -1,0 +1,65 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Payout #{{ payout.pk }}{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Payout #{{ payout.pk }}</h1><p class="sub"><a href="{% url 'staff:payout_list' %}">&larr; All payouts</a></p></div>
+  <span class="pill {{ payout.status|pill }}" style="font-size:14px">{{ payout.get_status_display }}</span></div>
+
+<div class="grid two">
+  <div class="card">
+    <h2>The money</h2>
+    <dl>
+      <dt>Paid to</dt><dd><a href="{% url 'staff:user_detail' payout.seller_id %}">{{ payout.seller.get_full_name }}</a> ({{ payout.get_kind_display|lower }})<div class="small">{{ payout.seller.email }}{% if payout.seller.phone_number %} · {{ payout.seller.phone_number }}{% endif %}</div></dd>
+      <dt>Order</dt><dd><a href="{% url 'staff:order_detail' payout.payment.order_id %}">#{{ payout.payment.order_id }}: {{ payout.payment.order.listing.title }}</a></dd>
+      <dt>Gross</dt><dd class="mono">{{ payout.gross_amount|naira }}</dd>
+      <dt>Choropia commission</dt><dd class="mono">&minus; {{ payout.commission_amount|naira }} ({{ payout.commission_rate }}%)</dd>
+      {% if payout.delivery_deduction %}<dt>Delivery share</dt><dd class="mono">&minus; {{ payout.delivery_deduction|naira }}</dd>{% endif %}
+      <dt><strong>To pay</strong></dt><dd class="mono"><strong>{{ payout.net_amount|naira }}</strong></dd>
+      <dt>Bank on file</dt><dd>{% if account %}{{ account.bank_name }} ••••{{ account.account_last4 }}, {{ account.account_name }}{% else %}<span class="pill bad">No account added yet</span>{% endif %}</dd>
+      {% if payout.failure_reason %}<dt>What went wrong</dt><dd>{{ payout.failure_reason }}</dd>{% endif %}
+      <dt>Attempts</dt><dd>{{ payout.attempts }}</dd>
+      <dt>Created</dt><dd>{{ payout.created_at }}</dd>
+      {% if payout.completed_at %}<dt>Paid on</dt><dd>{{ payout.completed_at }}</dd>{% endif %}
+    </dl>
+  </div>
+
+  <div class="card">
+    {% if payout.manual_paid_at %}
+      <h2>Paid by hand</h2>
+      <dl>
+        <dt>By</dt><dd>{{ payout.manual_paid_by.get_full_name|default:"A staff member" }}</dd>
+        <dt>When</dt><dd>{{ payout.manual_paid_at }}</dd>
+        <dt>Reference</dt><dd>{{ payout.manual_reference }}</dd>
+        {% if payout.manual_note %}<dt>Note</dt><dd>{{ payout.manual_note }}</dd>{% endif %}
+      </dl>
+    {% elif payout.status == 'success' %}
+      <h2>Paid automatically</h2><p class="small">Sent through Paystack{% if payout.paystack_transfer_code %} (transfer {{ payout.paystack_transfer_code }}){% endif %}.</p>
+    {% elif payout.status == 'processing' %}
+      <h2>Transfer in progress</h2><p class="small">A bank transfer is already on its way through Paystack. Wait for it to finish; paying by hand now could pay twice.</p>
+    {% elif can_pay_by_hand %}
+      <h2>Pay this by hand</h2>
+      {% if not request.user.is_superuser %}
+        <p class="small">Only a superuser can pay by hand.</p>
+      {% else %}
+        <p class="small">1. Show the bank details. 2. Send {{ payout.net_amount|naira }} from your bank app. 3. Record it here so the books are right and {{ payout.seller.first_name|default:"they" }} is told.</p>
+        {% if reveal_error %}<div class="msg error">{{ reveal_error }}</div>{% endif %}
+        {% if details %}
+          <div class="warnbox"><strong>{{ details.bank_name }}</strong><br><span class="secret">{{ details.account_number|default:"(not shown by Paystack)" }}</span><br>{{ details.account_name }}<div class="small">Looking at this was recorded in the activity log.</div></div>
+        {% else %}
+          <form method="post" action="{% url 'staff:payout_reveal' payout.pk %}">{% csrf_token %}<button class="btn ghost" type="submit">Show bank details</button></form>
+        {% endif %}
+        <form method="post" action="{% url 'staff:payout_mark_paid' payout.pk %}" onsubmit="return confirm('Mark this payout as paid? This tells the person and cannot be undone.');">{% csrf_token %}
+          <label for="reference">Bank transfer reference</label>
+          <input id="reference" name="reference" type="text" maxlength="100" required placeholder="From your bank app">
+          <label for="note">Note (optional)</label>
+          <textarea id="note" name="note" maxlength="300"></textarea>
+          <button class="btn" type="submit" style="margin-top:14px">I paid it: mark as paid</button>
+        </form>
+        {% if payout.status == 'needs_attention' %}
+        <form method="post" action="{% url 'staff:payout_retry' payout.pk %}" style="margin-top:14px">{% csrf_token %}<button class="btn ghost" type="submit">Or put it back in the automatic queue</button></form>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

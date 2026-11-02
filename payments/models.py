@@ -122,6 +122,13 @@ class Payout(TimeStampedModel):
     initiated_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
+    # Set when a person paid this by hand (bank app, cash) instead of the automatic transfer, for example while the
+    # Paystack account cannot make transfers. Kept as the accounting record of who paid it, when, and the bank's reference.
+    manual_paid_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    manual_paid_at = models.DateTimeField(null=True, blank=True)
+    manual_reference = models.CharField(max_length=100, blank=True)
+    manual_note = models.CharField(max_length=300, blank=True)
+
     class Meta:
         constraints = [models.UniqueConstraint(fields=["payment", "kind"], name="one_payout_per_payment_and_kind")]
 

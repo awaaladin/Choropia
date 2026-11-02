@@ -12,6 +12,7 @@ data class Profile(
     val avatar: String? = null,
     val location: String = "",
     val theme_preference: String = "light",
+    val email_verified: Boolean = false,
 )
 
 @Serializable

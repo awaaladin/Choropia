@@ -67,6 +67,7 @@ import com.choropia.app.ui.screens.CreateListingScreen
 import com.choropia.app.ui.screens.EditProfileScreen
 import com.choropia.app.ui.screens.FeedScreen
 import com.choropia.app.ui.screens.ForgotPasswordScreen
+import com.choropia.app.ui.screens.VerifyEmailScreen
 import com.choropia.app.ui.screens.InboxScreen
 import com.choropia.app.ui.screens.ListingDetailScreen
 import com.choropia.app.ui.screens.LoginGate
@@ -90,6 +91,7 @@ object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val FORGOT = "forgot"
+    const val VERIFY_EMAIL = "verify-email/{storefront}"
     const val SELL = "sell"
     const val ORDERS = "orders"
     const val NOTIFICATIONS = "notifications"
@@ -107,6 +109,7 @@ object Routes {
     const val MERCHANT = "merchant/{id}"
 
     fun listing(id: Int) = "listing/$id"
+    fun verifyEmail(storefront: Boolean) = "verify-email/$storefront"
     fun chat(id: Int) = "chat/$id"
     fun order(id: Int) = "order/$id"
     fun listingDelivery(id: Int) = "listing/$id/delivery"
@@ -258,6 +261,7 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                         onPayoutAccount = { navController.navigate(Routes.PAYOUT_ACCOUNT) },
                         onDriver = { navController.navigate(Routes.DRIVER) },
                         onEditProfile = { navController.navigate(Routes.EDIT_PROFILE) },
+                        onVerifyEmail = { navController.navigate(Routes.verifyEmail(false)) },
                         onApplyMerchant = { navController.navigate(Routes.APPLY_MERCHANT) },
                         showMessage = showMessage,
                     )
@@ -285,13 +289,21 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onRegistered = { wantsStorefront ->
                         // Registered from the login screen? Drop it too.
                         if (!navController.popBackStack(Routes.LOGIN, inclusive = true)) navController.popBackStack()
-                        if (wantsStorefront) navController.navigate(Routes.APPLY_MERCHANT)
+                        // A new account is asked to verify its email first; the storefront form (if wanted) follows.
+                        navController.navigate(Routes.verifyEmail(wantsStorefront))
                     },
                     onLogin = { if (!navController.popBackStack(Routes.LOGIN, inclusive = false)) navController.navigate(Routes.LOGIN) },
                     onBack = { navController.popBackStack() },
                 )
             }
             composable(Routes.FORGOT) { ForgotPasswordScreen(onBack = { navController.popBackStack() }) }
+            composable(Routes.VERIFY_EMAIL, arguments = listOf(navArgument("storefront") { type = NavType.BoolType })) { entry ->
+                val storefront = entry.arguments?.getBoolean("storefront") ?: false
+                VerifyEmailScreen(onDone = {
+                    navController.popBackStack()
+                    if (storefront) navController.navigate(Routes.APPLY_MERCHANT)
+                })
+            }
 
             // --- content ---
             composable(Routes.LISTING, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entry ->

@@ -1,0 +1,13 @@
+{% extends "staff/auth_base.html" %}
+{% block form %}
+<h1>Staff sign in</h1>
+<p class="sub">Choropia team only.</p>
+{% if error %}<div class="msg error" style="margin-top:14px">{{ error }}</div>{% endif %}
+<form method="post">{% csrf_token %}
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" autocomplete="username" required autofocus>
+  <label for="password">Password</label>
+  <input id="password" name="password" type="password" autocomplete="current-password" required>
+  <button class="btn" style="width:100%;margin-top:18px" type="submit">Sign in</button>
+</form>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Orders{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Orders</h1><p class="sub">Every order, newest first. Latest 100 shown.</p></div></div>
+<form class="search" method="get" style="max-width:760px">
+  <select name="status" style="max-width:220px"><option value="">All statuses</option>{% for value, name in statuses %}<option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ name }}</option>{% endfor %}</select>
+  <input type="search" name="q" value="{{ q }}" placeholder="Order number, item, or email">
+  <button class="btn ghost" type="submit">Filter</button>
+</form>
+<div class="card">
+{% if orders %}
+<table>
+  <thead><tr><th>Order</th><th>Item</th><th>Buyer</th><th>Seller</th><th class="right">Price</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for o in orders %}
+  <tr>
+    <td><a href="{% url 'staff:order_detail' o.pk %}">#{{ o.pk }}</a><div class="small">{{ o.created_at|date:"j M, H:i" }}</div></td>
+    <td>{{ o.listing.title|truncatechars:38 }}</td>
+    <td>{{ o.buyer.get_full_name }}</td><td>{{ o.seller.get_full_name }}</td>
+    <td class="right mono">{{ o.price|naira }}</td>
+    <td><span class="pill {{ o.status|pill }}">{{ o.get_status_display }}</span></td>
+  </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<div class="empty">No orders match.</div>{% endif %}
+</div>
+{% endblock %}

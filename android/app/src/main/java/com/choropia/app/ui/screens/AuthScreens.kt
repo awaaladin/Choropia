@@ -30,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -362,6 +363,77 @@ fun ForgotPasswordScreen(onBack: () -> Unit) {
                 )
                 PrimaryButton("Send reset link", { focus.clearFocus(); vm.requestReset(email) }, enabled = !vm.busy)
             }
+        }
+    }
+}
+
+
+/**
+ * "Enter the 6-digit code we emailed you." Shown right after signing up (the welcome email carries the first code) and
+ * from the profile for anyone who has not verified yet. A new code can be requested every minute.
+ */
+@Composable
+fun VerifyEmailScreen(onDone: () -> Unit) {
+    val repo = LocalRepository.current
+    val session = LocalSession.current
+    val user by session.user.collectAsState()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var code by remember { mutableStateOf("") }
+    var busy by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var info by remember { mutableStateOf<String?>(null) }
+    val focus = LocalFocusManager.current
+
+    fun confirm() {
+        if (busy || code.length != 6) return
+        busy = true
+        error = null
+        scope.launch {
+            try {
+                repo.confirmEmailCode(code)
+                session.refreshUser()
+                onDone()
+            } catch (e: com.choropia.app.data.network.ApiException) {
+                error = e.message
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    fun resend() {
+        if (busy) return
+        busy = true
+        error = null
+        info = null
+        scope.launch {
+            try {
+                info = repo.requestEmailCode().detail.ifBlank { "We sent a new code." }
+            } catch (e: com.choropia.app.data.network.ApiException) {
+                error = e.message
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    AuthFrame(
+        "Verify your email",
+        "We sent a 6-digit code to ${user?.email ?: "your email"}. Enter it below. It can take a minute, and it may land in spam.",
+        busy,
+        null,
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            error?.let { ErrorBanner(it) }
+            info?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary) }
+            ChoropiaField(
+                code, { code = it.filter { c -> c.isDigit() }.take(6); error = null }, "6-digit code",
+                keyboardType = KeyboardType.Number, imeAction = ImeAction.Done,
+                onImeAction = { focus.clearFocus(); confirm() },
+            )
+            PrimaryButton("Verify", { focus.clearFocus(); confirm() }, enabled = code.length == 6 && !busy)
+            QuietButton("Send me a new code", { resend() })
+            QuietButton("I'll do this later", onDone)
         }
     }
 }
