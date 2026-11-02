@@ -135,12 +135,12 @@ def send_payment_received(payment) -> None:
 
 # What each recipient is told about a status change. (paid_escrow is covered by the payment emails.)
 _ORDER_COPY = {
-    "courier_assigned": ("buyer", "A courier has been assigned", "The seller has handed your order to a courier."),
+    "courier_assigned": ("buyer", "Your order has been dispatched", "The seller has dispatched your order. You will be told when it is on its way."),
     "in_transit": ("buyer", "Your order is on its way", "Your courier is on the way with your item."),
     "delivered": ("buyer", "Your order was delivered", "Please check your item. If everything is as described, confirm receipt so the seller can be paid. If something is wrong, open a dispute from the order page."),
     "completed": ("both", "Order completed", "This order is complete. Thank you for using Choropia."),
     "refunded": ("both", "Order refunded", {"buyer": "Your payment is being returned to you.", "seller": "This order was refunded to the buyer."}),
-    "cancelled": ("buyer", "Your order was cancelled", "This item was bought by someone else a moment before your payment arrived, so your payment is being refunded in full."),
+    "cancelled": ("both", "The order was cancelled", {"buyer": "This order was cancelled. If you paid, your payment is being refunded in full.", "seller": "This order was cancelled before it was paid or dispatched. Nothing more to do."}),
     "disputed": ("both", "A dispute was opened", "A dispute was opened on this order. The payment stays safely in escrow while our team reviews it."),
 }
 

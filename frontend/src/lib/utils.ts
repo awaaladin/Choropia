@@ -34,7 +34,7 @@ export function timeAgo(iso: string) {
 export const STATUS_LABELS: Record<string, string> = {
   pending_payment: "Awaiting payment",
   paid_escrow: "Paid — in escrow",
-  courier_assigned: "Courier assigned",
+  courier_assigned: "Dispatched",
   in_transit: "In transit",
   delivered: "Delivered",
   confirmed: "Confirmed",

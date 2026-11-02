@@ -22,6 +22,7 @@ import social.urls
 import legal.views
 import staffpanel.urls
 from common import app_download
+from payments.return_page import payment_return
 from payments.webhook_router import PaystackRouterView
 
 api_v1_patterns = (
@@ -56,6 +57,7 @@ urlpatterns = [
     # The shared Paystack account's single webhook: handles Choropia's events and forwards the other
     # products' (see payments/webhook_router.py). Point the Paystack dashboard webhook URL here.
     # Readable legal pages for the apps and website to link to (Terms, Privacy Policy, Driver Terms).
+    path("pay/return/<int:order_id>/", payment_return, name="payment-return"),
     path("legal/<slug:slug>/", legal.views.page, name="legal-page"),
     re_path(r"^api/paystack-webhook/?$", PaystackRouterView.as_view(), name="paystack-router"),
     path("", include(core.urls)),

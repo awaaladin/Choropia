@@ -68,6 +68,9 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
     likes_count = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    # Edit only: tick it to show buyers that the price changed (the old price is shown crossed out). Left off, the new price
+    # simply replaces the old one with no trace.
+    show_price_change = serializers.BooleanField(write_only=True, required=False, default=False)
 
     class Meta:
         model = Listing
@@ -80,6 +83,9 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
             "title",
             "description",
             "price",
+            "previous_price",
+            "show_price_change",
+            "quantity",
             "condition",
             "status",
             "location",
@@ -97,7 +103,12 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "views_count", "created_at", "updated_at")
+        read_only_fields = ("id", "previous_price", "views_count", "created_at", "updated_at")
+
+    def validate_quantity(self, value):
+        if value < 1 or value > 999:
+            raise serializers.ValidationError("Enter how many you have, from 1 to 999.")
+        return value
 
     def validate_merchant(self, merchant):
         if merchant is None:
@@ -108,6 +119,7 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
         return merchant
 
     def create(self, validated_data):
+        validated_data.pop("show_price_change", None)
         photos = validated_data.pop("uploaded_photos", [])
         # Atomic: if saving a photo fails (storage outage), the listing row is rolled back too,
         # instead of leaving a photo-less listing behind.
@@ -119,6 +131,12 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         photos = validated_data.pop("uploaded_photos", [])
+        show_change = validated_data.pop("show_price_change", False)
+        new_price = validated_data.get("price")
+        if new_price is not None and new_price != instance.price:
+            instance.previous_price = instance.price if show_change else None
+        if validated_data.get("quantity", 0) > 0 and instance.status == Listing.Status.SOLD and instance.quantity == 0:
+            instance.status = Listing.Status.ACTIVE  # restocked: back on sale
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -147,6 +165,8 @@ class ListingListSerializer(ListingEngagementMixin, serializers.ModelSerializer)
             "id",
             "title",
             "price",
+            "previous_price",
+            "quantity",
             "condition",
             "status",
             "location",

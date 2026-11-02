@@ -198,6 +198,7 @@ export const api = {
     request<Paginated<Listing> | Listing[]>(`/listings/?merchant=${merchantId}`, { auth: false }),
   getListing: (id: number) => request<Listing>(`/listings/${id}/`),
   getFeed: () => request<Paginated<Listing> | Listing[]>("/feed/"),
+  updateListing: (id: number, data: unknown) => request<Listing>(`/listings/${id}/`, { method: "PATCH", body: data }),
   createListing: (formData: FormData) => request<Listing>("/listings/", { method: "POST", body: formData, formData: true }),
 
   // --- social ---
@@ -238,6 +239,9 @@ export const api = {
   confirmReceipt: (id: number) => request(`/orders/${id}/confirm_receipt/`, { method: "POST" }),
   openDispute: (id: number, reason: string) => request(`/orders/${id}/open_dispute/`, { method: "POST", body: { reason } }),
   assignCourier: (id: number) => request(`/orders/${id}/assign_courier/`, { method: "POST" }),
+  markInTransit: (id: number) => request(`/orders/${id}/mark_in_transit/`, { method: "POST" }),
+  markDelivered: (id: number) => request(`/orders/${id}/mark_delivered/`, { method: "POST" }),
+  cancelOrder: (id: number) => request(`/orders/${id}/cancel/`, { method: "POST" }),
   initializePayment: (orderId: number) =>
     request<{ authorization_url: string }>("/payments/initialize/", { method: "POST", body: { order_id: orderId } }),
   verifyPayment: (orderId: number) =>

@@ -12,7 +12,7 @@ import { STATUS_LABELS, naira, timeAgo } from "@/lib/utils";
 
 const STEPS = [
   { key: "paid_escrow", label: "Paid", icon: Lock },
-  { key: "courier_assigned", label: "Courier", icon: Truck },
+  { key: "courier_assigned", label: "Dispatched", icon: Truck },
   { key: "in_transit", label: "In transit", icon: Package },
   { key: "delivered", label: "Delivered", icon: Package },
   { key: "confirmed", label: "Confirmed", icon: CheckCircle2 },
@@ -102,6 +102,16 @@ export function OrderDetailPage() {
     onError: (err) => toast.error(errorMessage(err)),
   });
   const assignCourier = useMutation({ mutationFn: () => api.assignCourier(orderId), onSuccess: invalidate, onError: (err) => toast.error(errorMessage(err)) });
+  const inTransit = useMutation({ mutationFn: () => api.markInTransit(orderId), onSuccess: invalidate, onError: (err) => toast.error(errorMessage(err)) });
+  const delivered = useMutation({ mutationFn: () => api.markDelivered(orderId), onSuccess: invalidate, onError: (err) => toast.error(errorMessage(err)) });
+  const cancel = useMutation({
+    mutationFn: () => api.cancelOrder(orderId),
+    onSuccess: () => {
+      toast.success("The order was cancelled.");
+      invalidate();
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
   const confirm = useMutation({ mutationFn: () => api.confirmReceipt(orderId), onSuccess: invalidate, onError: (err) => toast.error(errorMessage(err)) });
   const dispute = useMutation({
     mutationFn: (reason: string) => api.openDispute(orderId, reason),
@@ -199,19 +209,56 @@ export function OrderDetailPage() {
             <Lock size={15} /> Pay into escrow
           </Button>
         )}
+        {/* The seller moves the item along; nobody is "assigned" by the site. Delivery by a Choropia driver (when offered) is
+            accepted by a driver in the Choropia app, and the order then shows who is coming. */}
         {o.status === "paid_escrow" && isSeller && (
-          <Button className="mt-4" loading={assignCourier.isPending} onClick={() => assignCourier.mutate()}>
-            <Truck size={15} /> Assign courier
+          <div className="mt-4 space-y-2">
+            <Button loading={assignCourier.isPending} onClick={() => assignCourier.mutate()}>
+              <Truck size={15} /> I've dispatched it
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              Tap this once the item has left you (you handed it over, or sent it with someone). Dispatch within 7 days or the buyer is refunded
+              automatically. You are paid as soon as the buyer confirms.
+            </p>
+          </div>
+        )}
+        {o.status === "courier_assigned" && isSeller && (
+          <Button className="mt-4" loading={inTransit.isPending} onClick={() => inTransit.mutate()}>
+            <Package size={15} /> It's on its way
           </Button>
         )}
-        {o.status === "delivered" && isBuyer && (
-          <div className="mt-4 flex gap-3">
+        {o.status === "in_transit" && isSeller && (
+          <div className="mt-4 space-y-2">
+            <Button loading={delivered.isPending} onClick={() => delivered.mutate()}>
+              <CheckCircle2 size={15} /> Mark as delivered
+            </Button>
+            <p className="text-sm text-muted-foreground">If the buyer does nothing, you are paid automatically 3 days after you mark it delivered.</p>
+          </div>
+        )}
+        {["paid_escrow", "courier_assigned", "in_transit", "delivered"].includes(o.status) && isBuyer && (
+          <div className="mt-4 flex flex-wrap gap-3">
             <Button loading={confirm.isPending} onClick={() => confirm.mutate()}>
-              <CheckCircle2 size={15} /> Confirm receipt
+              <CheckCircle2 size={15} /> {o.status === "delivered" ? "Confirm receipt" : "I received it"}
             </Button>
-            <Button variant="danger" onClick={() => setDisputeOpen(true)}>
-              Report a problem
+            {o.status !== "paid_escrow" && (
+              <Button variant="danger" onClick={() => setDisputeOpen(true)}>
+                {o.status === "delivered" ? "Report a problem" : "It hasn't arrived"}
+              </Button>
+            )}
+          </div>
+        )}
+        {["pending_payment", "paid_escrow"].includes(o.status) && (isBuyer || isSeller) && (
+          <div className="mt-4">
+            <Button
+              variant="secondary"
+              loading={cancel.isPending}
+              onClick={() => {
+                if (window.confirm(o.status === "paid_escrow" ? "Cancel this order? The buyer is refunded in full." : "Cancel this order?")) cancel.mutate();
+              }}
+            >
+              Cancel order
             </Button>
+            {o.status === "paid_escrow" && <p className="mt-1 text-sm text-muted-foreground">Until the item is on its way, either of you can cancel and the buyer gets their money back.</p>}
           </div>
         )}
 

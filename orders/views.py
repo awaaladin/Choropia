@@ -123,6 +123,41 @@ class OrderViewSet(
         return self._seller_step(request, self.get_object(), OrderStatus.DELIVERED, "delivered")
 
     @action(detail=True, methods=["post"])
+    def cancel(self, request, pk=None):
+        """Buyer or seller changes their mind. Allowed until the item is on its way:
+
+        * before payment: the order is simply cancelled (nothing was charged);
+        * after payment, before pickup or dispatch: the buyer is refunded in full through Paystack, the stock goes back on
+          sale, and any driver who had accepted the delivery is told it is off.
+        Once the item is on its way, a problem goes through a dispute instead."""
+        order = self.get_object()
+        if request.user.id not in (order.buyer_id, order.seller_id):
+            raise PermissionDenied()
+        who = "the buyer" if request.user.id == order.buyer_id else "the seller"
+
+        from payments.paystack import PaystackError
+        from payments.services import refund_escrow, reopen_listing
+
+        try:
+            with transaction.atomic():
+                order = Order.objects.select_for_update().get(pk=order.pk)
+                if order.status == OrderStatus.PENDING_PAYMENT:
+                    self._transition_or_400(order, OrderStatus.CANCELLED, actor=request.user, note=f"Cancelled by {who}")
+                elif order.status == OrderStatus.PAID_ESCROW:
+                    self._transition_or_400(order, OrderStatus.REFUNDED, actor=request.user, note=f"Cancelled by {who}; the buyer is refunded in full")
+                    try:
+                        refund_escrow(order)
+                    except ValueError as exc:
+                        raise ValidationError(str(exc))
+                    reopen_listing(order)
+                else:
+                    raise ValidationError("This order can no longer be cancelled here. If something is wrong, open a dispute from the order page.")
+        except PaystackError as exc:
+            # Nothing changed (the transaction rolled back), so the buyer can simply try again.
+            return Response({"detail": f"The refund could not be made just now, so the order was not cancelled: {exc}"}, status=502)
+        return Response(OrderSerializer(order, context={"request": request}).data)
+
+    @action(detail=True, methods=["post"])
     def open_dispute(self, request, pk=None):
         order = self.get_object()
         if request.user.id not in (order.buyer_id, order.seller_id):

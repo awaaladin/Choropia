@@ -222,6 +222,7 @@ class ChoropiaRepository(
         categoryId: Int,
         location: String,
         photoUris: List<Uri>,
+        quantity: Int = 1,
     ): Listing {
         val parts = withContext(Dispatchers.IO) {
             photoUris.take(MAX_PHOTOS).mapIndexed { index, uri ->
@@ -240,6 +241,7 @@ class ChoropiaRepository(
             put("description", field(description.trim()))
             put("price", field(price.trim()))
             put("condition", field(condition))
+            put("quantity", field(quantity.coerceIn(1, 999).toString()))
             put("category", field(categoryId.toString()))
             if (location.isNotBlank()) put("location", field(location.trim()))
         }
@@ -426,6 +428,11 @@ class ChoropiaRepository(
         apiCall { api.openDispute(orderId, DisputeRequest(reason.trim())) }
 
     suspend fun assignCourier(orderId: Int): Order = apiCall { api.assignCourier(orderId) }
+
+    suspend fun cancelOrder(orderId: Int): Order = apiCall { api.cancelOrder(orderId) }
+
+    suspend fun updateListing(id: Int, title: String, description: String, price: String, quantity: Int, condition: String, showPriceChange: Boolean): Listing =
+        apiCall { api.updateListing(id, com.choropia.app.data.network.UpdateListingRequest(title.trim(), description.trim(), price.trim(), quantity, condition, showPriceChange)) }
 
     suspend fun markInTransit(orderId: Int): Order = apiCall { api.markInTransit(orderId) }
 

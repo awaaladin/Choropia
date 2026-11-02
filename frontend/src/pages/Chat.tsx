@@ -31,6 +31,14 @@ export function ChatPage() {
 
   useEffect(() => setLive([]), [conversationId]);
 
+  // Fetching the messages marks them read on the server, so the unread badge must be refreshed to drop them.
+  useEffect(() => {
+    if (history.isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    }
+  }, [history.dataUpdatedAt, history.isSuccess, queryClient]);
+
   useEffect(() => {
     const url = wsUrl(`/ws/chat/${conversationId}/`);
     if (!url) return;

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>{% if paid %}Payment received{% else %}Confirming your payment{% endif %} | Choropia</title>
+<style>
+  body{margin:0;font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f1f4f9;color:#0f1b2d}
+  main{max-width:420px;margin:0 auto;padding:36px 18px}
+  .card{background:#fff;border:1px solid #dde3ee;border-radius:18px;padding:28px 24px;text-align:center}
+  h1{font-size:22px;margin:14px 0 6px}
+  p{margin:0 0 18px;color:#4a5a73}
+  .mark{width:56px;height:56px;border-radius:50%;margin:0 auto;display:grid;place-items:center;font-size:28px}
+  .ok{background:#d9f3ea;color:#0b7a55}.wait{background:#e6ecf7;color:#2c4f86}
+  a.btn{display:block;padding:15px;border-radius:12px;background:#0f1b2d;color:#fff;text-decoration:none;font-weight:700}
+  a.quiet{display:block;margin-top:14px;color:#2c4f86;font-size:14px}
+  @media (prefers-color-scheme: dark){body{background:#0c1422;color:#e8edf6}.card{background:#141f33;border-color:#24344f}p{color:#a9b6cb}a.btn{background:#e8edf6;color:#0c1422}a.quiet{color:#9bbbe6}}
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <div class="mark {% if paid %}ok{% else %}wait{% endif %}">{% if paid %}&#10003;{% else %}&#8987;{% endif %}</div>
+    <h1>{% if paid %}Payment received{% else %}We are confirming your payment{% endif %}</h1>
+    <p>{% if paid %}Your money is safe in escrow. Go back to the Choropia app to follow your order.{% else %}This usually takes a few seconds. Go back to the Choropia app: your order updates there as soon as it is confirmed.{% endif %}</p>
+    <a class="btn" id="open" href="{{ intent_url }}">Back to the Choropia app</a>
+    <a class="quiet" href="{{ web_url }}">Continue on the website instead</a>
+  </div>
+</main>
+<script>
+  // Try to open the app straight away; the button above does the same on a tap (some phones only allow it after a tap).
+  setTimeout(function () { window.location.href = "{{ intent_url|escapejs }}"; }, 350);
+</script>
+</body>
+</html>

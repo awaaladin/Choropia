@@ -41,6 +41,10 @@ export interface Listing {
   title: string;
   description?: string;
   price: string;
+  /** How many are left. Each paid order takes one; at zero the listing is sold. */
+  quantity?: number;
+  /** Set when the seller chose to show a price change: the old price, to be shown crossed out. */
+  previous_price?: string | null;
   condition: string;
   category: number;
   location?: string;

@@ -22,7 +22,7 @@ class OrderStatus:
     CHOICES = (
         (PENDING_PAYMENT, "Pending payment"),
         (PAID_ESCROW, "Paid into escrow"),
-        (COURIER_ASSIGNED, "Courier assigned"),
+        (COURIER_ASSIGNED, "Dispatched"),
         (IN_TRANSIT, "In transit"),
         (DELIVERED, "Delivered"),
         (CONFIRMED, "Confirmed by buyer"),

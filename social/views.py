@@ -59,15 +59,16 @@ class LikeViewSet(
 
 
 class FeedView(ListAPIView):
-    """Reverse-chronological mix of listings from followed accounts/storefronts plus nearby activity
-    in the user's own pilot-city location."""
+    """Every active listing, newest first, with listings from accounts and storefronts you follow listed ahead of the rest.
+    Your own listings are included, so something you just posted is still there after a refresh."""
 
     serializer_class = ListingListSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
+        from django.db.models import Case, IntegerField, Value, When
 
+        user = self.request.user
         followed_user_ids = Follow.objects.filter(
             follower=user, content_type=ContentType.objects.get_for_model(user.__class__)
         ).values_list("object_id", flat=True)
@@ -75,18 +76,16 @@ class FeedView(ListAPIView):
             follower=user, content_type=ContentType.objects.get_for_model(Merchant)
         ).values_list("object_id", flat=True)
 
-        location = getattr(getattr(user, "profile", None), "location", "") or ""
-
-        nearby_q = Q(location=location) if location else Q()
-
         return (
             Listing.objects.filter(status=Listing.Status.ACTIVE)
-            .filter(
-                Q(owner_id__in=followed_user_ids) | Q(merchant_id__in=followed_merchant_ids) | nearby_q
+            .annotate(
+                followed_first=Case(
+                    When(Q(owner_id__in=followed_user_ids) | Q(merchant_id__in=followed_merchant_ids), then=Value(0)),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
             )
-            .exclude(owner=user)
             .select_related("owner", "owner__profile", "merchant", "category")
             .prefetch_related("photos")
-            .distinct()
-            .order_by("-created_at")
+            .order_by("followed_first", "-created_at")
         )

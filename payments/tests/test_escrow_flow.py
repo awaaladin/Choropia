@@ -100,11 +100,10 @@ class OneItemSoldOnceTests(TestCase):
     def test_nobody_can_start_an_order_for_an_item_someone_has_paid_for(self):
         listing = make_listing()
         self.pay(payment_for(order_for(listing)))
-        listing.status = Listing.Status.ACTIVE  # even if it somehow still shows as for sale
-        listing.save()
+        Listing.objects.filter(pk=listing.pk).update(status=Listing.Status.ACTIVE)  # even if it somehow still shows as for sale
         response = client_for(make_buyer()).post("/api/v1/orders/", {"listing": listing.id}, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertIn("bought by someone else", str(response.json()))
+        self.assertIn("sold out", str(response.json()))
 
     def test_a_sold_listing_cannot_be_ordered_at_all(self):
         listing = make_listing()
@@ -324,12 +323,12 @@ class SellerNeverShipsTests(TestCase):
         self.run_job(ps)
         ps.refund.assert_called_once()
 
-    def test_the_item_is_not_relisted_if_another_buyer_holds_it(self):
+    def test_a_listing_with_two_units_keeps_the_other_buyers_unit_when_one_is_refunded(self):
         order, _ = self.make(paid_days_ago=9)
-        other = order_for(order.listing, status=OrderStatus.PAID_ESCROW)  # defensive: should never happen
+        Listing.objects.filter(pk=order.listing_id).update(quantity=1, status=Listing.Status.ACTIVE)  # a second unit is still for sale
         self.run_job()
         order.listing.refresh_from_db()
-        self.assertEqual(order.listing.status, Listing.Status.SOLD)
+        self.assertEqual((order.listing.quantity, order.listing.status), (2, Listing.Status.ACTIVE))
 
     def test_both_sides_are_told(self):
         order, _ = self.make(paid_days_ago=9)

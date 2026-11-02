@@ -68,6 +68,9 @@ data class Listing(
     val title: String,
     val description: String = "",
     val price: String = "0",
+    val quantity: Int = 1,
+    /** Set when the seller chose to show a price change: the old price, shown crossed out. */
+    val previous_price: String? = null,
     val condition: String = "used",
     val status: String = "active",
     val location: String = "",

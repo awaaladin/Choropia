@@ -111,7 +111,7 @@ data class StatusUi(val label: String, val tone: Tone)
 fun orderStatusUi(status: String): StatusUi = when (status) {
     "pending_payment" -> StatusUi("Awaiting payment", Tone.Warn)
     "paid_escrow" -> StatusUi("Paid · in escrow", Tone.Neutral)
-    "courier_assigned" -> StatusUi("Courier assigned", Tone.Neutral)
+    "courier_assigned" -> StatusUi("Dispatched", Tone.Neutral)
     "in_transit" -> StatusUi("In transit", Tone.Neutral)
     "delivered" -> StatusUi("Delivered", Tone.Warn)
     "confirmed" -> StatusUi("Confirmed", Tone.Success)
@@ -358,6 +358,7 @@ class OrderDetailViewModel(
         null
     }
 
+    fun cancel() = act("The order was cancelled.") { repo.cancelOrder(orderId) }
     fun dispatch() = act("Marked as dispatched. The buyer has been notified.") { repo.assignCourier(orderId) }
     fun inTransit() = act("Marked as on its way.") { repo.markInTransit(orderId) }
     fun delivered() = act("Marked as delivered. The buyer can now confirm or report a problem.") { repo.markDelivered(orderId) }
@@ -397,7 +398,7 @@ class OrderDetailViewModel(
 private val mainFlow = listOf(
     "pending_payment" to "Order placed",
     "paid_escrow" to "Payment held in escrow",
-    "courier_assigned" to "Courier assigned",
+    "courier_assigned" to "Dispatched",
     "in_transit" to "In transit",
     "delivered" to "Delivered",
     "confirmed" to "Receipt confirmed",
@@ -440,6 +441,7 @@ fun OrderDetailScreen(
     var disputeOpen by remember { mutableStateOf(false) }
     var reviewOpen by remember { mutableStateOf(false) }
     var confirmReceipt by remember { mutableStateOf(false) }
+    var cancelOpen by remember { mutableStateOf(false) }
     var delivery by remember { mutableStateOf<com.choropia.app.data.model.OrderDelivery?>(null) }
 
     Box(Modifier.fillMaxSize()) {
@@ -561,6 +563,9 @@ fun OrderDetailScreen(
                                     }
                                     "disputed" -> InfoNote("A moderator is reviewing this dispute. Funds stay in escrow until it's resolved.")
                                 }
+                                if ((order.status == "pending_payment" || order.status == "paid_escrow") && (isBuyer || isSeller)) {
+                                    SecondaryButton("Cancel order", { cancelOpen = true }, enabled = !state.busy, destructive = true)
+                                }
                                 SecondaryButton(
                                     "Message ${if (isBuyer) "seller" else "buyer"}",
                                     { vm.openChat(onOpenChat) },
@@ -576,6 +581,20 @@ fun OrderDetailScreen(
         }
         BlockingLoader(visible = state.busy)
 
+        if (cancelOpen) {
+            AlertDialog(
+                onDismissRequest = { cancelOpen = false },
+                title = { Text("Cancel this order?") },
+                text = {
+                    Text(
+                        if (state.order?.status == "paid_escrow") "The buyer is refunded in full and the item goes back on sale. You can do this until the item is on its way."
+                        else "Nothing has been charged, so nothing needs refunding.",
+                    )
+                },
+                confirmButton = { TextButton(onClick = { cancelOpen = false; vm.cancel() }) { Text("Yes, cancel it") } },
+                dismissButton = { TextButton(onClick = { cancelOpen = false }) { Text("Keep it") } },
+            )
+        }
         if (confirmReceipt) {
             AlertDialog(
                 onDismissRequest = { confirmReceipt = false },

@@ -25,6 +25,9 @@ class Payment(TimeStampedModel):
     provider = models.CharField(max_length=20, choices=Provider.choices, default=Provider.PAYSTACK)
 
     authorization_url = models.URLField(blank=True)  # the provider's hosted checkout page
+    # Started from the Android app: Paystack sends the buyer to a page that opens the app again, instead of the website
+    # (where the phone's browser is not signed in).
+    return_to_app = models.BooleanField(default=False)
     paid_at = models.DateTimeField(null=True, blank=True)
     released_at = models.DateTimeField(null=True, blank=True)
     refunded_at = models.DateTimeField(null=True, blank=True)

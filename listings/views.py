@@ -77,5 +77,6 @@ class ListingViewSet(viewsets.ModelViewSet):
     def mark_sold(self, request, pk=None):
         listing = self.get_object()
         listing.status = Listing.Status.SOLD
-        listing.save(update_fields=["status"])
+        listing.quantity = 0  # the seller is saying there are none left
+        listing.save(update_fields=["status", "quantity"])
         return Response(ListingSerializer(listing, context={"request": request}).data)

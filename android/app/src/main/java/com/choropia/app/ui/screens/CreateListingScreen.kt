@@ -113,6 +113,7 @@ class CreateListingViewModel(private val repo: ChoropiaRepository) : ViewModel()
         category: Category?,
         location: String,
         photos: List<Uri>,
+        quantity: Int,
         onCreated: (Int) -> Unit,
     ) {
         val local = mutableMapOf<String, String>()
@@ -131,7 +132,7 @@ class CreateListingViewModel(private val repo: ChoropiaRepository) : ViewModel()
         fieldErrors = emptyMap()
         viewModelScope.launch {
             try {
-                val created = repo.createListing(title, description, price, condition, category!!.id, location, photos)
+                val created = repo.createListing(title, description, price, condition, category!!.id, location, photos, quantity)
                 onCreated(created.id)
             } catch (e: ApiException) {
                 error = e.message
@@ -150,6 +151,7 @@ fun CreateListingScreen(onBack: () -> Unit, onCreated: (Int) -> Unit) {
 
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var quantityText by remember { mutableStateOf("1") }
     var price by remember { mutableStateOf("") }
     var condition by remember { mutableStateOf("used") }
     var category by remember { mutableStateOf<Category?>(null) }
@@ -227,6 +229,10 @@ fun CreateListingScreen(onBack: () -> Unit, onCreated: (Int) -> Unit) {
                     price, { price = it.filter { c -> c.isDigit() || c == '.' }; vm.previewFor(price) }, "Price (₦)",
                     keyboardType = KeyboardType.Decimal, error = vm.fieldErrors["price"],
                 )
+                ChoropiaField(
+                    quantityText, { quantityText = it.filter { c -> c.isDigit() }.take(3) }, "How many do you have?",
+                    keyboardType = KeyboardType.Number, error = vm.fieldErrors["quantity"],
+                )
                 vm.preview?.let { p ->
                     Text(
                         "You'll receive ${com.choropia.app.ui.util.formatNaira(p.you_receive)} after our ${p.commission_percent.removeSuffix(".00").removeSuffix(".0")}% fee. " +
@@ -271,7 +277,7 @@ fun CreateListingScreen(onBack: () -> Unit, onCreated: (Int) -> Unit) {
             Box(Modifier.padding(16.dp)) {
                 PrimaryButton(
                     "Post listing",
-                    { vm.submit(title, description, price, condition, category, location, photos, onCreated) },
+                    { vm.submit(title, description, price, condition, category, location, photos, (quantityText.toIntOrNull() ?: 1).coerceIn(1, 999), onCreated) },
                     enabled = !vm.busy,
                 )
             }

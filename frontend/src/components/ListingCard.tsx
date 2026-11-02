@@ -95,7 +95,13 @@ export function ListingCard({ item, view, density, style }: { item: Listing; vie
           <Button variant="secondary" className="ml-auto" onClick={() => messageSeller(item.id)}>
             <MessageCircle size={14} /> <span className="hidden sm:inline">Message</span>
           </Button>
-          <Button onClick={() => buy(item.id)}>Buy {naira(item.price)}</Button>
+          {item.quantity !== undefined && item.quantity > 0 && item.quantity <= 5 && (
+            <span className="self-center text-xs font-medium text-muted-foreground">{item.quantity === 1 ? "Only 1 left" : `${item.quantity} left`}</span>
+          )}
+          <Button onClick={() => buy(item.id)}>
+            Buy{" "}
+            {item.previous_price && Number(item.previous_price) !== Number(item.price) && <s className="opacity-70">{naira(item.previous_price)}</s>} {naira(item.price)}
+          </Button>
         </div>
       </div>
     </article>

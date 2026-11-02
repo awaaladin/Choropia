@@ -76,7 +76,16 @@ data class RegisterRequest(
 @Serializable data class SendMessageRequest(val conversation: Int, val body: String)
 @Serializable data class CreateOrderRequest(val listing: Int)
 @Serializable data class DisputeRequest(val reason: String)
-@Serializable data class InitializePaymentRequest(val order_id: Int)
+@Serializable data class InitializePaymentRequest(val order_id: Int, val source: String = "app")  // "app": Paystack returns to the app
+@Serializable
+data class UpdateListingRequest(
+    val title: String,
+    val description: String,
+    val price: String,
+    val quantity: Int,
+    val condition: String,
+    val show_price_change: Boolean,
+)
 
 @Serializable data class ProfileUpdate(val bio: String, val location: String, val theme_preference: String)
 
@@ -365,6 +374,12 @@ interface ChoropiaApi {
 
     @POST("orders/{id}/open_dispute/")
     suspend fun openDispute(@Path("id") id: Int, @Body body: DisputeRequest): Order
+
+    @POST("orders/{id}/cancel/")
+    suspend fun cancelOrder(@Path("id") id: Int): Order
+
+    @PATCH("listings/{id}/")
+    suspend fun updateListing(@Path("id") id: Int, @Body body: UpdateListingRequest): Listing
 
     @POST("orders/{id}/mark_in_transit/")
     suspend fun markInTransit(@Path("id") id: Int): Order

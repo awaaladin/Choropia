@@ -61,6 +61,9 @@ export function CreateListingPage() {
             <Field label="Price (₦)">
               <Input name="price" type="number" step="0.01" min="0" required />
             </Field>
+            <Field label="How many do you have?">
+              <Input name="quantity" type="number" min="1" max="999" step="1" defaultValue="1" required />
+            </Field>
             <Field label="Condition">
               <Select name="condition" defaultValue="used">
                 <option value="used">Used</option>

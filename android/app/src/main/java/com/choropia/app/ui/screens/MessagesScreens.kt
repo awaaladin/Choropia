@@ -359,6 +359,8 @@ fun ChatScreen(conversationId: Int, onBack: () -> Unit) {
     var draft by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val context = LocalContext.current
+    // The first load of a conversation marks its messages read; update the badge right away.
+    LaunchedEffect(state.loading) { if (!state.loading) session.refreshUnread() }
     val recorder = remember { com.choropia.app.ui.util.VoiceRecorder(context) }
     var recording by remember { mutableStateOf(false) }
     var recordedSeconds by remember { mutableStateOf(0) }
@@ -393,6 +395,7 @@ fun ChatScreen(conversationId: Int, onBack: () -> Unit) {
             while (true) {
                 delay(3_000)
                 vm.poll()
+                session.refreshUnread() // opening the chat marked these messages read on the server
             }
         }
     }

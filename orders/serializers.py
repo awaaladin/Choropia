@@ -99,8 +99,8 @@ class OrderCreateSerializer(serializers.Serializer):
             raise serializers.ValidationError("You cannot buy your own listing.")
         if is_demo_user(listing.owner):
             raise serializers.ValidationError(DEMO_LISTING_MESSAGE)
-        if listing_has_paid_order(listing):
-            raise serializers.ValidationError("This item has just been bought by someone else.")
+        if listing.quantity < 1:
+            raise serializers.ValidationError("This item is sold out.")
         return listing
 
     def create(self, validated_data):

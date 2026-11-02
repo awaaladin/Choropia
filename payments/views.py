@@ -39,11 +39,11 @@ class InitializePaymentView(APIView):
             raise PermissionDenied("Only the buyer can initialize payment for this order.")
         if order.status != Order.Status.PENDING_PAYMENT:
             raise ValidationError("This order is not awaiting payment.")
-        if order.listing.status != "active" or listing_has_paid_order(order.listing, exclude_order_id=order.pk):
+        if order.listing.status != "active" or order.listing.quantity < 1:
             raise ValidationError("This item is no longer available.")
 
         try:
-            payment = initialize_payment(order, callback_url=request.data.get("callback_url"))
+            payment = initialize_payment(order, callback_url=request.data.get("callback_url"), return_to_app=request.data.get("source") == "app")
         except (PaystackError, GaxtronError) as exc:
             logger.error("Could not start checkout for order %s: %s", order.id, exc)
             return Response(

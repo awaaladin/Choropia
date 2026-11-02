@@ -59,6 +59,11 @@ class Listing(TimeStampedModel):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     views_count = models.PositiveIntegerField(default=0)
+    # How many the seller has. Each paid order takes one; at zero the listing is marked sold. A refund or cancellation
+    # after payment puts one back.
+    quantity = models.PositiveIntegerField(default=1)
+    # Set only when the seller changed the price and chose to show it: buyers then see the old price crossed out.
+    previous_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

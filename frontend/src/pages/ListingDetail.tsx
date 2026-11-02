@@ -125,11 +125,24 @@ export function ListingDetailPage() {
         <div className="flex flex-col">
           <div className="flex items-start justify-between gap-3">
             <h1 className="font-display text-2xl font-bold">{item.title}</h1>
-            <span className="shrink-0 font-mono text-2xl font-semibold">{naira(item.price)}</span>
+            <span className="shrink-0 text-right font-mono text-2xl font-semibold">
+              {item.previous_price && Number(item.previous_price) !== Number(item.price) && (
+                <span className="mr-2 text-base font-normal text-muted-foreground line-through">{naira(item.previous_price)}</span>
+              )}
+              {naira(item.price)}
+            </span>
           </div>
           <p className="mt-1 text-sm capitalize text-muted-foreground">
             {item.condition} · {item.location || "Uyo"}
           </p>
+          {isMine && (
+            <Link to={`/listings/${item.id}/edit`} className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
+              Edit this listing
+            </Link>
+          )}
+          {item.quantity !== undefined && item.quantity > 0 && (
+            <p className="mt-1 text-sm font-medium text-primary">{item.quantity === 1 ? "Only 1 left" : `${item.quantity} available`}</p>
+          )}
           <p className="mt-4 whitespace-pre-line text-muted-foreground">{item.description}</p>
 
           <Link

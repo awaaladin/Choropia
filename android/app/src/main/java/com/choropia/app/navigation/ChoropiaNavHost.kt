@@ -1,6 +1,7 @@
 package com.choropia.app.navigation
 
 import com.choropia.app.ui.screens.DriverScreen
+import com.choropia.app.ui.screens.EditListingScreen
 import com.choropia.app.ui.screens.ListingDeliveryScreen
 import com.choropia.app.ui.screens.MyListingsScreen
 import com.choropia.app.ui.screens.PayoutAccountScreen
@@ -60,6 +61,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.choropia.app.ui.LocalSession
 import com.choropia.app.ui.screens.ApplyMerchantScreen
 import com.choropia.app.ui.screens.ChatScreen
@@ -102,6 +104,7 @@ object Routes {
     const val SECURITY = "security"
     const val PAYOUT_ACCOUNT = "payout-account"
     const val DRIVER = "driver"
+    const val EDIT_LISTING = "listing/{id}/edit"
     const val LISTING_DELIVERY = "listing/{id}/delivery"
     const val LISTING = "listing/{id}"
     const val CHAT = "chat/{id}"
@@ -109,6 +112,7 @@ object Routes {
     const val MERCHANT = "merchant/{id}"
 
     fun listing(id: Int) = "listing/$id"
+    fun editListing(id: Int) = "listing/$id/edit"
     fun verifyEmail(storefront: Boolean) = "verify-email/$storefront"
     fun chat(id: Int) = "chat/$id"
     fun order(id: Int) = "order/$id"
@@ -139,6 +143,14 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
     val scope = rememberCoroutineScope()
 
     val showMessage: (String) -> Unit = { text -> scope.launch { snackbar.showSnackbar(text) } }
+
+    // The page Paystack returns to opens choropia://order/<id>; when the app is already running that arrives as a new intent.
+    val activity = androidx.compose.ui.platform.LocalContext.current as? androidx.activity.ComponentActivity
+    androidx.compose.runtime.DisposableEffect(activity, navController) {
+        val listener = androidx.core.util.Consumer<android.content.Intent> { intent -> navController.handleDeepLink(intent) }
+        activity?.addOnNewIntentListener(listener)
+        onDispose { activity?.removeOnNewIntentListener(listener) }
+    }
     val needsLogin: () -> Unit = { navController.navigate(Routes.LOGIN) }
 
     fun goTab(target: String) {
@@ -316,6 +328,15 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onOpenMerchant = { navController.navigate(Routes.merchant(it)) },
                     onNeedsLogin = needsLogin,
                     showMessage = showMessage,
+                    onEdit = { navController.navigate(Routes.editListing(it)) },
+                )
+            }
+            composable(Routes.EDIT_LISTING, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entry ->
+                val id = entry.arguments?.getInt("id") ?: return@composable
+                EditListingScreen(
+                    listingId = id,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { showMessage("Your listing was updated"); navController.popBackStack() },
                 )
             }
             composable(Routes.SELL) {
@@ -375,7 +396,11 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onOpenListing = { navController.navigate(Routes.listing(it)) },
                 )
             }
-            composable(Routes.ORDER, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entry ->
+            composable(
+                Routes.ORDER,
+                arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "choropia://order/{id}" }),
+            ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: return@composable
                 OrderDetailScreen(
                     orderId = id,

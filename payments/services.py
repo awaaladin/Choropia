@@ -35,14 +35,22 @@ def payable_amount(order):
     return Decimal(order.price)
 
 
-def initialize_payment(order, callback_url=None):
+def initialize_payment(order, callback_url=None, return_to_app=False):
     provider = settings.PAYMENT_PROVIDER
     payment, created = Payment.objects.get_or_create(
         order=order,
-        defaults={"reference": generate_reference(order), "amount": payable_amount(order), "provider": provider},
+        defaults={"reference": generate_reference(order), "amount": payable_amount(order), "provider": provider, "return_to_app": return_to_app},
     )
     if payment.status != Payment.Status.INITIALIZED:
         return payment
+
+    if not created and payment.return_to_app != return_to_app:
+        # A checkout opened from the website, now paid from the app (or the other way round): Paystack remembers where to send
+        # the buyer afterwards, so start a fresh one that goes back to the right place.
+        payment.return_to_app = return_to_app
+        payment.reference = generate_reference(order)
+        payment.authorization_url = ""
+        payment.save(update_fields=["return_to_app", "reference", "authorization_url"])
 
     if not created and payment.provider != provider:
         # The platform switched provider since this checkout was started; start a fresh one
@@ -66,7 +74,11 @@ def _initialize_paystack(payment):
         amount=payment.amount,
         reference=payment.reference,
         # Server-chosen, never the client's: Paystack sends the buyer back to the order page.
-        callback_url=f"{settings.CHOROPIA_SITE_URL.rstrip('/')}/orders/{order.id}",
+        callback_url=(
+            f"{settings.CHOROPIA_SITE_URL.rstrip('/')}/pay/return/{order.id}/"
+            if payment.return_to_app
+            else f"{settings.CHOROPIA_SITE_URL.rstrip('/')}/orders/{order.id}"
+        ),
         metadata=paystack_metadata(
             "ORDER",
             f"Order #{order.id}: {order.listing.title}",
@@ -107,29 +119,32 @@ def _initialize_gaxtron(payment):
 
 
 def reserve_listing(order):
-    """Marks the item sold the moment money for it arrives. Returns False if the item is no longer
-    available (already sold, removed, or another buyer's payment got there first), in which case the
-    caller must hand this buyer's money back instead of holding it."""
+    """Takes one unit out of stock the moment money for it arrives. Returns False if there is none left (the last one went to
+    another buyer a moment earlier, or the listing was removed), in which case the caller must hand this buyer's money back
+    instead of holding it. The listing is marked sold when the last unit goes."""
     from listings.models import Listing
-    from orders.models import listing_has_paid_order
 
     listing = Listing.objects.select_for_update().get(pk=order.listing_id)
-    if listing.status != Listing.Status.ACTIVE or listing_has_paid_order(listing, exclude_order_id=order.pk):
+    if listing.status != Listing.Status.ACTIVE or listing.quantity < 1:
         return False
-    listing.status = Listing.Status.SOLD
-    listing.save(update_fields=["status", "updated_at"])
+    listing.quantity -= 1
+    if listing.quantity == 0:
+        listing.status = Listing.Status.SOLD
+    listing.save(update_fields=["quantity", "status", "updated_at"])
     return True
 
 
 def reopen_listing(order):
-    """Puts an unsold item back on sale (the order was refunded before the item changed hands)."""
+    """Puts one unit back on sale (a paid order was refunded or cancelled before the item changed hands)."""
     from listings.models import Listing
-    from orders.models import listing_has_paid_order
 
     listing = Listing.objects.select_for_update().get(pk=order.listing_id)
-    if listing.status == Listing.Status.SOLD and not listing_has_paid_order(listing, exclude_order_id=order.pk):
+    if listing.status == Listing.Status.REMOVED:
+        return
+    listing.quantity += 1
+    if listing.status == Listing.Status.SOLD:
         listing.status = Listing.Status.ACTIVE
-        listing.save(update_fields=["status", "updated_at"])
+    listing.save(update_fields=["quantity", "status", "updated_at"])
 
 
 def _hold_for_refund(payment, data, raw_payload):
@@ -140,7 +155,8 @@ def _hold_for_refund(payment, data, raw_payload):
     payment.paystack_transaction_id = str(data.get("id") or "")
     payment.raw_webhook_payload = raw_payload or data
     payment.save(update_fields=["status", "paid_at", "paystack_transaction_id", "raw_webhook_payload"])
-    payment.order.transition_to(OrderStatus.CANCELLED, note="Item no longer available; payment is being refunded")
+    if payment.order.status != OrderStatus.CANCELLED:  # already cancelled by the buyer or seller: nothing more to change
+        payment.order.transition_to(OrderStatus.CANCELLED, note="Item no longer available; payment is being refunded")
     transaction.on_commit(lambda pid=payment.pk: process_pending_refund(pid))
     logger.warning("Payment %s arrived for an unavailable item; refunding", payment.reference)
     return payment
@@ -240,7 +256,8 @@ def confirm_paystack_payment(reference, data, raw_payload=None):
         payment.save(update_fields=["status", "raw_webhook_payload"])
         return payment
 
-    if not reserve_listing(payment.order):
+    # Paid on a checkout that was left open after the order was cancelled: give the money straight back.
+    if payment.order.status == OrderStatus.CANCELLED or not reserve_listing(payment.order):
         return _hold_for_refund(payment, data, raw_payload)
 
     _mark_held(payment, "Payment confirmed via Paystack")

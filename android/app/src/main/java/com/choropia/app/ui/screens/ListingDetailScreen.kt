@@ -223,6 +223,7 @@ fun ListingDetailScreen(
     onOpenMerchant: (Int) -> Unit,
     onNeedsLogin: () -> Unit,
     showMessage: (String) -> Unit,
+    onEdit: (Int) -> Unit = {},
 ) {
     val repo = LocalRepository.current
     val session = LocalSession.current
@@ -272,8 +273,25 @@ fun ListingDetailScreen(
                         item(key = "info") {
                             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Text(listing.title, style = MaterialTheme.typography.headlineSmall)
+                                if (listing.quantity in 1..5) {
+                                    Text(
+                                        if (listing.quantity == 1) "Only 1 left" else "${listing.quantity} left",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                    )
+                                }
+                                if (isOwner && listing.status != "removed") {
+                                    com.choropia.app.ui.components.QuietButton("Edit this listing", { onEdit(listing.id) })
+                                }
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text(formatNaira(listing.price), style = MoneyStyle.copy(fontSize = androidx.compose.ui.unit.TextUnit(26f, androidx.compose.ui.unit.TextUnitType.Sp)))
+                                    listing.previous_price?.takeIf { it.toBigDecimalOrNull() != listing.price.toBigDecimalOrNull() }?.let { old ->
+                                        Text(
+                                            formatNaira(old),
+                                            style = MaterialTheme.typography.bodyLarge.copy(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
                                     Box(Modifier.weight(1f))
                                     StatusPill(
                                         listing.condition,
