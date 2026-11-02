@@ -38,3 +38,6 @@ REST_FRAMEWORK = {
 
 # A throwaway key so encrypted-document tests run; real keys only ever come from the environment.
 DOCUMENT_ENCRYPTION_KEYS = "0g4yZ3m0c0nF0c1c8Jr3Oq8o2m3m3VbYQb0xv4b2xGc="
+
+# Staff alert emails are tested on purpose (staffpanel/tests_alerts.py); elsewhere they would only add noise to email counts.
+STAFF_ALERTS_ENABLED = False

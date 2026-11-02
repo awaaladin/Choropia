@@ -146,6 +146,7 @@ class RunScheduledJobsView(View):
 
     def run(self):
         from dispatch.services import nudge_stale_offers, purge_rejected_documents
+        from staffpanel.digest import send_daily_digest
 
         from .services import retry_pending_refunds
         from .tasks import auto_refund_undispatched_task, auto_release_escrow_task, poll_paystack_payments_task
@@ -159,6 +160,7 @@ class RunScheduledJobsView(View):
             ("payouts", payouts.process_pending_payouts),
             ("dispatch_nudges", nudge_stale_offers),
             ("purge_rejected_documents", purge_rejected_documents),
+            ("staff_digest", send_daily_digest),
         ):
             try:
                 results[name] = job()

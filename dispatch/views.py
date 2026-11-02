@@ -142,8 +142,15 @@ class DriverMeView(DispatchView):
             profile.review_note = ""
             profile.save()
         from legal.services import record_acceptance
+        from notifications import staff_alerts
 
         record_acceptance(request.user, ("driver_terms", "privacy"), request)
+        staff_alerts.alert(
+            "New driver application", "A new driver applied",
+            [f"{profile.full_name} ({request.user.email}), {profile.get_vehicle_type_display()}.",
+             "They still need to upload their 4 documents; you will be emailed again when they are complete."],
+            f"/staff/drivers/{profile.pk}/",
+        )
         return Response(payloads.driver_me(profile), status=200)
 
 
@@ -180,11 +187,22 @@ class DriverDocumentsView(DispatchView):
         if not crypto.keys_configured():
             raise DispatchError("Document uploads are temporarily unavailable.", code="unavailable", status=503)
 
+        had_all = all(profile.documents.filter(kind=k.value).exists() for k in DriverDocument.REQUIRED)
         DriverDocument.objects.update_or_create(
             driver=profile,
             kind=kind,
             defaults={"content_type": real_type, "size_bytes": len(content), "encrypted_data": crypto.encrypt(content)},
         )
+        has_all = all(profile.documents.filter(kind=k.value).exists() for k in DriverDocument.REQUIRED)
+        if has_all and (not had_all or profile.status == DriverProfile.Status.APPROVED):
+            from notifications import staff_alerts
+
+            staff_alerts.alert(
+                "Driver documents ready to check", "A driver is ready for review",
+                [f"{profile.full_name} ({profile.user.email}) has uploaded all 4 documents.",
+                 "Open their page, look at each document, call the guarantor, then approve or reject."],
+                f"/staff/drivers/{profile.pk}/",
+            )
         if profile.status == DriverProfile.Status.APPROVED:
             # Changing an ID after approval means staff must look again.
             profile.status = DriverProfile.Status.PENDING

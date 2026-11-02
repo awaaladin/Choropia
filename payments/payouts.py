@@ -163,6 +163,14 @@ def release_hook(payment):
     payout = create_payout(payment)
     transaction.on_commit(lambda: process_payout_safely(payout.pk))
     driver_payout = create_driver_payout(payment)
+    if not settings.PAYOUTS_ENABLED:
+        # Automatic transfers are off, so this money is for a person to hand over.
+        from notifications import staff_alerts
+
+        lines = [f"Pay the seller {payout.seller.get_full_name()} {staff_alerts.money(payout.net_amount)} (Choropia keeps {staff_alerts.money(payout.commission_amount)})."]
+        if driver_payout:
+            lines.append(f"Pay the driver {driver_payout.seller.get_full_name()} {staff_alerts.money(driver_payout.net_amount)}.")
+        staff_alerts.alert(f"Pay out order #{payment.order_id}", "Money to hand over", lines, f"/staff/payouts/{payout.pk}/")
     if driver_payout is not None:
         transaction.on_commit(lambda: process_payout_safely(driver_payout.pk))
     return payout
@@ -176,6 +184,13 @@ def _attention(payout, reason):
     payout.failure_reason = reason[:500]
     payout.save(update_fields=["status", "failure_reason", "updated_at"])
     logger.error("Payout %s needs a person: %s", payout.pk, reason)
+    from notifications import staff_alerts
+
+    staff_alerts.alert(
+        f"Payout #{payout.pk} needs you", "A payout needs attention",
+        [f"{payout.seller.get_full_name()}: {staff_alerts.money(payout.net_amount)} for order #{payout.payment.order_id}.", f"Why: {reason[:200]}"],
+        f"/staff/payouts/{payout.pk}/",
+    )
     return payout
 
 

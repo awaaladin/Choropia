@@ -64,6 +64,7 @@ def notify_on_order_status_change(sender, instance, created, **kwargs):
         return  # a stage skipped because the buyer confirmed in person; the final status says enough
 
     order = instance.order
+    _alert_staff_about_order(order, instance)
     notification_type = (
         Notification.Type.DISPUTE if instance.to_status == "disputed" else Notification.Type.ORDER_STATUS
     )
@@ -82,3 +83,30 @@ def notify_on_order_status_change(sender, instance, created, **kwargs):
             emails.send_order_update(order, instance.to_status, participant, actor=instance.actor)
         except Exception:  # noqa: BLE001 - email must never break an order transition
             logger.exception("Order email could not be prepared for order %s", order.id)
+
+
+def _alert_staff_about_order(order, history):
+    """The system moves money and goods by itself where it can; these are the moments a person should know about."""
+    from . import staff_alerts
+
+    item = f"Order #{order.id}: {order.listing.title}"
+    who = f"Seller {order.seller.get_full_name()} ({order.seller.email}) to buyer {order.buyer.get_full_name()} ({order.buyer.email})."
+    if history.to_status == "paid_escrow":
+        staff_alerts.alert(
+            f"New paid order #{order.id}", "A buyer has paid",
+            [item, f"Amount: {staff_alerts.money(order.price)} (held until delivery is confirmed).", who], "/staff/deals/?tab=progress",
+        )
+    elif history.to_status == "disputed":
+        staff_alerts.alert(
+            f"Dispute on order #{order.id}", "A dispute was opened",
+            [item, who, f"Reason: {order.dispute_reason or 'none written'}", "The money stays held until you decide."], f"/staff/orders/{order.id}/",
+        )
+    elif history.to_status == "refunded" and (history.note or "").startswith("Cancelled by"):
+        staff_alerts.alert(
+            f"Order #{order.id} cancelled and refunded", "A paid order was cancelled", [item, who, history.note], f"/staff/orders/{order.id}/"
+        )
+    elif history.to_status == "confirmed":
+        staff_alerts.alert(
+            f"Order #{order.id} confirmed: money is ready to release", "The buyer confirmed receipt",
+            [item, who, "The seller will be paid. Check Payouts if automatic transfers are off."], "/staff/payouts/?tab=waiting",
+        )

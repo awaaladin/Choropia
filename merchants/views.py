@@ -27,6 +27,18 @@ class MerchantApplicationViewSet(
             return MerchantApplication.objects.all().order_by("-created_at")
         return MerchantApplication.objects.filter(applicant=user).order_by("-created_at")
 
+    def perform_create(self, serializer):
+        application = serializer.save()
+        from notifications import staff_alerts
+
+        staff_alerts.alert(
+            "New storefront application", "Someone applied for a storefront",
+            [f"Business: {application.business_name}",
+             f"Applicant: {application.applicant.get_full_name()} ({application.applicant.email})",
+             "Review it in the Django admin (Merchant applications)."],
+            "/admin/merchants/merchantapplication/",
+        )
+
     @action(detail=True, methods=["post"], permission_classes=[IsStaffOrModerator])
     def review(self, request, pk=None):
         application = self.get_object()

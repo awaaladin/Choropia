@@ -392,6 +392,9 @@ EMAIL_USE_TLS = EMAIL_USE_TLS and not EMAIL_USE_SSL
 EMAIL_TIMEOUT = env_int("EMAIL_TIMEOUT", 10)  # Vercel stops a function at 10 s; never hang on SMTP
 # Must be on a domain verified with the email provider, or it will refuse to send.
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "Choropia <no-reply@choropia.local>")
+# Who is emailed when something needs a person (new driver, dispute, money to hand over). Comma separated.
+STAFF_ALERT_EMAILS = [e.strip() for e in env("STAFF_ALERT_EMAILS", "hiexecontact@gmail.com").split(",") if e.strip()]
+STAFF_ALERTS_ENABLED = env_bool("STAFF_ALERTS_ENABLED", True)
 SUPPORT_EMAIL = env("SUPPORT_EMAIL", "") or DEFAULT_FROM_EMAIL.rpartition("<")[2].rstrip(">").strip()
 
 # Email one-time codes (accounts/otp.py)

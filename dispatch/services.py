@@ -487,6 +487,14 @@ def nudge_stale_offers(now=None):
                 link=f"/orders/{delivery.order_id}",
             )
             nudged.append(delivery.pk)
+            from notifications import staff_alerts
+
+            staff_alerts.alert(
+                f"Order #{delivery.order_id}: no driver yet", "A paid delivery has no driver",
+                [f"{delivery.pickup_area} to {delivery.dropoff_area}, {staff_alerts.money(delivery.fee)} fee. "
+                 f"Nobody has accepted after {settings.DISPATCH_NUDGE_HOURS} hours; the seller has been told."],
+                f"/staff/orders/{delivery.order_id}/",
+            )
     return nudged
 
 
