@@ -340,6 +340,8 @@ DOCUMENT_ENCRYPTION_KEYS = env("DOCUMENT_ENCRYPTION_KEY", "")
 DOCUMENT_MAX_BYTES = env_int("DOCUMENT_MAX_BYTES", 3 * 1024 * 1024)
 PROOF_PHOTO_MAX_BYTES = env_int("PROOF_PHOTO_MAX_BYTES", 3 * 1024 * 1024)
 HANDOVER_MAX_ATTEMPTS = env_int("HANDOVER_MAX_ATTEMPTS", 5)
+# Identity documents of drivers who were rejected are deleted this many days after the decision (data-protection retention).
+REJECTED_DOCUMENT_RETENTION_DAYS = env_int("REJECTED_DOCUMENT_RETENTION_DAYS", 30)
 # The current version of the Terms and Privacy Policy (see the legal app); bump when the text changes.
 LEGAL_VERSION = env("LEGAL_VERSION", "2026-10-27")
 LEGAL_COMPANY_NAME = env("LEGAL_COMPANY_NAME", "Choropia")

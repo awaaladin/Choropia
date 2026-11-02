@@ -210,6 +210,11 @@ export function AppShell() {
 
       <footer className="hidden border-t border-border py-6 text-center text-xs text-muted-foreground md:block">
         Choropia — social buy-and-sell marketplace (Uyo pilot)
+        <span className="mt-1 block">
+          <Link to="/driver" className="hover:underline">Deliver with Choropia</Link> ·{" "}
+          <a href="/legal/terms/" className="hover:underline">Terms</a> ·{" "}
+          <a href="/legal/privacy/" className="hover:underline">Privacy</a>
+        </span>
       </footer>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-panel pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden" aria-label="Primary">

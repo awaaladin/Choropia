@@ -714,3 +714,23 @@ class NullBodiesAreJsonTests(TestCase):
         c = client_for(user)
         r = c.get("/api/v1/dispatch/driver/me/")
         self.assertEqual((r.status_code, r.content), (200, b"null"))
+
+
+class DocumentRetentionTests(TestCase):
+    def _driver(self, label, status, days_ago):
+        driver = make_driver(label, status=status)
+        DriverProfile.objects.filter(pk=driver.pk).update(reviewed_at=timezone.now() - timezone.timedelta(days=days_ago))
+        DriverDocument.objects.create(driver=driver, kind="id_card", content_type="image/jpeg", size_bytes=4, encrypted_data=crypto.encrypt(JPEG))
+        return driver
+
+    def test_only_old_rejections_lose_their_documents(self):
+        old_rejected = self._driver("oldrej", "rejected", 31)
+        new_rejected = self._driver("newrej", "rejected", 5)
+        approved = self._driver("okdriver", "approved", 400)
+        suspended = self._driver("susp", "suspended", 400)
+        result = services.purge_rejected_documents()
+        self.assertEqual(result, {"documents_deleted": 1})
+        self.assertFalse(old_rejected.documents.exists())
+        for kept in (new_rejected, approved, suspended):
+            self.assertTrue(kept.documents.exists())
+        self.assertTrue(DriverProfile.objects.filter(pk=old_rejected.pk).exists(), "the application itself stays")

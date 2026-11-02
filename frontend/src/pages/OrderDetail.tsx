@@ -9,6 +9,7 @@ import { errorMessage } from "@/lib/actions";
 import { api, rows } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { STATUS_LABELS, naira, timeAgo } from "@/lib/utils";
+import { OrderDelivery } from "@/components/OrderDelivery";
 
 const STEPS = [
   { key: "paid_escrow", label: "Paid", icon: Lock },
@@ -102,6 +103,8 @@ export function OrderDetailPage() {
     onError: (err) => toast.error(errorMessage(err)),
   });
   const assignCourier = useMutation({ mutationFn: () => api.assignCourier(orderId), onSuccess: invalidate, onError: (err) => toast.error(errorMessage(err)) });
+  const delivery = useQuery({ queryKey: ["order-delivery", orderId], queryFn: () => api.dispatch.orderDelivery(orderId) });
+  const driverDelivery = !!delivery.data && delivery.data.status !== "cancelled";
   const inTransit = useMutation({ mutationFn: () => api.markInTransit(orderId), onSuccess: invalidate, onError: (err) => toast.error(errorMessage(err)) });
   const delivered = useMutation({ mutationFn: () => api.markDelivered(orderId), onSuccess: invalidate, onError: (err) => toast.error(errorMessage(err)) });
   const cancel = useMutation({
@@ -211,7 +214,11 @@ export function OrderDetailPage() {
         )}
         {/* The seller moves the item along; nobody is "assigned" by the site. Delivery by a Choropia driver (when offered) is
             accepted by a driver in the Choropia app, and the order then shows who is coming. */}
-        {o.status === "paid_escrow" && isSeller && (
+        <OrderDelivery orderId={orderId} listingId={o.listing} orderStatus={o.status} isBuyer={isBuyer} isSeller={isSeller} />
+        {driverDelivery && isSeller && ["paid_escrow", "courier_assigned", "in_transit"].includes(o.status) && (
+          <p className="mt-4 rounded-lg bg-accent p-3 text-sm">A Choropia driver will collect this from you. Hand it over when they arrive. You are paid automatically once the buyer's handover code is confirmed.</p>
+        )}
+        {o.status === "paid_escrow" && isSeller && !driverDelivery && (
           <div className="mt-4 space-y-2">
             <Button loading={assignCourier.isPending} onClick={() => assignCourier.mutate()}>
               <Truck size={15} /> I've dispatched it
@@ -222,12 +229,12 @@ export function OrderDetailPage() {
             </p>
           </div>
         )}
-        {o.status === "courier_assigned" && isSeller && (
+        {o.status === "courier_assigned" && isSeller && !driverDelivery && (
           <Button className="mt-4" loading={inTransit.isPending} onClick={() => inTransit.mutate()}>
             <Package size={15} /> It's on its way
           </Button>
         )}
-        {o.status === "in_transit" && isSeller && (
+        {o.status === "in_transit" && isSeller && !driverDelivery && (
           <div className="mt-4 space-y-2">
             <Button loading={delivered.isPending} onClick={() => delivered.mutate()}>
               <CheckCircle2 size={15} /> Mark as delivered

@@ -140,6 +140,11 @@ export function ListingDetailPage() {
               Edit this listing
             </Link>
           )}
+          {isMine && (
+            <Link to={`/listings/${item.id}/delivery`} className="ml-4 mt-2 inline-block text-sm font-medium text-primary hover:underline">
+              Delivery options
+            </Link>
+          )}
           {item.quantity !== undefined && item.quantity > 0 && (
             <p className="mt-1 text-sm font-medium text-primary">{item.quantity === 1 ? "Only 1 left" : `${item.quantity} available`}</p>
           )}

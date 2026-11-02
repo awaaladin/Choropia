@@ -488,3 +488,17 @@ def nudge_stale_offers(now=None):
             )
             nudged.append(delivery.pk)
     return nudged
+
+
+def purge_rejected_documents(now=None):
+    """Deletes the identity documents of drivers rejected more than REJECTED_DOCUMENT_RETENTION_DAYS ago. Approved, pending and
+    suspended drivers keep theirs (suspended ones may be needed for a dispute). The application itself is kept, so a person who
+    applies again simply uploads fresh documents."""
+    from .models import DriverDocument
+
+    now = now or timezone.now()
+    cutoff = now - timezone.timedelta(days=settings.REJECTED_DOCUMENT_RETENTION_DAYS)
+    stale = DriverDocument.objects.filter(driver__status=DriverProfile.Status.REJECTED, driver__reviewed_at__lte=cutoff)
+    count = stale.count()
+    stale.delete()
+    return {"documents_deleted": count}

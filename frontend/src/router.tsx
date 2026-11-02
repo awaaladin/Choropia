@@ -11,6 +11,9 @@ import { FeedPage } from "@/pages/Feed";
 import { ForgotPasswordPage } from "@/pages/ForgotPassword";
 import { VerifyEmailPage } from "@/pages/VerifyEmail";
 import { EditListingPage } from "@/pages/EditListing";
+import { DriverPage } from "@/pages/Driver";
+import { ListingDeliveryPage } from "@/pages/ListingDelivery";
+import { PayoutAccountPage } from "@/pages/PayoutAccount";
 import { HowItWorksPage } from "@/pages/HowItWorks";
 import { LandingPage } from "@/pages/Landing";
 import { ListingDetailPage } from "@/pages/ListingDetail";
@@ -54,6 +57,9 @@ export const router = createBrowserRouter([
         children: [
           { path: "verify-email", element: <VerifyEmailPage /> },
           { path: "listings/:id/edit", element: <EditListingPage /> },
+          { path: "listings/:id/delivery", element: <ListingDeliveryPage /> },
+          { path: "driver", element: <DriverPage /> },
+          { path: "payout-account", element: <PayoutAccountPage /> },
           { path: "listings/new", element: <CreateListingPage /> },
           { path: "reels/new", element: <CreateReelPage /> },
           { path: "orders", element: <OrdersPage /> },

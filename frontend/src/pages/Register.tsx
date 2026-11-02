@@ -107,6 +107,13 @@ export function RegisterPage() {
             <Lock size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input name="password" type="password" placeholder="Password" required className="pl-9" />
           </div>
+          <label className="page-enter flex items-start gap-2 text-sm" style={delay(220)}>
+            <input type="checkbox" name="accept_terms" value="true" required className="mt-1" />
+            <span>
+              I agree to the <a href="/legal/terms/" target="_blank" rel="noreferrer" className="font-medium text-primary underline">Terms</a> and the{" "}
+              <a href="/legal/privacy/" target="_blank" rel="noreferrer" className="font-medium text-primary underline">Privacy Policy</a>.
+            </span>
+          </label>
           <Button type="submit" className="page-enter w-full" style={delay(240)} loading={loading}>
             <UserPlus size={15} /> Create account
           </Button>

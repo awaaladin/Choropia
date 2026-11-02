@@ -137,6 +137,15 @@ export function ProfilePage() {
         </div>
       </Section>
 
+      <Section title="Money and delivery" description="Where you get paid, and earning as a delivery driver.">
+        <div className="flex flex-wrap gap-3">
+          <Link to="/payout-account" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">Payout account</Link>
+          <Link to="/driver" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">Deliver with Choropia</Link>
+          <a href="/legal/terms/" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">Terms</a>
+          <a href="/legal/privacy/" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-accent">Privacy Policy</a>
+        </div>
+      </Section>
+
       <Section title="Display preferences" description="Changes apply instantly and stay saved on this device.">
         <div className="space-y-5">
           <div>

@@ -9,6 +9,7 @@ export interface Profile {
   avatar: string | null;
   location: string;
   theme_preference: "light" | "dark";
+  email_verified?: boolean;
 }
 
 export interface User {
@@ -201,4 +202,97 @@ export interface WalletTransaction {
   released_at: string | null;
   refunded_at: string | null;
   created_at: string;
+}
+
+// --- delivery by independent drivers (dispatch) -------------------------------------------------------------
+
+export interface Area {
+  id: number;
+  name: string;
+}
+
+export interface DriverDocumentStatus {
+  kind: string;
+  label: string;
+  uploaded: boolean;
+}
+
+export interface DriverMe {
+  id: number;
+  status: "pending" | "approved" | "rejected" | "suspended";
+  status_label: string;
+  review_note: string;
+  full_name: string;
+  phone: string;
+  whatsapp: string;
+  vehicle_type: string;
+  plate_number: string;
+  guarantor_name: string;
+  guarantor_phone: string;
+  available: boolean;
+  documents: DriverDocumentStatus[];
+  documents_complete: boolean;
+}
+
+export interface RoutePrice {
+  id: number;
+  from_area: Area;
+  to_area: Area;
+  price: string;
+  is_active?: boolean;
+  you_pay?: string;
+}
+
+export interface PublicDriver {
+  id: number;
+  name: string;
+  vehicle_type: string;
+  routes: RoutePrice[];
+}
+
+export interface ListingDeliveryInfo {
+  enabled: boolean;
+  payer?: "buyer" | "seller" | "split";
+  pickup_area?: Area;
+  drivers?: PublicDriver[];
+}
+
+export interface OrderDelivery {
+  id: number;
+  order: number;
+  status: "awaiting_payment" | "offered" | "accepted" | "picked_up" | "delivered" | "cancelled";
+  status_label: string;
+  pickup_area: Area;
+  dropoff_area: Area;
+  payer: "buyer" | "seller" | "split";
+  fee: string;
+  buyer_share: string;
+  seller_share: string;
+  driver: { name: string; vehicle_type: string; plate_number: string; phone: string; whatsapp: string } | null;
+  handover_code?: string;
+  dropoff_note?: string;
+  can_cancel_choice?: boolean;
+  can_reassign?: boolean;
+  drivers_notified?: number;
+  you_earn?: string;
+  listing_title?: string;
+  pickup?: { name: string; phone: string };
+  dropoff?: { name: string; phone: string; note: string };
+  can_pick_up?: boolean;
+  can_deliver?: boolean;
+}
+
+export interface JobCard {
+  id: number;
+  order: number;
+  listing_title: string;
+  pickup_area: Area;
+  dropoff_area: Area;
+  you_earn: string;
+  state: string;
+}
+
+export interface DriverJobs {
+  open: JobCard[];
+  mine: OrderDelivery[];
 }

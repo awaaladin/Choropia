@@ -1,5 +1,12 @@
 import type {
   AppNotification,
+  Area,
+  DriverJobs,
+  DriverMe,
+  ListingDeliveryInfo,
+  OrderDelivery,
+  PublicDriver,
+  RoutePrice,
   Category,
   Comment,
   Conversation,
@@ -185,6 +192,51 @@ export const api = {
   /** Emails a fresh 6-digit code to the signed-in person, to verify their address. */
   requestEmailCode: () => request<{ detail: string }>("/auth/email-otp/request/", { method: "POST" }),
   confirmEmailCode: (code: string) => request<{ email_verified: boolean }>("/auth/email-otp/confirm/", { method: "POST", body: { code } }),
+
+  // --- delivery by independent drivers ---
+  dispatch: {
+    areas: () => request<Area[]>("/dispatch/areas/", { auth: false }),
+    addArea: (name: string) => request<Area>("/dispatch/areas/", { method: "POST", body: { name } }),
+    driverMe: () => request<DriverMe | null>("/dispatch/driver/me/"),
+    apply: (body: Record<string, unknown>) => request<DriverMe>("/dispatch/driver/me/", { method: "PUT", body }),
+    setAvailable: (available: boolean) => request<DriverMe>("/dispatch/driver/me/", { method: "PUT", body: { available } }),
+    uploadDocument: (kind: string, file: File) => {
+      const form = new FormData();
+      form.append("kind", kind);
+      form.append("file", file);
+      return request<DriverMe>("/dispatch/driver/documents/", { method: "POST", body: form, formData: true });
+    },
+    routes: () => request<RoutePrice[]>("/dispatch/driver/routes/"),
+    addRoute: (body: { from_area: number; to_area: number; price: string }) => request("/dispatch/driver/routes/", { method: "POST", body }),
+    deleteRoute: (id: number) => request(`/dispatch/driver/routes/${id}/`, { method: "DELETE" }),
+    jobs: () => request<DriverJobs>("/dispatch/driver/jobs/"),
+    accept: (id: number) => request<OrderDelivery>(`/dispatch/driver/jobs/${id}/accept/`, { method: "POST" }),
+    decline: (id: number) => request(`/dispatch/driver/jobs/${id}/decline/`, { method: "POST" }),
+    pickup: (id: number) => request<OrderDelivery>(`/dispatch/driver/jobs/${id}/pickup/`, { method: "POST" }),
+    deliver: (id: number, code: string, photo: File) => {
+      const form = new FormData();
+      form.append("code", code);
+      form.append("photo", photo);
+      return request<OrderDelivery>(`/dispatch/driver/jobs/${id}/deliver/`, { method: "POST", body: form, formData: true });
+    },
+    browseDrivers: (fromArea: number) => request<PublicDriver[]>(`/dispatch/drivers/?from=${fromArea}`),
+    listingDelivery: (listingId: number, to?: number) =>
+      request<ListingDeliveryInfo>(`/dispatch/listings/${listingId}/delivery/${to ? `?to=${to}` : ""}`, { auth: false }),
+    saveListingDelivery: (listingId: number, body: { enabled: boolean; payer: string; pickup_area: number; drivers: number[] }) =>
+      request<ListingDeliveryInfo>(`/dispatch/listings/${listingId}/delivery/`, { method: "PUT", body }),
+    orderDelivery: (orderId: number) => request<OrderDelivery | null>(`/dispatch/orders/${orderId}/delivery/`),
+    chooseDelivery: (orderId: number, body: { dropoff_area: number; driver: number; dropoff_note: string }) =>
+      request<OrderDelivery>(`/dispatch/orders/${orderId}/delivery/`, { method: "POST", body }),
+    clearDelivery: (orderId: number) => request(`/dispatch/orders/${orderId}/delivery/`, { method: "DELETE" }),
+    reassign: (orderId: number) => request<OrderDelivery>(`/dispatch/orders/${orderId}/delivery/reassign/`, { method: "POST" }),
+  },
+
+  // --- payout account (where sellers and drivers are paid) ---
+  banks: () => request<{ code: string; name: string }[]>("/payouts/banks/"),
+  payoutAccount: () => request<{ configured: boolean; bank_name: string; account_last4: string; account_name: string }>("/payouts/account/"),
+  savePayoutAccount: (bank_code: string, account_number: string) =>
+    request<{ configured: boolean; bank_name: string; account_last4: string; account_name: string }>("/payouts/account/", { method: "PUT", body: { bank_code, account_number } }),
+  deletePayoutAccount: () => request("/payouts/account/", { method: "DELETE" }),
 
   // --- profile ---
   me: () => request<User>("/users/me/"),
