@@ -2,7 +2,7 @@
 {% load staff_extras %}
 {% block title %}Sellers{% endblock %}
 {% block content %}
-<div class="top"><div><h1>Sellers</h1><p class="sub">Keep the pilot small: choose who can post listings. Everyone can still browse and buy.</p></div></div>
+<div class="top"><div><h1>Sellers</h1><p class="sub">Keep the pilot small: choose who can post listings. Add as many sellers as you like, in any category. Everyone can still browse and buy.</p></div></div>
 
 <div class="card" style="margin-bottom:14px">
   <h2>Invite-only selling</h2>
@@ -36,8 +36,8 @@
     <form method="post" action="{% url 'staff:seller_add' %}">{% csrf_token %}
       <label for="email">Their email</label>
       <input id="email" name="email" type="email" required>
-      <label for="focus">What they sell</label>
-      <select id="focus" name="focus"><option value="Gadgets">Gadgets</option><option value="Fashion">Fashion</option><option value="">Other</option></select>
+      <label for="focus">What they sell (any wording)</label>
+      <input id="focus" name="focus" type="text" maxlength="40" list="focus-list" placeholder="For example Gadgets, Fashion, Food"><datalist id="focus-list"><option value="Gadgets"><option value="Fashion"><option value="Phones"><option value="Home"><option value="Services"></datalist>
       <button class="btn" style="margin-top:14px" type="submit">Approve this seller</button>
     </form>
     {% else %}<p class="small">Only a superuser can add sellers.</p>{% endif %}
