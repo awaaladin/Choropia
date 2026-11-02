@@ -60,7 +60,8 @@ function useUnreadNotifications() {
   const { loggedIn } = useAuth();
   const { data } = useQuery({
     queryKey: ["notifications"],
-    queryFn: api.listNotifications,
+    // Same cache entry as the Notifications page, so it must hold the same shape: a plain list.
+    queryFn: async () => rows(await api.listNotifications()),
     enabled: loggedIn,
     refetchInterval: 60_000,
   });
