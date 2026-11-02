@@ -78,6 +78,18 @@ function ApplyForm() {
   return (
     <Card title="Apply to be a driver">
       <p className="mb-4 text-sm text-muted-foreground">Individual drivers only for now. You will need your phone, WhatsApp, a guarantor, and clear photos of four documents.</p>
+      <div className="mb-5 rounded-xl border border-border bg-accent/50 p-4 text-sm">
+        <p className="font-semibold">Your documents are private and encrypted</p>
+        <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
+          <li>Every document is scrambled (encrypted) the moment you upload it, before it is saved.</li>
+          <li>Only Choropia's small verification team can open them, and every time one is opened it is written in a log.</li>
+          <li>We never show them to sellers, buyers or other drivers, and we never sell or share them with anyone. The only exception is if the law forces us to.</li>
+          <li>If we can't approve you, your documents are deleted automatically after 30 days.</li>
+        </ul>
+        <p className="mt-2 text-muted-foreground">
+          Read the full <a className="font-medium text-primary underline" href="/legal/privacy/" target="_blank" rel="noreferrer">Privacy Policy</a>.
+        </p>
+      </div>
       <form onSubmit={onSubmit} className="space-y-4">
         <Field label="Full name (as on your ID)">
           <Input name="full_name" required />
@@ -195,7 +207,7 @@ function Review({ profile }: { profile: DriverMe }) {
       )}
       {profile.status !== "suspended" && !submitted && (
         <Card title="Your documents">
-          <p className="mb-3 text-sm text-muted-foreground">They are encrypted on our servers. Only our verification team can open them, and every view is logged.</p>
+          <p className="mb-3 text-sm text-muted-foreground">They are encrypted on our servers. Only our verification team can open them, every view is logged, and we never share them with anyone.</p>
           <input
             ref={input}
             type="file"
