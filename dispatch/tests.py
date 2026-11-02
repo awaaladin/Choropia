@@ -734,3 +734,18 @@ class DocumentRetentionTests(TestCase):
         for kept in (new_rejected, approved, suspended):
             self.assertTrue(kept.documents.exists())
         self.assertTrue(DriverProfile.objects.filter(pk=old_rejected.pk).exists(), "the application itself stays")
+
+
+class TestDriverHiddenTests(DispatchBase):
+    def test_a_test_driver_is_never_listed_chosen_or_offered_jobs_even_when_approved(self):
+        tester = make_driver("tester", is_test=True)
+        route(tester, self.ewet, self.aka, "100")
+        body = APIClient().get(f"/api/v1/dispatch/drivers/?from={self.ewet.pk}").content.decode()
+        self.assertNotIn("Tester", body)
+        with self.assertRaises(services.DispatchError):
+            services.set_listing_delivery(self.listing, self.seller, True, "buyer", self.ewet, [tester.pk])
+        self.options.drivers.add(tester)  # even if it somehow got attached
+        order, _ = self.chosen(self.d1)
+        self.pay(order)
+        self.assertFalse(DeliveryOffer.objects.filter(driver=tester).exists())
+        self.assertNotIn("Tester", str(APIClient().get(f"/api/v1/dispatch/listings/{self.listing.pk}/delivery/?to={self.aka.pk}").json()))

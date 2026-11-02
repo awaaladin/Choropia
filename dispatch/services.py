@@ -99,7 +99,7 @@ def set_listing_delivery(listing, user, enabled, payer, pickup_area, driver_ids)
         raise DispatchError("Only the seller can change delivery for this listing.", status=403)
     if payer not in ListingDelivery.Payer.values:
         raise DispatchError("Choose who pays for delivery: buyer, seller or split.")
-    drivers = list(DriverProfile.objects.filter(pk__in=driver_ids, status=DriverProfile.Status.APPROVED))
+    drivers = list(DriverProfile.objects.filter(pk__in=driver_ids, status=DriverProfile.Status.APPROVED, is_test=False))
     if enabled and not drivers:
         raise DispatchError("Pick at least one approved driver (picking more than one means a faster pickup).")
     if enabled and len(drivers) != len(set(driver_ids)):
@@ -120,7 +120,7 @@ def options_for_buyer(listing, dropoff_area=None):
     if options is None or not options.enabled:
         return None
     result = []
-    for driver in options.drivers.filter(status=DriverProfile.Status.APPROVED):
+    for driver in options.drivers.filter(status=DriverProfile.Status.APPROVED, is_test=False):
         routes = DriverRoute.objects.filter(driver=driver, from_area=options.pickup_area, is_active=True).select_related("to_area")
         if dropoff_area is not None:
             routes = routes.filter(to_area=dropoff_area)
@@ -212,7 +212,7 @@ def _eligible_drivers(delivery):
     options = ListingDelivery.objects.filter(listing_id=delivery.order.listing_id).first()
     chosen = options.drivers.all() if options else DriverProfile.objects.none()
     result = []
-    for driver in chosen.filter(status=DriverProfile.Status.APPROVED, available=True):
+    for driver in chosen.filter(status=DriverProfile.Status.APPROVED, available=True, is_test=False):
         route = eligible_route(driver, delivery.pickup_area, delivery.dropoff_area)
         if route is not None and route.price <= delivery.fee:
             result.append(driver)

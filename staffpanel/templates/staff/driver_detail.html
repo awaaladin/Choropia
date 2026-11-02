@@ -28,6 +28,12 @@
 </div>
 
 <div class="card" style="margin-top:14px">
+  <h2>Test account</h2>
+  <p class="small">{% if driver.is_test %}<span class="pill warn">TEST</span> Hidden from sellers and buyers. It is never offered real jobs.{% else %}Real drivers are visible to sellers and buyers once approved. Tick this for your own test accounts.{% endif %}</p>
+  {% if request.user.is_superuser %}<form method="post" action="{% url 'staff:driver_test_toggle' driver.pk %}">{% csrf_token %}<button class="btn ghost" type="submit">{% if driver.is_test %}Make it a real driver{% else %}Mark as a test account{% endif %}</button></form>{% endif %}
+</div>
+
+<div class="card" style="margin-top:14px">
   <h2>Decision</h2>
   <form method="post" action="{% url 'staff:driver_decide' driver.pk %}">{% csrf_token %}
     <label for="note">Message to the driver (used if you reject or suspend)</label>

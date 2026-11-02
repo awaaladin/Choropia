@@ -27,6 +27,7 @@ urlpatterns = [
     path("drivers/", views.driver_list, name="driver_list"),
     path("drivers/<int:pk>/", views.driver_detail, name="driver_detail"),
     path("drivers/<int:pk>/decide/", views.driver_decide, name="driver_decide"),
+    path("drivers/<int:pk>/test/", views.driver_test_toggle, name="driver_test_toggle"),
     path("documents/<int:pk>/", views.document_view, name="document_view"),
     path("people/", views.user_list, name="user_list"),
     path("people/<int:pk>/", views.user_detail, name="user_detail"),

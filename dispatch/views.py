@@ -294,7 +294,7 @@ class DriversBrowseView(DispatchView):
     """Approved drivers and their prices, for a seller choosing who to offer. No phone numbers."""
 
     def get(self, request):
-        routes = DriverRoute.objects.filter(is_active=True, driver__status=DriverProfile.Status.APPROVED).select_related("from_area", "to_area", "driver")
+        routes = DriverRoute.objects.filter(is_active=True, driver__status=DriverProfile.Status.APPROVED, driver__is_test=False).select_related("from_area", "to_area", "driver")
         if request.query_params.get("from"):
             routes = routes.filter(from_area_id=request.query_params["from"])
         if request.query_params.get("to"):

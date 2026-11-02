@@ -359,6 +359,17 @@ def document_view(request, pk):
     return response
 
 
+@superuser_required
+@require_POST
+def driver_test_toggle(request, pk):
+    driver = get_object_or_404(DriverProfile, pk=pk)
+    driver.is_test = not driver.is_test
+    driver.save(update_fields=["is_test", "updated_at"])
+    audit(request, "driver.test_on" if driver.is_test else "driver.test_off", f"driver {driver.pk}", driver.full_name)
+    messages.success(request, "Marked as a test account: sellers and buyers can't see or pick them." if driver.is_test else "No longer a test account: real sellers and buyers can see them.")
+    return redirect("staff:driver_detail", pk=pk)
+
+
 @staff_required
 @require_POST
 def driver_decide(request, pk):

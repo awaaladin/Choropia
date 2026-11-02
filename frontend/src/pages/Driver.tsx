@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Camera, FileUp, MapPin, Truck } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
 import { AreaSelect } from "@/components/AreaSelect";
 import { ErrorState, Field, Input, Modal, Pill, Select, Skeleton } from "@/components/ui";
@@ -143,9 +144,11 @@ function Review({ profile }: { profile: DriverMe }) {
   const [kind, setKind] = useState<string | null>(null);
   const upload = useMutation({
     mutationFn: ({ kind, file }: { kind: string; file: File }) => api.dispatch.uploadDocument(kind, file),
-    onSuccess: () => {
-      toast.success("Document uploaded securely.");
+    onSuccess: (updated) => {
+      toast.success(updated.documents_complete ? "That's all four. Your application is submitted." : "Document uploaded securely.");
+      queryClient.setQueryData(["driver-me"], updated);
       queryClient.invalidateQueries({ queryKey: ["driver-me"] });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -157,15 +160,40 @@ function Review({ profile }: { profile: DriverMe }) {
         : profile.documents_complete
           ? "We have everything. Our team is checking your documents. You'll get an email when you're approved."
           : "Upload all four documents below so we can verify you.";
+  const uploaded = profile.documents.filter((d) => d.uploaded).length;
+  const submitted = profile.status === "pending" && profile.documents_complete;
   return (
     <>
-      <Card>
-        <div className="flex items-center gap-2">
-          <Pill active>{profile.status_label}</Pill>
-        </div>
-        <p className="mt-3 text-sm text-muted-foreground">{message}</p>
-      </Card>
-      {profile.status !== "suspended" && (
+      {submitted ? (
+        <Card>
+          <div className="text-center">
+            <div className="mx-auto grid size-14 place-items-center rounded-full bg-success/15 text-success">
+              <CheckCircle2 size={30} />
+            </div>
+            <h2 className="mt-3 font-display text-xl font-bold">Application submitted</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Thank you, {profile.full_name.split(" ")[0]}. You don't need to do anything else right now.</p>
+          </div>
+          <ol className="mt-5 space-y-3 text-sm">
+            <li className="flex gap-3"><CheckCircle2 size={18} className="mt-0.5 shrink-0 text-success" /> <span><strong>Your details</strong> are saved.</span></li>
+            <li className="flex gap-3"><CheckCircle2 size={18} className="mt-0.5 shrink-0 text-success" /> <span><strong>All 4 documents</strong> are uploaded and locked away safely.</span></li>
+            <li className="flex gap-3"><span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full border-2 border-primary text-[10px] font-bold text-primary">3</span> <span><strong>We check your documents</strong> and call your guarantor. You'll get an email when you're approved.</span></li>
+            <li className="flex gap-3"><span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full border-2 border-border text-[10px] font-bold text-muted-foreground">4</span> <span><strong>Then you come back here</strong> to add your trips and prices, and start getting delivery jobs.</span></li>
+          </ol>
+          <div className="mt-5 flex gap-3">
+            <Link to="/feed" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">Back to Choropia</Link>
+            <a href="/legal/driver_terms/" target="_blank" rel="noreferrer" className="self-center text-sm text-primary underline">Driver Terms</a>
+          </div>
+        </Card>
+      ) : (
+        <Card>
+          <div className="flex items-center gap-2">
+            <Pill active>{profile.status_label}</Pill>
+            {profile.status === "pending" && <span className="text-sm text-muted-foreground">{uploaded} of 4 documents uploaded</span>}
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">{message}</p>
+        </Card>
+      )}
+      {profile.status !== "suspended" && !submitted && (
         <Card title="Your documents">
           <p className="mb-3 text-sm text-muted-foreground">They are encrypted on our servers. Only our verification team can open them, and every view is logged.</p>
           <input

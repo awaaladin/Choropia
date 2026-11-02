@@ -63,6 +63,8 @@ class DriverProfile(TimeStampedModel):
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     available = models.BooleanField(default=True, help_text="The driver can switch off to stop getting new job alerts.")
     terms_accepted_version = models.CharField(max_length=20, blank=True)
+    # A staff member's own test driver: even when approved, it is never shown to sellers or buyers and never offered real jobs.
+    is_test = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.full_name} ({self.get_status_display()})"
