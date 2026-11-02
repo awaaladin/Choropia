@@ -33,7 +33,7 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 # failures (every test that logs in shares one in-memory counter). Production settings are untouched.
 REST_FRAMEWORK = {
     **REST_FRAMEWORK,  # noqa: F405
-    "DEFAULT_THROTTLE_RATES": {"auth": "10000/min", "listing-create": "10000/hour", "payout-account": "10000/hour", "otp": "10000/hour", "dispatch-write": "10000/hour", "dispatch-documents": "10000/hour", "handover-code": "10000/hour"},
+    "DEFAULT_THROTTLE_RATES": {"auth": "10000/min", "listing-create": "10000/hour", "payout-account": "10000/hour", "otp": "10000/hour", "dispatch-write": "10000/hour", "avatar": "10000/hour", "dispatch-documents": "10000/hour", "handover-code": "10000/hour"},
 }
 
 # A throwaway key so encrypted-document tests run; real keys only ever come from the environment.

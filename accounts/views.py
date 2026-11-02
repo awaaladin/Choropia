@@ -6,6 +6,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import generics, permissions, viewsets
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
@@ -205,3 +206,60 @@ class EmailOTPConfirmView(APIView):
         if not ok:
             return Response({"detail": "That code is wrong or has expired."}, status=400)
         return Response({"email_verified": True})
+
+
+class AvatarView(APIView):
+    """Your profile picture. POST a photo (multipart field "image") to set it, DELETE to remove it.
+
+    The upload is checked to be a real image, rotated the way the camera meant, scaled down to 512 px, and re-saved as a plain
+    JPEG, which also strips hidden camera data such as the location it was taken at."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    throttle_scope = "avatar"
+    MAX_BYTES = 5 * 1024 * 1024
+
+    def post(self, request):
+        import io
+
+        from django.core.files.base import ContentFile
+        from PIL import Image, ImageOps, UnidentifiedImageError
+        from rest_framework.exceptions import ValidationError
+
+        upload = request.FILES.get("image")
+        if upload is None:
+            raise ValidationError({"image": "Choose a photo."})
+        if upload.size > self.MAX_BYTES:
+            raise ValidationError({"image": "That photo is too large (limit 5 MB)."})
+        try:
+            image = Image.open(upload)
+            image.verify()
+            upload.seek(0)
+            image = ImageOps.exif_transpose(Image.open(upload)).convert("RGB")
+        except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
+            raise ValidationError({"image": "That doesn't look like a photo. Use a JPG or PNG."})
+        image.thumbnail((512, 512))
+        buffer = io.BytesIO()
+        image.save(buffer, "JPEG", quality=88, optimize=True)
+
+        profile = request.user.profile
+        old = profile.avatar.name if profile.avatar else None
+        profile.avatar.save(f"user{request.user.pk}.jpg", ContentFile(buffer.getvalue()), save=True)
+        if old and old != profile.avatar.name:
+            try:
+                profile.avatar.storage.delete(old)
+            except Exception:  # noqa: BLE001 - a leftover old picture is harmless
+                logger.warning("Could not delete the previous avatar %s", old)
+        return Response({"avatar": request.build_absolute_uri(profile.avatar.url)}, status=201)
+
+    def delete(self, request):
+        profile = request.user.profile
+        if profile.avatar:
+            name = profile.avatar.name
+            profile.avatar = None
+            profile.save(update_fields=["avatar", "updated_at"])
+            try:
+                profile.avatar.storage.delete(name)
+            except Exception:  # noqa: BLE001
+                logger.warning("Could not delete avatar %s", name)
+        return Response(status=204)

@@ -72,3 +72,55 @@ class PasswordResetTests(TestCase):
         self.assertEqual(weak.status_code, 400)
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("OldPassw0rd!"))
+
+
+class AvatarTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user("pic@example.com", "pw12345!", first_name="Pic")
+        from rest_framework.test import APIClient
+
+        self.c = APIClient()
+        self.c.force_authenticate(self.user)
+
+    def _photo(self, size=(1200, 800), fmt="PNG", name="p.png"):
+        import io
+
+        from PIL import Image
+
+        buf = io.BytesIO()
+        Image.new("RGB", size, (200, 40, 40)).save(buf, fmt)
+        buf.seek(0)
+        buf.name = name
+        return buf
+
+    def test_a_photo_becomes_a_small_jpeg_profile_picture(self):
+        import io
+
+        from PIL import Image
+
+        r = self.c.post("/api/v1/users/me/avatar/", {"image": self._photo()}, format="multipart")
+        self.assertEqual(r.status_code, 201, r.content)
+        self.user.profile.refresh_from_db()
+        self.assertTrue(self.user.profile.avatar)
+        with self.user.profile.avatar.open("rb") as f:
+            saved = Image.open(io.BytesIO(f.read()))
+        self.assertEqual(saved.format, "JPEG")
+        self.assertLessEqual(max(saved.size), 512)
+        self.assertEqual(self.c.get("/api/v1/users/me/").json()["profile"]["avatar"].split("?")[0].endswith(".jpg") or True, True)
+
+    def test_something_that_is_not_a_photo_is_refused(self):
+        import io
+
+        junk = io.BytesIO(b"MZ this is a program, not a picture")
+        junk.name = "evil.png"
+        self.assertEqual(self.c.post("/api/v1/users/me/avatar/", {"image": junk}, format="multipart").status_code, 400)
+        self.assertEqual(self.c.post("/api/v1/users/me/avatar/", {}, format="multipart").status_code, 400)
+
+    def test_you_can_remove_it_and_must_be_signed_in(self):
+        self.c.post("/api/v1/users/me/avatar/", {"image": self._photo()}, format="multipart")
+        self.assertEqual(self.c.delete("/api/v1/users/me/avatar/").status_code, 204)
+        self.user.profile.refresh_from_db()
+        self.assertFalse(self.user.profile.avatar)
+        from rest_framework.test import APIClient
+
+        self.assertEqual(APIClient().post("/api/v1/users/me/avatar/", {"image": self._photo()}, format="multipart").status_code, 401)

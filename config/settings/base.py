@@ -230,6 +230,7 @@ REST_FRAMEWORK = {
         "payout-account": "20/hour",
         "otp": "20/hour",
         "dispatch-write": "60/hour",
+        "avatar": "30/hour",
         "dispatch-documents": "20/hour",
         "handover-code": "30/hour",
     },

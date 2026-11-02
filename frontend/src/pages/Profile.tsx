@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Grid2X2, LayoutList, LogOut, ShieldAlert, SlidersHorizontal, SunMoon } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
@@ -29,6 +29,7 @@ export function ProfilePage() {
   const navigate = useNavigate();
   const user = useQuery({ queryKey: ["me"], queryFn: api.me });
   const [saved, setSaved] = useState(false);
+  const photoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!saved) return;
@@ -42,6 +43,24 @@ export function ProfilePage() {
       queryClient.setQueryData(["me"], data);
       setSaved(true);
       prefs.update("theme", data.profile!.theme_preference);
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+
+  const uploadPhoto = useMutation({
+    mutationFn: api.uploadAvatar,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      toast.success("Profile picture updated");
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+
+  const removePhoto = useMutation({
+    mutationFn: api.removeAvatar,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+      toast.success("Profile picture removed");
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -94,8 +113,31 @@ export function ProfilePage() {
     <div className="mx-auto max-w-md space-y-5">
       <Section title="Your profile">
         <div className="mb-5 flex items-center gap-3">
-          <Avatar src={profile.avatar} name={displayName(u)} size={56} />
-          <p className="text-sm text-muted-foreground">{u.email}</p>
+          <Avatar src={profile.avatar} name={displayName(u)} size={72} />
+          <div className="min-w-0">
+            <p className="truncate text-sm text-muted-foreground">{u.email}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button type="button" variant="secondary" loading={uploadPhoto.isPending} onClick={() => photoInput.current?.click()}>
+                {profile.avatar ? "Change photo" : "Add a photo"}
+              </Button>
+              {profile.avatar && (
+                <Button type="button" variant="ghost" loading={removePhoto.isPending} onClick={() => removePhoto.mutate()}>
+                  Remove
+                </Button>
+              )}
+            </div>
+            <input
+              ref={photoInput}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                if (file) uploadPhoto.mutate(file);
+              }}
+            />
+          </div>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-3">

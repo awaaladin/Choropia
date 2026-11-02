@@ -249,6 +249,12 @@ export const api = {
   listMerchantListings: (merchantId: number) =>
     request<Paginated<Listing> | Listing[]>(`/listings/?merchant=${merchantId}`, { auth: false }),
   getListing: (id: number) => request<Listing>(`/listings/${id}/`),
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append("image", file);
+    return request<{ avatar: string }>("/users/me/avatar/", { method: "POST", body: form, formData: true });
+  },
+  removeAvatar: () => request("/users/me/avatar/", { method: "DELETE" }),
   myListings: () => request<Paginated<Listing> | Listing[]>("/listings/?mine=true"),
   markSold: (id: number) => request<Listing>(`/listings/${id}/mark_sold/`, { method: "POST" }),
   getFeed: () => request<Paginated<Listing> | Listing[]>("/feed/"),

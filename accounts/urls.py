@@ -16,6 +16,7 @@ from .views import (
     LoginView,
     LogoutAllView,
     LogoutView,
+    AvatarView,
     MeView,
     PasswordResetConfirmView,
     PasswordResetRequestView,
@@ -43,4 +44,5 @@ urlpatterns = [
     path("auth/email-otp/request/", EmailOTPRequestView.as_view(), name="email_otp_request"),
     path("auth/email-otp/confirm/", EmailOTPConfirmView.as_view(), name="email_otp_confirm"),
     path("users/me/", MeView.as_view(), name="me"),
+    path("users/me/avatar/", AvatarView.as_view(), name="me-avatar"),
 ] + router.urls
