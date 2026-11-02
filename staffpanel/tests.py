@@ -253,3 +253,85 @@ class DriverReviewTests(Base):
         self.assertTrue(AuditLog.objects.filter(action="driver.document_view").exists())
         self.assertEqual(Client().get(f"/staff/documents/{doc.pk}/").status_code, 302)
         self.assertEqual(self.login(self.buyer).get(f"/staff/documents/{doc.pk}/").status_code, 403)
+
+
+class DealsBoardTests(Base):
+    def test_a_released_deal_with_an_unpaid_payout_needs_you_and_names_both_sides(self):
+        User.objects.filter(pk=self.seller.pk).update(phone_number="08031112222")
+        User.objects.filter(pk=self.buyer.pk).update(phone_number="08033334444")
+        Payout.objects.filter(pk=self.payout.pk).update(status=Payout.Status.PENDING)
+        page = self.login(self.staff).get("/staff/deals/?tab=needs")
+        self.assertContains(page, "Pay the seller")
+        self.assertContains(page, "19000.00")
+        self.assertContains(page, "FROM (seller)")
+        self.assertContains(page, "08031112222")
+        self.assertContains(page, "08033334444")
+
+    def test_each_stage_has_a_plain_next_step(self):
+        from .views import describe_deal
+
+        expected = {
+            OrderStatus.PENDING_PAYMENT: "Waiting for the buyer to pay",
+            OrderStatus.PAID_ESCROW: "waiting for the seller to send",
+            OrderStatus.IN_TRANSIT: "On its way",
+            OrderStatus.DELIVERED: "Waiting for the buyer to confirm",
+            OrderStatus.DISPUTED: "decide who gets the money",
+        }
+        for status, text in expected.items():
+            order = Order.objects.create(listing=self.listing, buyer=self.buyer, seller=self.seller, price=Decimal("10.00"), status=status)
+            step, needs = describe_deal(order)
+            self.assertIn(text.lower(), step.lower(), status)
+            self.assertEqual(needs, status == OrderStatus.DISPUTED)
+
+    def test_tabs_split_in_progress_waiting_and_finished(self):
+        c = self.login(self.staff)
+        paid = Order.objects.create(listing=self.listing, buyer=self.buyer, seller=self.seller, price=Decimal("10.00"), status=OrderStatus.IN_TRANSIT)
+        unpaid = Order.objects.create(listing=self.listing, buyer=self.buyer, seller=self.seller, price=Decimal("11.00"), status=OrderStatus.PENDING_PAYMENT)
+        self.assertContains(c.get("/staff/deals/?tab=progress"), f"Order #{paid.pk}")
+        self.assertNotContains(c.get("/staff/deals/?tab=progress"), f"Order #{unpaid.pk}")
+        self.assertContains(c.get("/staff/deals/?tab=unpaid"), f"Order #{unpaid.pk}")
+
+
+class InviteOnlySellingTests(Base):
+    def _create(self, user):
+        from rest_framework.test import APIClient
+
+        c = APIClient()
+        c.force_authenticate(user)
+        return c.post("/api/v1/listings/", {"title": "Phone", "description": "x", "price": "100.00", "condition": "used", "category": self.listing.category_id}, format="json")
+
+    def test_off_by_default_so_anyone_can_sell(self):
+        self.assertEqual(self._create(self.buyer).status_code, 201)
+
+    def test_when_on_only_approved_sellers_and_staff_can_post(self):
+        c = self.login(self.boss)
+        c.post("/staff/sellers/add/", {"email": "seller@example.com", "focus": "Gadgets"})
+        c.post("/staff/sellers/setting/", {"on": "1"})
+        self.assertEqual(self._create(self.buyer).status_code, 403)
+        self.assertIn("invite-only", str(self._create(self.buyer).json()))
+        self.assertEqual(self._create(self.seller).status_code, 201)
+        self.assertEqual(self._create(self.staff).status_code, 201)
+
+    def test_browsing_and_buying_are_unaffected(self):
+        self.login(self.boss).post("/staff/sellers/setting/", {"on": "1"})
+        from rest_framework.test import APIClient
+
+        self.assertEqual(APIClient().get("/api/v1/listings/").status_code, 200)
+
+    def test_removing_a_seller_stops_new_posts_and_turning_it_off_reopens_selling(self):
+        c = self.login(self.boss)
+        c.post("/staff/sellers/add/", {"email": "buyer@example.com", "focus": "Fashion"})
+        c.post("/staff/sellers/setting/", {"on": "1"})
+        self.assertEqual(self._create(self.buyer).status_code, 201)
+        from .models import ApprovedSeller
+
+        c.post(f"/staff/sellers/{ApprovedSeller.objects.get(user=self.buyer).pk}/remove/")
+        self.assertEqual(self._create(self.buyer).status_code, 403)
+        c.post("/staff/sellers/setting/", {"on": "0"})
+        self.assertEqual(self._create(self.buyer).status_code, 201)
+
+    def test_only_superusers_change_it_and_unknown_emails_are_refused(self):
+        self.assertEqual(self.login(self.staff).post("/staff/sellers/setting/", {"on": "1"}).status_code, 403)
+        page = self.login(self.boss).post("/staff/sellers/add/", {"email": "nobody@example.com"}, follow=True)
+        self.assertContains(page, "No account has that email")
+        self.assertEqual(self.login(self.staff).get("/staff/sellers/").status_code, 200)

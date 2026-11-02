@@ -451,3 +451,125 @@ def listing_toggle(request, pk):
 @staff_required
 def audit_log(request):
     return render(request, "staff/audit.html", {"nav": "audit", "entries": AuditLog.objects.select_related("staff")[:200]})
+
+
+# --- the deals board: who is paying whom, and where each deal stands -------------------------------------------------------
+
+
+def describe_deal(order):
+    """(next step for you, needs_you) in plain words, for the manual-escrow days."""
+    payment = getattr(order, "payment", None)
+    delivery = getattr(order, "dispatch_delivery", None)
+    seller_payout = payment.payouts.filter(kind=Payout.Kind.SELLER).first() if payment else None
+    status = order.status
+    if status == OrderStatus.PENDING_PAYMENT:
+        return "Waiting for the buyer to pay.", False
+    if status == OrderStatus.PAID_ESCROW:
+        if delivery and delivery.status == OrderDelivery.Status.OFFERED:
+            return "Buyer has paid. Waiting for a driver to accept the delivery.", False
+        return "Buyer has paid and the money is held. Waiting for the seller to send it.", False
+    if status in (OrderStatus.COURIER_ASSIGNED, OrderStatus.IN_TRANSIT):
+        return "On its way to the buyer.", False
+    if status == OrderStatus.DELIVERED:
+        return "Delivered. Waiting for the buyer to confirm (or the automatic release).", False
+    if status == OrderStatus.DISPUTED:
+        return "Dispute open: decide who gets the money.", True
+    if status in (OrderStatus.CONFIRMED, OrderStatus.COMPLETED):
+        if seller_payout and seller_payout.status != Payout.Status.SUCCESS:
+            return f"Buyer confirmed. Pay the seller {seller_payout.net_amount}.", True
+        if payment and payment.status == Payment.Status.RELEASED and seller_payout is None:
+            return "Released, payout being set up.", True
+        return "Done. The seller has been paid.", False
+    if status == OrderStatus.REFUNDED:
+        return "Refunded to the buyer.", False
+    return "Cancelled.", False
+
+
+DEAL_TABS = {
+    "needs": ("Needs you", None),
+    "progress": ("In progress", [OrderStatus.PAID_ESCROW, OrderStatus.COURIER_ASSIGNED, OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED]),
+    "unpaid": ("Waiting for payment", [OrderStatus.PENDING_PAYMENT]),
+    "done": ("Finished", [OrderStatus.COMPLETED, OrderStatus.CONFIRMED, OrderStatus.REFUNDED, OrderStatus.CANCELLED]),
+}
+
+
+@staff_required
+def deals(request):
+    tab = request.GET.get("tab", "needs")
+    if tab not in DEAL_TABS:
+        tab = "needs"
+    base = Order.objects.select_related("listing", "buyer", "seller", "payment", "dispatch_delivery__driver", "dispatch_delivery__dropoff_area", "dispatch_delivery__pickup_area").order_by("-updated_at")
+    q = request.GET.get("q", "").strip()
+    if q:
+        base = base.filter(Q(listing__title__icontains=q) | Q(buyer__email__icontains=q) | Q(seller__email__icontains=q) | Q(pk__iexact=q.lstrip("#")))
+    rows = []
+    for order in base[:300]:
+        step, needs = describe_deal(order)
+        rows.append({"order": order, "step": step, "needs": needs, "delivery": getattr(order, "dispatch_delivery", None), "payment": getattr(order, "payment", None)})
+    if tab == "needs":
+        shown = [r for r in rows if r["needs"]]
+    else:
+        statuses = DEAL_TABS[tab][1]
+        shown = [r for r in rows if r["order"].status in statuses and not (tab == "done" and r["needs"])]
+    counts = {
+        "needs": sum(1 for r in rows if r["needs"]),
+        "progress": sum(1 for r in rows if r["order"].status in DEAL_TABS["progress"][1]),
+        "unpaid": sum(1 for r in rows if r["order"].status in DEAL_TABS["unpaid"][1]),
+        "done": sum(1 for r in rows if r["order"].status in DEAL_TABS["done"][1] and not r["needs"]),
+    }
+    tabs = [(key, value[0], counts[key]) for key, value in DEAL_TABS.items()]
+    return render(request, "staff/deals.html", {"nav": "deals", "tab": tab, "tabs": tabs, "rows": shown[:100], "q": q})
+
+
+# --- who may sell during the pilot --------------------------------------------------------------------------------------------
+
+
+@staff_required
+def sellers(request):
+    from .models import ApprovedSeller, SiteSettings
+
+    return render(request, "staff/sellers.html", {
+        "nav": "sellers", "setting": SiteSettings.load(),
+        "approved": ApprovedSeller.objects.select_related("user").order_by("focus", "user__email"),
+    })
+
+
+@superuser_required
+@require_POST
+def seller_setting(request):
+    from .models import SiteSettings
+
+    setting = SiteSettings.load()
+    setting.seller_approval_required = request.POST.get("on") == "1"
+    setting.save()
+    audit(request, "sellers.invite_only_on" if setting.seller_approval_required else "sellers.invite_only_off")
+    messages.success(request, "Only approved sellers can post listings now." if setting.seller_approval_required else "Anyone can post listings again.")
+    return redirect("staff:sellers")
+
+
+@superuser_required
+@require_POST
+def seller_add(request):
+    from .models import ApprovedSeller
+
+    email = (request.POST.get("email") or "").strip().lower()
+    person = User.objects.filter(email__iexact=email).first()
+    if person is None:
+        messages.error(request, "No account has that email. Ask them to sign up first, then add them.")
+    else:
+        ApprovedSeller.objects.update_or_create(user=person, defaults={"focus": (request.POST.get("focus") or "").strip()[:40], "added_by": request.user})
+        audit(request, "sellers.approve", f"user {person.pk}", person.email)
+        messages.success(request, f"{person.get_full_name()} can now sell.")
+    return redirect("staff:sellers")
+
+
+@superuser_required
+@require_POST
+def seller_remove(request, pk):
+    from .models import ApprovedSeller
+
+    approved = get_object_or_404(ApprovedSeller, pk=pk)
+    audit(request, "sellers.remove", f"user {approved.user_id}", approved.user.email)
+    approved.delete()
+    messages.success(request, "Removed. Their existing listings stay up; they cannot post new ones.")
+    return redirect("staff:sellers")

@@ -1,0 +1,48 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Deals{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Deals</h1><p class="sub">Every deal from the seller to the buyer: who sent it, who it is going to, where it is, and what you need to do next.</p></div></div>
+<div class="tabs">
+  {% for key, name, count in tabs %}<a class="{% if tab == key %}on{% endif %}" href="?tab={{ key }}">{{ name }} ({{ count }})</a>{% endfor %}
+</div>
+<form class="search" method="get"><input type="hidden" name="tab" value="{{ tab }}"><input type="search" name="q" value="{{ q }}" placeholder="Item, name, email or order number"><button class="btn ghost" type="submit">Search</button></form>
+
+{% if rows %}
+<div class="grid" style="gap:12px">
+{% for r in rows %}
+  {% with o=r.order %}
+  <div class="card" {% if r.needs %}style="border-color:oklch(0.577 0.245 27.3 / .5)"{% endif %}>
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+      <div><strong><a href="{% url 'staff:order_detail' o.pk %}">Order #{{ o.pk }}: {{ o.listing.title|truncatechars:48 }}</a></strong>
+        <div class="small">{{ o.updated_at|timesince }} ago</div></div>
+      <div style="text-align:right"><span class="pill {{ o.status|pill }}">{{ o.get_status_display }}</span>
+        <div class="mono" style="font-weight:700;margin-top:4px">{{ o.price|naira }}{% if r.payment and r.payment.amount != o.price %} <span class="small">(buyer pays {{ r.payment.amount|naira }})</span>{% endif %}</div></div>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr auto 1fr;align-items:center;margin-top:14px;gap:10px">
+      <div>
+        <div class="small">FROM (seller)</div>
+        <strong><a href="{% url 'staff:user_detail' o.seller_id %}">{{ o.seller.get_full_name }}</a></strong>
+        <div class="small">{{ o.seller.phone_number|default:"no phone on file" }} · {{ o.seller.email }}</div>
+      </div>
+      <div style="font-size:22px;color:var(--muted-fg)">&rarr;</div>
+      <div>
+        <div class="small">TO (buyer)</div>
+        <strong><a href="{% url 'staff:user_detail' o.buyer_id %}">{{ o.buyer.get_full_name }}</a></strong>
+        <div class="small">{{ o.buyer.phone_number|default:"no phone on file" }} · {{ o.buyer.email }}</div>
+        {% if r.delivery and r.delivery.dropoff_note %}<div class="small">Deliver to: {{ r.delivery.dropoff_area }}, {{ r.delivery.dropoff_note }}</div>{% endif %}
+      </div>
+    </div>
+    {% if r.delivery and r.delivery.status != 'cancelled' %}
+    <div class="small" style="margin-top:10px">Delivery: <span class="pill {{ r.delivery.status|pill }}">{{ r.delivery.get_status_display }}</span>
+      {% if r.delivery.driver %}driver <a href="{% url 'staff:driver_detail' r.delivery.driver_id %}">{{ r.delivery.driver.full_name }}</a> ({{ r.delivery.driver.phone }}){% endif %}</div>
+    {% endif %}
+    <div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:{% if r.needs %}oklch(0.577 0.245 27.3 / .12){% else %}var(--muted){% endif %}"><strong>{% if r.needs %}You: {% else %}Next: {% endif %}</strong>{{ r.step }}
+      {% if o.status == 'disputed' %}<a class="btn small" style="margin-left:8px" href="{% url 'staff:order_detail' o.pk %}">Open dispute</a>{% endif %}
+    </div>
+  </div>
+  {% endwith %}
+{% endfor %}
+</div>
+{% else %}<div class="card"><div class="empty">Nothing here.</div></div>{% endif %}
+{% endblock %}

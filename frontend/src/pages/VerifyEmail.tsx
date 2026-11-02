@@ -1,6 +1,6 @@
 import { MailCheck, ShieldCheck } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
@@ -13,6 +13,9 @@ import { useAuth } from "@/lib/auth";
 export function VerifyEmailPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Where to go afterwards. Only places inside the site: the driver form (for people who joined as drivers) or the feed.
+  const next = searchParams.get("next") === "/driver" ? "/driver" : "/feed";
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -25,7 +28,7 @@ export function VerifyEmailPage() {
       await api.confirmEmailCode(code);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       toast.success("Email verified. Thank you!");
-      navigate("/feed", { viewTransition: true });
+      navigate(next, { viewTransition: true });
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {
@@ -66,7 +69,7 @@ export function VerifyEmailPage() {
         <button type="button" onClick={resend} disabled={resending} className="font-medium text-primary hover:underline disabled:opacity-60">
           Send me a new code
         </button>
-        <button type="button" onClick={() => navigate("/feed")} className="text-muted-foreground hover:underline">
+        <button type="button" onClick={() => navigate(next)} className="text-muted-foreground hover:underline">
           I'll do this later
         </button>
       </div>

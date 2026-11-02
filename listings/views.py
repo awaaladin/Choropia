@@ -1,4 +1,5 @@
 from django.db.models import F
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -28,6 +29,15 @@ class ListingViewSet(viewsets.ModelViewSet):
         if self.action == "create":
             self.throttle_scope = "listing-create"
         return super().get_throttles()
+
+    def create(self, request, *args, **kwargs):
+        from staffpanel.models import may_sell
+
+        if not may_sell(request.user):
+            raise PermissionDenied(
+                "Selling on Choropia is invite-only during the pilot. You can browse and buy as normal; message us if you would like to sell."
+            )
+        return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
         qs = Listing.objects.select_related(

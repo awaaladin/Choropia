@@ -1,6 +1,6 @@
 import { AtSign, Heart, Lock, Phone, Tag, User, UserPlus, Verified } from "lucide-react";
 import { useState, type CSSProperties, type FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router"; // eslint-disable-line
 import { toast } from "sonner";
 import community from "@/assets/choropia-community.jpg";
 import { Link } from "@/components/AppLink";
@@ -23,6 +23,8 @@ export function RegisterPage() {
   const { register } = useAuth();
   const prefs = usePrefs();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const asDriver = searchParams.get("as") === "driver";
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -33,7 +35,8 @@ export function RegisterPage() {
     setLoading(true);
     try {
       await register(payload);
-      navigate("/verify-email", { viewTransition: true }); // the welcome email carries the 6-digit code
+      // The welcome email carries the 6-digit code. Someone joining as a driver carries on to the driver form afterwards.
+      navigate(asDriver ? "/verify-email?next=/driver" : "/verify-email", { viewTransition: true });
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {
@@ -82,9 +85,11 @@ export function RegisterPage() {
       </div>
 
       <div className="flex flex-col justify-center bg-popover p-8 lg:col-span-7">
-        <h1 className="page-enter text-xl font-bold">Create your account</h1>
+        <h1 className="page-enter text-xl font-bold">{asDriver ? "Join as a delivery driver" : "Create your account"}</h1>
         <p className="page-enter mb-6 mt-1 text-sm text-muted-foreground" style={delay(40)}>
-          It only takes a minute.
+          {asDriver
+            ? "First create your account. Right after, you will fill in your driver details and upload your documents."
+            : "It only takes a minute."}
         </p>
 
         <form onSubmit={onSubmit} className="space-y-4">
@@ -118,7 +123,13 @@ export function RegisterPage() {
             <UserPlus size={15} /> Create account
           </Button>
         </form>
-        <p className="page-enter mt-4 text-sm text-muted-foreground" style={delay(280)}>
+                {!asDriver && (
+          <p className="page-enter mt-3 text-sm text-muted-foreground">
+            Want to earn by delivering?{" "}
+            <Link to="/register?as=driver" className="font-medium text-primary hover:underline">Join as a delivery driver</Link>
+          </p>
+        )}
+<p className="page-enter mt-4 text-sm text-muted-foreground" style={delay(280)}>
           Already have an account?{" "}
           <Link to="/login" className="font-medium text-primary hover:underline">
             Log in

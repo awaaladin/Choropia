@@ -8,6 +8,8 @@
 <div class="warnbox"><strong>Automatic payouts are switched off.</strong> Sellers and drivers are not paid by Paystack until <code>PAYOUTS_ENABLED</code> is turned on. Pay people by hand from <a href="{% url 'staff:payout_list' %}?tab=waiting">Payouts</a>.</div>
 {% endif %}
 
+<div class="card" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span><strong>Following the money by hand?</strong> The Deals board shows each deal from seller to buyer, where it is, and what you need to do next.</span><a class="btn" href="{% url 'staff:deals' %}">Open deals</a></div>
+
 <div class="grid kpis">
   <div class="card kpi {% if attention_count %}alert{% endif %}"><div class="label">Payouts needing you</div><div class="value">{{ attention_count }}</div><div class="note"><a href="{% url 'staff:payout_list' %}?tab=attention">Open the list</a></div></div>
   <div class="card kpi"><div class="label">Owed to sellers and drivers</div><div class="value mono">{{ owed|naira }}</div><div class="note">{{ owed_count }} payout{{ owed_count|pluralize }} not paid yet</div></div>

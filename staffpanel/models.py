@@ -18,3 +18,36 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.at:%Y-%m-%d %H:%M} {self.action} {self.target}"
+
+
+class SiteSettings(models.Model):
+    """One row of switches the owner can flip from the staff panel."""
+
+    seller_approval_required = models.BooleanField(
+        default=False,
+        help_text="When on, only approved sellers (and staff) can post listings. Everyone can still browse and buy.",
+    )
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+
+class ApprovedSeller(models.Model):
+    """A seller the owner has let in during the pilot, with what they sell (for example Gadgets or Fashion)."""
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="approved_seller")
+    focus = models.CharField(max_length=40, blank=True)
+    added_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user_id} ({self.focus})"
+
+
+def may_sell(user) -> bool:
+    """False only when the pilot is invite-only and this person has not been approved."""
+    if not SiteSettings.load().seller_approval_required:
+        return True
+    return bool(user.is_authenticated and (user.is_staff or ApprovedSeller.objects.filter(user=user).exists()))

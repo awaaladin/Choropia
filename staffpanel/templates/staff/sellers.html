@@ -1,0 +1,46 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Sellers{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Sellers</h1><p class="sub">Keep the pilot small: choose who can post listings. Everyone can still browse and buy.</p></div></div>
+
+<div class="card" style="margin-bottom:14px">
+  <h2>Invite-only selling</h2>
+  <p>{% if setting.seller_approval_required %}<span class="pill good">ON</span> Only the sellers below (and staff) can post listings.{% else %}<span class="pill warn">OFF</span> Anyone with an account can post listings.{% endif %}</p>
+  {% if request.user.is_superuser %}
+  <form method="post" action="{% url 'staff:seller_setting' %}">{% csrf_token %}
+    <input type="hidden" name="on" value="{% if setting.seller_approval_required %}0{% else %}1{% endif %}">
+    <button class="btn {% if setting.seller_approval_required %}ghost{% endif %}" type="submit">{% if setting.seller_approval_required %}Let anyone sell{% else %}Turn on invite-only selling{% endif %}</button>
+  </form>
+  {% endif %}
+  {% if not setting.seller_approval_required and not approved %}<p class="small" style="margin-top:10px">Add your two sellers below first, then turn this on.</p>{% endif %}
+</div>
+
+<div class="grid two">
+  <div class="card">
+    <h2>Approved sellers</h2>
+    {% if approved %}
+    <table><tbody>
+      {% for a in approved %}
+      <tr><td><a href="{% url 'staff:user_detail' a.user_id %}">{{ a.user.get_full_name }}</a><div class="small">{{ a.user.email }}</div></td>
+          <td>{% if a.focus %}<span class="pill plain">{{ a.focus }}</span>{% endif %}</td>
+          <td class="right">{% if request.user.is_superuser %}<form method="post" action="{% url 'staff:seller_remove' a.pk %}" onsubmit="return confirm('Remove this seller?');">{% csrf_token %}<button class="btn small ghost" type="submit">Remove</button></form>{% endif %}</td></tr>
+      {% endfor %}
+    </tbody></table>
+    {% else %}<div class="empty">No approved sellers yet.</div>{% endif %}
+  </div>
+  <div class="card">
+    <h2>Add a seller</h2>
+    {% if request.user.is_superuser %}
+    <p class="small">They need a Choropia account first. Use the email they signed up with.</p>
+    <form method="post" action="{% url 'staff:seller_add' %}">{% csrf_token %}
+      <label for="email">Their email</label>
+      <input id="email" name="email" type="email" required>
+      <label for="focus">What they sell</label>
+      <select id="focus" name="focus"><option value="Gadgets">Gadgets</option><option value="Fashion">Fashion</option><option value="">Other</option></select>
+      <button class="btn" style="margin-top:14px" type="submit">Approve this seller</button>
+    </form>
+    {% else %}<p class="small">Only a superuser can add sellers.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}
