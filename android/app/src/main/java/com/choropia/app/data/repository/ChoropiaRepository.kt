@@ -499,6 +499,15 @@ class ChoropiaRepository(
         com.choropia.app.data.model.Area(added.id, added.name)
     }
 
+    /** Sets your profile picture (shrunk on the phone first; the server re-saves it as a clean JPEG). */
+    suspend fun uploadAvatar(uri: Uri) {
+        val bytes = withContext(Dispatchers.IO) { compressImage(uri) }
+        val part = MultipartBody.Part.createFormData("image", "avatar.jpg", bytes.toRequestBody("image/jpeg".toMediaType()))
+        apiCall { api.uploadAvatar(part) }
+    }
+
+    suspend fun removeAvatar() = apiCall { api.removeAvatar() }
+
     suspend fun driverMe(): com.choropia.app.data.model.DriverMe? = apiCall { api.driverMe() }
 
     suspend fun driverApply(request: com.choropia.app.data.network.DriverApplyRequest) = apiCall { api.driverApply(request) }

@@ -154,6 +154,13 @@ interface ChoropiaApi {
     suspend fun driverAvailability(@Body body: DriverAvailabilityRequest): DriverMe
 
     @Multipart
+    @POST("users/me/avatar/")
+    suspend fun uploadAvatar(@Part image: MultipartBody.Part)
+
+    @DELETE("users/me/avatar/")
+    suspend fun removeAvatar()
+
+    @Multipart
     @POST("dispatch/driver/documents/")
     suspend fun uploadDriverDocument(@Part("kind") kind: RequestBody, @Part file: MultipartBody.Part): DriverMe
 

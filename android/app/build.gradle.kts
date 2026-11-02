@@ -27,8 +27,8 @@ android {
         applicationId = "com.choropia.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.7.0"
+        versionCode = 9
+        versionName = "1.8.0"
 
         buildConfigField("String", "API_ORIGIN", "\"$apiOrigin\"")
         buildConfigField("String", "API_BASE_URL", "\"$apiOrigin/api/v1/\"")

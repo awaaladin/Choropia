@@ -40,8 +40,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -96,6 +100,20 @@ fun ProfileScreen(
     val themeMode by repo.themeModeFlow.collectAsState(initial = "system")
     val scope = rememberCoroutineScope()
     var confirmLogout by remember { mutableStateOf(false) }
+    var photoBusy by remember { mutableStateOf(false) }
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) scope.launch {
+            photoBusy = true
+            try {
+                repo.uploadAvatar(uri)
+                session.refreshUser()
+                showMessage("Profile picture updated")
+            } catch (e: Exception) {
+                showMessage(e.message ?: "Could not upload that photo")
+            }
+            photoBusy = false
+        }
+    }
 
     LaunchedEffect(Unit) { session.refreshUser() }
 
@@ -106,7 +124,15 @@ fun ProfileScreen(
         val u = user
         SurfaceCard(Modifier.fillMaxWidth(), padding = PaddingValues(18.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Avatar(u?.displayName ?: "You", u?.profile?.avatar, size = 68.dp)
+                Box(
+                    Modifier.size(68.dp).clickable(enabled = !photoBusy) {
+                        photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Avatar(u?.displayName ?: "You", u?.profile?.avatar, size = 68.dp)
+                    if (photoBusy) CircularProgressIndicator(Modifier.size(28.dp), strokeWidth = 3.dp)
+                }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(u?.displayName ?: "Your account", style = MaterialTheme.typography.titleLarge)
                     Text(u?.email.orEmpty(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -116,6 +142,19 @@ fun ProfileScreen(
                             Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
+                }
+                if (u?.profile?.avatar != null) {
+                    TextButton(onClick = {
+                        scope.launch {
+                            try {
+                                repo.removeAvatar()
+                                session.refreshUser()
+                                showMessage("Profile picture removed")
+                            } catch (e: Exception) {
+                                showMessage(e.message ?: "Could not remove it")
+                            }
+                        }
+                    }) { Text("Remove") }
                 }
                 IconButton(onClick = onEditProfile) { Icon(Icons.Outlined.Edit, "Edit profile") }
             }
