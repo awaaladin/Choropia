@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Gavel, Lock, Package, ShieldCheck, Truck } from "lucide-react";
-import { useState, type FormEvent } from "react";
-import { useParams } from "react-router";
+import { useEffect, useState, type FormEvent } from "react";
+import { useParams, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
 import { ErrorState, Modal, Skeleton, Textarea } from "@/components/ui";
@@ -76,6 +76,25 @@ export function OrderDetailPage() {
 
   const order = useQuery({ queryKey: ["order", orderId], queryFn: () => api.getOrder(orderId) });
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+
+  // Paystack sends the buyer back here with ?reference=...; confirm with the server straight away
+  // instead of waiting for the webhook.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const returnedReference = searchParams.get("reference");
+  useEffect(() => {
+    if (!returnedReference) return;
+    api
+      .verifyPayment(orderId)
+      .then((result) => {
+        if (result.order_status !== "pending_payment") toast.success("Payment received. It's held safely in escrow.");
+      })
+      .catch(() => {})
+      .finally(() => {
+        invalidate();
+        setSearchParams({}, { replace: true });
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [returnedReference, orderId]);
 
   const pay = useMutation({
     mutationFn: () => api.initializePayment(orderId),

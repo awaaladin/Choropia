@@ -140,10 +140,26 @@ interface AuthResponse {
   user: User;
 }
 
+/** Returned by /auth/login/ and /auth/google/ instead of tokens when the account has 2-step
+ * verification on — the client must then post {challenge, code} to /auth/2fa/verify/. */
+interface TwoFactorChallenge {
+  two_factor_required: true;
+  challenge: string;
+}
+
 export const api = {
   // --- auth ---
-  async login(identifier: string, password: string) {
-    const data = await request<AuthResponse>("/auth/login/", { method: "POST", body: { identifier, password }, auth: false });
+  async login(identifier: string, password: string): Promise<AuthResponse | TwoFactorChallenge> {
+    const data = await request<AuthResponse | TwoFactorChallenge>("/auth/login/", {
+      method: "POST",
+      body: { identifier, password },
+      auth: false,
+    });
+    if ("access" in data) tokens.set(data.access, data.refresh);
+    return data;
+  },
+  async verifyTwoFactor(challenge: string, code: string) {
+    const data = await request<AuthResponse>("/auth/2fa/verify/", { method: "POST", body: { challenge, code }, auth: false });
     tokens.set(data.access, data.refresh);
     return data.user;
   },
@@ -220,6 +236,11 @@ export const api = {
   assignCourier: (id: number) => request(`/orders/${id}/assign_courier/`, { method: "POST" }),
   initializePayment: (orderId: number) =>
     request<{ authorization_url: string }>("/payments/initialize/", { method: "POST", body: { order_id: orderId } }),
+  verifyPayment: (orderId: number) =>
+    request<{ reference: string; status: string; order_status: string }>("/payments/verify/", {
+      method: "POST",
+      body: { order_id: orderId },
+    }),
 
   // --- notifications ---
   listNotifications: () => request<Paginated<AppNotification> | AppNotification[]>("/notifications/"),
