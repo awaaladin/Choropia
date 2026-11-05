@@ -250,6 +250,23 @@ class ChoropiaRepository(
 
     suspend fun markSold(listingId: Int): Listing = apiCall { api.markSold(listingId) }
 
+    suspend fun deleteListing(listingId: Int) = apiCall { api.deleteListing(listingId) }
+
+    suspend fun removeListingPhoto(listingId: Int, photoId: Int): Listing = apiCall { api.removeListingPhoto(listingId, photoId) }
+
+    suspend fun addListingPhotos(listingId: Int, uris: List<Uri>): Listing {
+        val parts = withContext(Dispatchers.IO) {
+            uris.take(MAX_PHOTOS).mapIndexed { index, uri ->
+                MultipartBody.Part.createFormData("uploaded_photos", "photo_$index.jpg", compressImage(uri).toRequestBody("image/jpeg".toMediaType()))
+            }
+        }
+        return apiCall { api.addListingPhotos(listingId, parts) }
+    }
+
+    suspend fun walletSummary() = apiCall { api.walletSummary() }
+
+    suspend fun walletTransactions() = apiCall { api.walletTransactions() }.results
+
     private fun compressImage(uri: Uri): ByteArray {
         val resolver = appContext.contentResolver
         val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }

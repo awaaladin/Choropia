@@ -70,3 +70,22 @@ class AndroidAppInfoView(APIView):
             "min_android": MIN_ANDROID,
             "download_url": "/downloads/choropia.apk",
         }
+
+
+def assetlinks(request):
+    """/.well-known/assetlinks.json: tells Android that this website and the Choropia app belong together, so web links
+    (choropia.vercel.app/listings/12, ...) open the installed app instead of the browser. The fingerprint is the public
+    SHA-256 of the app's release signing certificate (not a secret)."""
+    return JsonResponse(
+        [
+            {
+                "relation": ["delegate_permission/common.handle_all_urls"],
+                "target": {
+                    "namespace": "android_app",
+                    "package_name": "com.choropia.app",
+                    "sha256_cert_fingerprints": list(settings.ANDROID_CERT_FINGERPRINTS),
+                },
+            }
+        ],
+        safe=False,
+    )

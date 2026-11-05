@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
@@ -19,6 +19,9 @@ export function EditListingPage() {
   const [price, setPrice] = useState("");
   const [showChange, setShowChange] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [newPhotos, setNewPhotos] = useState<File[]>([]);
+  const [deleting, setDeleting] = useState(false);
+  const photoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (listing.data) setPrice(String(Number(listing.data.price)));
@@ -45,6 +48,7 @@ export function EditListingPage() {
     setSaving(true);
     try {
       await api.updateListing(id, body);
+      if (newPhotos.length) await api.addListingPhotos(id, newPhotos);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["listing", id] }),
         queryClient.invalidateQueries({ queryKey: ["feed"] }),
@@ -59,11 +63,72 @@ export function EditListingPage() {
     }
   };
 
+  const removePhoto = async (photoId: number) => {
+    try {
+      await api.removeListingPhoto(id, photoId);
+      await queryClient.invalidateQueries({ queryKey: ["listing", id] });
+    } catch (err) {
+      toast.error(errorMessage(err));
+    }
+  };
+
+  const onDelete = async () => {
+    if (!window.confirm("Delete this listing for good? Buyers will no longer see it.")) return;
+    setDeleting(true);
+    try {
+      await api.deleteListing(id);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["feed"] }),
+        queryClient.invalidateQueries({ queryKey: ["listings"] }),
+        queryClient.invalidateQueries({ queryKey: ["my-listings"] }),
+      ]);
+      toast.success("Listing deleted");
+      navigate("/my-listings", { replace: true });
+    } catch (err) {
+      toast.error(errorMessage(err));
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="panel editorial-enter mx-auto max-w-xl p-6">
       <h1 className="text-xl font-bold">Edit your listing</h1>
       <p className="mb-5 mt-1 text-sm text-muted-foreground">Changes apply straight away, wherever the listing appears.</p>
       <form onSubmit={onSubmit} className="space-y-4">
+        <Field label="Photos">
+          <div className="flex flex-wrap gap-2">
+            {(item.photos ?? []).map((p) => (
+              <div key={p.id} className="relative">
+                <img src={p.image} alt="" className="size-20 rounded-lg object-cover" />
+                <button type="button" aria-label="Remove photo" onClick={() => removePhoto(p.id)} className="absolute -right-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-destructive text-xs text-white">
+                  ×
+                </button>
+              </div>
+            ))}
+            {newPhotos.map((f, i) => (
+              <div key={`${f.name}-${i}`} className="relative">
+                <img src={URL.createObjectURL(f)} alt="" className="size-20 rounded-lg object-cover ring-2 ring-primary" />
+                <button type="button" aria-label="Remove photo" onClick={() => setNewPhotos((all) => all.filter((_, j) => j !== i))} className="absolute -right-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-destructive text-xs text-white">
+                  ×
+                </button>
+              </div>
+            ))}
+            <button type="button" onClick={() => photoInput.current?.click()} className="grid size-20 place-items-center rounded-lg border border-dashed border-border text-xs text-muted-foreground hover:bg-accent">
+              + Add
+            </button>
+            <input
+              ref={photoInput}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                setNewPhotos((all) => [...all, ...Array.from(e.target.files ?? [])].slice(0, 6));
+                e.target.value = "";
+              }}
+            />
+          </div>
+        </Field>
         <Field label="Title">
           <Input name="title" defaultValue={item.title} required maxLength={120} />
         </Field>
@@ -102,6 +167,9 @@ export function EditListingPage() {
           </Button>
           <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
             Cancel
+          </Button>
+          <Button type="button" variant="danger" className="ml-auto" loading={deleting} onClick={onDelete}>
+            Delete listing
           </Button>
         </div>
       </form>

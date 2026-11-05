@@ -93,7 +93,7 @@ export function LandingPage() {
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {listings.isPending && Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="aspect-[4/3] w-full" />)}
           {featured.map((item, index) => (
-            <Link data-reveal key={item.id} to={`/listings/${item.id}`} className="group">
+            <Link key={item.id} to={`/listings/${item.id}`} className="group">
               <div className="relative overflow-hidden rounded-md">
                 {item.cover_photo ? (
                   <img

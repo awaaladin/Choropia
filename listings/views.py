@@ -8,7 +8,7 @@ from common.geo import haversine_km
 from common.permissions import IsOwnerOrReadOnly
 
 from .filters import ListingFilter
-from .models import Category, Listing
+from .models import Category, Listing, ListingPhoto
 from .serializers import CategorySerializer, ListingListSerializer, ListingSerializer
 
 
@@ -50,6 +50,8 @@ class ListingViewSet(viewsets.ModelViewSet):
                 qs = qs.exclude(status=Listing.Status.REMOVED)
             else:
                 qs = qs.filter(status=Listing.Status.ACTIVE)
+        else:
+            qs = qs.exclude(status=Listing.Status.REMOVED)  # taken down by the owner: gone for everyone
         return qs
 
     def get_serializer_class(self):
@@ -82,6 +84,32 @@ class ListingViewSet(viewsets.ModelViewSet):
         instance.refresh_from_db(fields=["views_count"])
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        """Takes the listing down for good. It disappears from the feed and search, and "My listings", and stays only as a record
+        behind any past orders. Refused while a buyer has paid and is waiting for the item."""
+        from orders.models import listing_has_paid_order
+
+        listing = self.get_object()
+        if listing_has_paid_order(listing):
+            raise PermissionDenied("A buyer has paid for this item and is waiting for it. Finish or cancel that order first.")
+        listing.status = Listing.Status.REMOVED
+        listing.save(update_fields=["status"])
+        return Response(status=204)
+
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path=r"photos/(?P<photo_id>\d+)",
+        permission_classes=[permissions.IsAuthenticated, IsOwnerOrReadOnly],
+    )
+    def remove_photo(self, request, pk=None, photo_id=None):
+        listing = self.get_object()
+        photo = ListingPhoto.objects.filter(listing=listing, pk=photo_id).first()
+        if photo is None:
+            return Response(status=404)
+        photo.delete()
+        return Response(ListingSerializer(listing, context={"request": request}).data)
 
     @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated, IsOwnerOrReadOnly])
     def mark_sold(self, request, pk=None):

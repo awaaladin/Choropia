@@ -65,6 +65,18 @@ class MyListingsViewModel(private val repo: ChoropiaRepository) : ViewModel() {
         load(initial = true)
     }
 
+    fun delete(id: Int, onDone: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                repo.deleteListing(id)
+                _state.update { s -> s.copy(items = s.items.filterNot { it.id == id }) }
+                onDone("Listing deleted")
+            } catch (e: ApiException) {
+                onDone(e.message ?: "Could not delete that listing")
+            }
+        }
+    }
+
     fun load(initial: Boolean = false) {
         viewModelScope.launch {
             _state.update { it.copy(loading = initial && it.items.isEmpty(), refreshing = !initial, error = null) }
@@ -84,6 +96,22 @@ fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (Int) -> Unit, onSell: (
     val vm = rememberVm { MyListingsViewModel(repo) }
     val state by vm.state.collectAsState()
     var tab by remember { mutableIntStateOf(0) }   // 0 active, 1 sold
+    var pendingDelete by remember { mutableStateOf<Int?>(null) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    pendingDelete?.let { id ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("Delete this listing?") },
+            text = { Text("It will be removed for good and buyers will no longer see it.") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    pendingDelete = null
+                    vm.delete(id) { android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_SHORT).show() }
+                }) { Text("Delete") }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { pendingDelete = null }) { Text("Keep it") } },
+        )
+    }
 
     val visible = state.items.filter { if (tab == 0) it.status == "active" else it.status == "sold" }
 
@@ -121,8 +149,13 @@ fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (Int) -> Unit, onSell: (
                     items(visible, key = { it.id }) { listing ->
                         Column {
                             GridListingCard(listing, onClick = { onOpenListing(listing.id) })
-                            if (listing.status == "active") {
-                                androidx.compose.material3.TextButton(onClick = { onDelivery(listing.id) }) { Text("Delivery options") }
+                            Row {
+                                if (listing.status == "active") {
+                                    androidx.compose.material3.TextButton(onClick = { onDelivery(listing.id) }) { Text("Delivery") }
+                                }
+                                androidx.compose.material3.TextButton(onClick = { pendingDelete = listing.id }) {
+                                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                                }
                             }
                         }
                     }

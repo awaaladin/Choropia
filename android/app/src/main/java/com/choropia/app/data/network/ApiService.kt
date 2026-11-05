@@ -87,6 +87,18 @@ data class UpdateListingRequest(
     val show_price_change: Boolean,
 )
 
+@Serializable data class WalletSide(val released_total: String = "0", val held_total: String = "0", val spent_total: String = "0")
+@Serializable data class WalletSummary(val selling: WalletSide = WalletSide(), val buying: WalletSide = WalletSide())
+@Serializable
+data class WalletTransaction(
+    val id: Int,
+    val order: Int,
+    val listing_title: String = "",
+    val role: String = "",
+    val amount: String = "0",
+    val status: String = "",
+)
+
 @Serializable data class ProfileUpdate(val bio: String, val location: String, val theme_preference: String)
 
 @Serializable
@@ -303,6 +315,22 @@ interface ChoropiaApi {
         @PartMap fields: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part photos: List<MultipartBody.Part>,
     ): Listing
+
+    @DELETE("listings/{id}/")
+    suspend fun deleteListing(@Path("id") id: Int)
+
+    @DELETE("listings/{id}/photos/{photoId}/")
+    suspend fun removeListingPhoto(@Path("id") id: Int, @Path("photoId") photoId: Int): Listing
+
+    @Multipart
+    @PATCH("listings/{id}/")
+    suspend fun addListingPhotos(@Path("id") id: Int, @Part photos: List<MultipartBody.Part>): Listing
+
+    @GET("wallet/summary/")
+    suspend fun walletSummary(): WalletSummary
+
+    @GET("wallet/transactions/")
+    suspend fun walletTransactions(): PaginatedResponse<WalletTransaction>
 
     @POST("listings/{id}/mark_sold/")
     suspend fun markSold(@Path("id") id: Int): Listing

@@ -4,6 +4,7 @@ import com.choropia.app.ui.screens.DriverScreen
 import com.choropia.app.ui.screens.EditListingScreen
 import com.choropia.app.ui.screens.ListingDeliveryScreen
 import com.choropia.app.ui.screens.MyListingsScreen
+import com.choropia.app.ui.screens.WalletScreen
 import com.choropia.app.ui.screens.PayoutAccountScreen
 import com.choropia.app.ui.screens.SecurityScreen
 import com.choropia.app.ui.screens.WatchlistScreen
@@ -101,6 +102,7 @@ object Routes {
     const val EDIT_PROFILE = "profile/edit"
     const val WATCHLIST = "watchlist"
     const val MY_LISTINGS = "my-listings"
+    const val WALLET = "wallet"
     const val SECURITY = "security"
     const val PAYOUT_ACCOUNT = "payout-account"
     const val DRIVER = "driver"
@@ -269,6 +271,7 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                         onOrders = { navController.navigate(Routes.ORDERS) },
                         onWatchlist = { navController.navigate(Routes.WATCHLIST) },
                         onMyListings = { navController.navigate(Routes.MY_LISTINGS) },
+                        onWallet = { navController.navigate(Routes.WALLET) },
                         onSecurity = { navController.navigate(Routes.SECURITY) },
                         onPayoutAccount = { navController.navigate(Routes.PAYOUT_ACCOUNT) },
                         onDriver = { navController.navigate(Routes.DRIVER) },
@@ -318,7 +321,11 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
             }
 
             // --- content ---
-            composable(Routes.LISTING, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entry ->
+            composable(
+                Routes.LISTING,
+                arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://choropia.vercel.app/listings/{id}" }),
+            ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: return@composable
                 ListingDetailScreen(
                     listingId = id,
@@ -337,6 +344,12 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     listingId = id,
                     onBack = { navController.popBackStack() },
                     onSaved = { showMessage("Your listing was updated"); navController.popBackStack() },
+                    onDeleted = {
+                        showMessage("Listing deleted")
+                        // the listing page we came from no longer exists: go back past it
+                        navController.popBackStack()
+                        navController.popBackStack()
+                    },
                 )
             }
             composable(Routes.SELL) {
@@ -352,7 +365,11 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     LoginGate("Log in to sell", "Create an account to post listings.", needsLogin) { navController.navigate(Routes.REGISTER) }
                 }
             }
-            composable(Routes.CHAT, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entry ->
+            composable(
+                Routes.CHAT,
+                arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://choropia.vercel.app/messages/{id}" }),
+            ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: return@composable
                 ChatScreen(conversationId = id, onBack = { navController.popBackStack() })
             }
@@ -362,6 +379,9 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onBack = { navController.popBackStack() },
                     showMessage = showMessage,
                 )
+            }
+            composable(Routes.WALLET) {
+                WalletScreen(onBack = { navController.popBackStack() }, onOpenOrder = { navController.navigate(Routes.order(it)) })
             }
             composable(Routes.MY_LISTINGS) {
                 MyListingsScreen(
@@ -399,7 +419,10 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
             composable(
                 Routes.ORDER,
                 arguments = listOf(navArgument("id") { type = NavType.IntType }),
-                deepLinks = listOf(navDeepLink { uriPattern = "choropia://order/{id}" }),
+                deepLinks = listOf(
+                    navDeepLink { uriPattern = "choropia://order/{id}" },
+                    navDeepLink { uriPattern = "https://choropia.vercel.app/orders/{id}" },
+                ),
             ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: return@composable
                 OrderDetailScreen(
@@ -418,7 +441,11 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onOpenMerchant = { navController.navigate(Routes.merchant(it)) },
                 )
             }
-            composable(Routes.MERCHANT, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entry ->
+            composable(
+                Routes.MERCHANT,
+                arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "https://choropia.vercel.app/merchants/{id}" }),
+            ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: return@composable
                 MerchantProfileScreen(
                     merchantId = id,

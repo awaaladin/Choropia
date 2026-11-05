@@ -52,6 +52,7 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     # The Android app lives in object storage; this path (linked from the landing page) redirects to it.
     # Must come before core.urls, whose catch-all would otherwise answer with the SPA shell.
+    path(".well-known/assetlinks.json", app_download.assetlinks, name="assetlinks"),
     path("downloads/choropia.apk", app_download.apk_redirect, name="android-apk"),
     path("api/v1/app/android/", app_download.AndroidAppInfoView.as_view(), name="android-app-info"),
     # The shared Paystack account's single webhook: handles Choropia's events and forwards the other

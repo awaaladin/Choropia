@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PackagePlus, Pencil, Truck } from "lucide-react";
+import { PackagePlus, Pencil, Trash2, Truck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
@@ -20,6 +20,17 @@ export function MyListingsPage() {
       toast.success("Marked as sold.");
       queryClient.invalidateQueries({ queryKey: ["my-listings"] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: number) => api.deleteListing(id),
+    onSuccess: () => {
+      toast.success("Listing deleted.");
+      queryClient.invalidateQueries({ queryKey: ["my-listings"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["listings"] });
     },
     onError: (err) => toast.error(errorMessage(err)),
   });
@@ -71,15 +82,20 @@ export function MyListingsPage() {
                 <p className="text-sm text-muted-foreground">
                   {l.status === "sold" ? "Sold out" : l.quantity === 1 ? "1 left" : `${l.quantity ?? 1} left`} · {l.likes_count ?? 0} likes
                 </p>
-                {l.status === "active" && (
-                  <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {l.status === "active" && (
+                    <>
                     <Link to={`/listings/${l.id}/edit`} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-accent"><Pencil size={14} /> Edit</Link>
                     <Link to={`/listings/${l.id}/delivery`} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-accent"><Truck size={14} /> Delivery</Link>
                     <Button variant="secondary" loading={sold.isPending && sold.variables === l.id} onClick={() => window.confirm("Mark this listing as sold? It will stop showing to buyers.") && sold.mutate(l.id)}>
                       Mark sold
                     </Button>
-                  </div>
-                )}
+                    </>
+                  )}
+                  <Button variant="danger" loading={remove.isPending && remove.variables === l.id} onClick={() => window.confirm("Delete this listing for good? Buyers will no longer see it.") && remove.mutate(l.id)}>
+                    <Trash2 size={14} /> Delete
+                  </Button>
+                </div>
               </div>
             </li>
           ))}

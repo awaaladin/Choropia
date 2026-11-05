@@ -86,6 +86,7 @@ fun ProfileScreen(
     onOrders: () -> Unit,
     onWatchlist: () -> Unit,
     onMyListings: () -> Unit,
+    onWallet: () -> Unit = {},
     onSecurity: () -> Unit,
     onPayoutAccount: () -> Unit,
     onDriver: () -> Unit,
@@ -173,6 +174,8 @@ fun ProfileScreen(
                 MenuRow(Icons.Outlined.ReceiptLong, "My orders", "Track purchases and sales", onOrders)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 MenuRow(Icons.Outlined.Sell, "My listings", "Items you're selling or have sold", onMyListings)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                MenuRow(Icons.Outlined.ReceiptLong, "Wallet", "Money held in escrow and released to you", onWallet)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 MenuRow(Icons.Outlined.BookmarkBorder, "Watchlist", "Listings you saved", onWatchlist)
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

@@ -32,6 +32,17 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="choropia" android:host="order" />
             </intent-filter>
+            <!-- Web links to Choropia open the app instead of the browser (verified through /.well-known/assetlinks.json on the site). -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="choropia.vercel.app" />
+                <data android:pathPrefix="/listings/" />
+                <data android:pathPrefix="/orders/" />
+                <data android:pathPrefix="/merchants/" />
+                <data android:pathPrefix="/messages/" />
+            </intent-filter>
         </activity>
 
         <!-- Lets the camera app save a delivery proof photo into our private cache folder. -->
