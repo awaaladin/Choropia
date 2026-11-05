@@ -263,6 +263,10 @@ class ChoropiaRepository(
         return apiCall { api.addListingPhotos(listingId, parts) }
     }
 
+    suspend fun registerPushToken(token: String) = apiCall { api.registerPushToken(com.choropia.app.data.network.PushTokenRequest(token)) }
+
+    suspend fun unregisterPushToken(token: String) = apiCall { api.unregisterPushToken(com.choropia.app.data.network.PushTokenRequest(token)) }
+
     /** The newest published build, for the in-app update prompt. */
     suspend fun latestAppVersion() = apiCall { api.appUpdateInfo() }
 

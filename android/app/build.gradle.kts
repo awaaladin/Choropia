@@ -6,6 +6,12 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
+// Firebase push notifications switch on when android/app/google-services.json exists (from the Firebase console; git-ignored,
+// CI writes it from the GOOGLE_SERVICES_JSON secret). Without it the app builds and runs exactly as before, minus push.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 // Release signing comes from android/keystore.properties (git-ignored). Without it the release
 // build is simply left unsigned instead of failing, so other contributors can still build.
 val keystoreProps = Properties().apply {
@@ -27,8 +33,8 @@ android {
         applicationId = "com.choropia.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.8.2"
+        versionCode = 12
+        versionName = "1.9.0"
 
         buildConfigField("String", "API_ORIGIN", "\"$apiOrigin\"")
         buildConfigField("String", "API_BASE_URL", "\"$apiOrigin/api/v1/\"")
@@ -110,6 +116,9 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 

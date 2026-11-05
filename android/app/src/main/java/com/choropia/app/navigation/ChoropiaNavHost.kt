@@ -324,7 +324,10 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
             composable(
                 Routes.LISTING,
                 arguments = listOf(navArgument("id") { type = NavType.IntType }),
-                deepLinks = listOf(navDeepLink { uriPattern = "https://choropia.vercel.app/listings/{id}" }),
+                deepLinks = listOf(
+                    navDeepLink { uriPattern = "https://choropia.vercel.app/listings/{id}" },
+                    navDeepLink { uriPattern = "choropia://listing/{id}" },
+                ),
             ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: return@composable
                 ListingDetailScreen(
@@ -368,7 +371,10 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
             composable(
                 Routes.CHAT,
                 arguments = listOf(navArgument("id") { type = NavType.IntType }),
-                deepLinks = listOf(navDeepLink { uriPattern = "https://choropia.vercel.app/messages/{id}" }),
+                deepLinks = listOf(
+                    navDeepLink { uriPattern = "https://choropia.vercel.app/messages/{id}" },
+                    navDeepLink { uriPattern = "choropia://chat/{id}" },
+                ),
             ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: return@composable
                 ChatScreen(conversationId = id, onBack = { navController.popBackStack() })

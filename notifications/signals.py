@@ -76,13 +76,63 @@ def notify_on_order_status_change(sender, instance, created, **kwargs):
             recipient=participant,
             actor=instance.actor,
             notification_type=notification_type,
-            verb=f"Order #{order.id} status changed to '{instance.to_status}'",
+            verb=_order_verb(order, instance.to_status, is_seller=participant.id == order.seller_id),
             target=order,
         )
         try:
             emails.send_order_update(order, instance.to_status, participant, actor=instance.actor)
         except Exception:  # noqa: BLE001 - email must never break an order transition
             logger.exception("Order email could not be prepared for order %s", order.id)
+
+
+ORDER_WORDING = {
+    # status: (to the seller, to the buyer); {item} is the listing title
+    "paid_escrow": ("Someone ordered '{item}'. It is paid and held safely: please dispatch it.", "Your payment for '{item}' is held safely until it arrives."),
+    "courier_assigned": ("A driver has been assigned to '{item}'.", "A driver has been assigned to '{item}'."),
+    "in_transit": ("'{item}' is on its way to the buyer.", "'{item}' is on its way to you."),
+    "delivered": ("'{item}' was marked delivered.", "'{item}' was marked delivered. Please confirm you received it."),
+    "confirmed": ("The buyer confirmed '{item}'. Your payout is being prepared.", "You confirmed '{item}'."),
+    "completed": ("Order for '{item}' is complete.", "Order for '{item}' is complete."),
+    "refunded": ("The order for '{item}' was refunded to the buyer.", "Your payment for '{item}' was refunded."),
+    "cancelled": ("The order for '{item}' was cancelled.", "The order for '{item}' was cancelled."),
+    "disputed": ("A dispute was opened on '{item}'.", "A dispute was opened on '{item}'."),
+}
+
+
+def _order_verb(order, status, is_seller):
+    wording = ORDER_WORDING.get(status)
+    if wording is None:
+        return f"Order #{order.id} status changed to '{status}'"
+    return wording[0 if is_seller else 1].format(item=order.listing.title)
+
+
+@receiver(post_save, sender="listings.Listing")
+def notify_followers_of_new_listing(sender, instance, created, **kwargs):
+    """People who follow the seller (or their storefront) hear about a new listing."""
+    if not created or instance.status != "active":
+        return
+    from django.contrib.contenttypes.models import ContentType
+
+    from social.models import Follow
+
+    owner = instance.owner
+    targets = [(ContentType.objects.get_for_model(owner), owner.pk)]
+    if instance.merchant_id:
+        targets.append((ContentType.objects.get_for_model(instance.merchant), instance.merchant_id))
+    seen = set()
+    for content_type, object_id in targets:
+        followers = Follow.objects.filter(content_type=content_type, object_id=object_id).select_related("follower")[:300]
+        for follow in followers:
+            if follow.follower_id in seen:
+                continue
+            seen.add(follow.follower_id)
+            create_notification(
+                recipient=follow.follower,
+                actor=owner,
+                notification_type=Notification.Type.NEW_LISTING,
+                verb=f"{owner.get_full_name() or 'Someone you follow'} posted '{instance.title}'",
+                target=instance,
+            )
 
 
 def _alert_staff_about_order(order, history):

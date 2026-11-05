@@ -40,6 +40,7 @@ class Session(private val repository: ChoropiaRepository) {
                 if (loggedIn) {
                     runCatching { repository.me() }.onSuccess { _user.value = it }
                     refreshUnread()
+                    com.choropia.app.push.PushRegistrar.register(repository)
                 } else {
                     _user.value = null
                     _unread.value = 0
@@ -73,5 +74,8 @@ class Session(private val repository: ChoropiaRepository) {
         _unread.value = 0
     }
 
-    suspend fun logout() = repository.logout()
+    suspend fun logout() {
+        com.choropia.app.push.PushRegistrar.unregister(repository)
+        repository.logout()
+    }
 }

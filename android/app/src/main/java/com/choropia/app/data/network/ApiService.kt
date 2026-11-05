@@ -40,6 +40,7 @@ import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -95,6 +96,8 @@ data class AppUpdateInfo(
     val notes: String = "",
     val download_url: String = "/downloads/choropia.apk",
 )
+
+@Serializable data class PushTokenRequest(val token: String, val platform: String = "android")
 
 @Serializable data class WalletSide(val released_total: String = "0", val held_total: String = "0", val spent_total: String = "0")
 @Serializable data class WalletSummary(val selling: WalletSide = WalletSide(), val buying: WalletSide = WalletSide())
@@ -334,6 +337,12 @@ interface ChoropiaApi {
     @Multipart
     @PATCH("listings/{id}/")
     suspend fun addListingPhotos(@Path("id") id: Int, @Part photos: List<MultipartBody.Part>): Listing
+
+    @POST("notifications/devices/")
+    suspend fun registerPushToken(@Body body: PushTokenRequest)
+
+    @HTTP(method = "DELETE", path = "notifications/devices/", hasBody = true)
+    suspend fun unregisterPushToken(@Body body: PushTokenRequest)
 
     @GET("app/android/")
     suspend fun appUpdateInfo(): AppUpdateInfo

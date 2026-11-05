@@ -4,6 +4,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.contrib.contenttypes.models import ContentType
 
+from . import push
 from .models import Notification
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ def create_notification(recipient, notification_type, verb, actor=None, target=N
         target_object_id=target.pk if target else None,
     )
     _push_realtime(notification)
+    push.send_after_commit(notification)
     return notification
 
 

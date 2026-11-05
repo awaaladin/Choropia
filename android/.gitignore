@@ -22,3 +22,5 @@ local-builds/
 
 # CI artifacts pulled down with gh
 apk-output/
+
+google-services.json

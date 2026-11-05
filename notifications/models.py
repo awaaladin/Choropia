@@ -13,6 +13,7 @@ class Notification(TimeStampedModel):
         ORDER_STATUS = "order_status", "Order status changed"
         DISPUTE = "dispute", "Dispute opened"
         DISPATCH = "dispatch", "Delivery update"
+        NEW_LISTING = "new_listing", "New listing"
 
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"
@@ -35,3 +36,14 @@ class Notification(TimeStampedModel):
 
     def __str__(self):
         return f"Notification<{self.notification_type}> to {self.recipient_id}"
+
+
+class DeviceToken(TimeStampedModel):
+    """A phone that signed in to Choropia and can receive push notifications (a Firebase registration token)."""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="device_tokens")
+    token = models.CharField(max_length=300, unique=True)
+    platform = models.CharField(max_length=10, default="android")
+
+    def __str__(self):
+        return f"DeviceToken<{self.platform}> of user {self.user_id}"
