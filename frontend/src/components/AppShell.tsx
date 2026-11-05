@@ -31,7 +31,7 @@ const TABS = [
   { to: "/listings/new", label: "Sell", icon: PlusCircle },
   { to: "/my-listings", label: "Mine", icon: ShoppingBag },
   { to: "/orders", label: "Orders", icon: Package },
-  { to: "/messages", label: "Messages", icon: MessageCircle },
+  { to: "/messages", label: "Chat", icon: MessageCircle },
 ] as const;
 
 const ROUTE_LOADER_MS = 420;
@@ -206,7 +206,7 @@ export function AppShell() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-5 pb-24 md:pb-8 lg:px-8">
+      <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-5 pb-28 md:pb-8 lg:px-8">
         <Outlet />
       </main>
 
@@ -220,7 +220,7 @@ export function AppShell() {
       </footer>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-panel pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden" aria-label="Primary">
-        <div className="grid grid-cols-6">
+        <div className="grid grid-cols-7">
           {TABS.map(({ to, label, icon: Icon, ...rest }) => (
             <NavLink
               key={to}
@@ -228,7 +228,7 @@ export function AppShell() {
               end={"end" in rest}
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors active:scale-95",
+                  "flex min-w-0 flex-col items-center gap-0.5 px-0.5 py-2 text-[10px] font-medium transition-colors active:scale-95",
                   isActive ? "text-primary" : "text-muted-foreground",
                 )
               }

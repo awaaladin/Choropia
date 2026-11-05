@@ -8,6 +8,7 @@ import { DownloadHelp } from "@/components/DownloadHelp";
 import { PublicShell } from "@/components/PublicShell";
 import { Skeleton } from "@/components/ui";
 import { api, rows } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { useReveal } from "@/lib/useReveal";
 import { naira } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ const STEPS = [
 
 export function LandingPage() {
   useReveal();
+  const { loggedIn } = useAuth();
   const listings = useQuery({ queryKey: ["listings", { landing: true }], queryFn: async () => rows(await api.listListings()) });
   const featured = (listings.data ?? []).slice(0, 3);
 
@@ -55,13 +57,24 @@ export function LandingPage() {
           <p className="page-enter mt-6 max-w-md text-base leading-7 text-hero-foreground/85">
             Behind every good find is a real person. Discover the makers, merchants, and everyday treasures in your neighbourhood.
           </p>
-          <div className="page-enter mt-8 flex flex-wrap gap-3">
-            <LinkButton to="/marketplace" variant="secondary" className="h-11 px-5">
-              Find your next good thing <ArrowUpRight size={17} />
+          <div className="page-enter mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            {loggedIn ? (
+              <LinkButton to="/feed" className="h-12 px-5 sm:h-11">
+                Go to your feed <ArrowRight size={17} />
+              </LinkButton>
+            ) : (
+              <LinkButton to="/register" className="h-12 px-5 sm:h-11">
+                Create a free account <ArrowRight size={17} />
+              </LinkButton>
+            )}
+            <LinkButton to="/marketplace" variant="secondary" className="h-12 px-5 sm:h-11">
+              Browse the marketplace <ArrowUpRight size={17} />
             </LinkButton>
-            <Link to="/how-it-works" className="inline-flex h-11 items-center gap-2 px-3 text-sm font-semibold text-hero-foreground">
-              How it works <ArrowRight size={16} />
-            </Link>
+            {!loggedIn && (
+              <Link to="/login" className="inline-flex h-11 items-center justify-center gap-2 px-3 text-sm font-semibold text-hero-foreground">
+                Already have an account? Log in
+              </Link>
+            )}
           </div>
           <div className="mt-10 flex items-center gap-2 text-xs text-hero-foreground/75">
             <MapPin size={14} /> Uyo, Akwa Ibom

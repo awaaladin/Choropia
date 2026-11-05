@@ -32,16 +32,16 @@ function Stepper({ status }: { status: string }) {
   const index = STEPS.findIndex((s) => s.key === status);
   const progress = Math.max(0, index / (STEPS.length - 1)) * 100;
   return (
-    <div className="relative mt-5 px-4">
-      <div className="absolute left-4 right-4 top-4 h-0.5 bg-border" />
-      <div className="absolute left-4 top-4 h-0.5 bg-primary transition-all duration-500" style={{ width: `calc((100% - 2rem) * ${progress / 100})` }} />
-      <div className="relative flex justify-between">
+    <div className="relative mt-5">
+      <div className="absolute left-[8.333%] right-[8.333%] top-4 h-0.5 bg-border" />
+      <div className="absolute left-[8.333%] top-4 h-0.5 bg-primary transition-all duration-500" style={{ width: `calc(83.333% * ${progress / 100})` }} />
+      <div className="relative flex">
         {STEPS.map((step, i) => {
           const done = index > i;
           const active = index === i;
           const Icon = step.icon;
           return (
-            <div key={step.key} className="-mx-1 flex w-16 flex-col items-center">
+            <div key={step.key} className="flex min-w-0 flex-1 flex-col items-center">
               <div
                 className={`grid size-8 shrink-0 place-items-center rounded-full transition-colors ${
                   done ? "bg-primary text-primary-foreground" : active ? "bg-foreground text-background" : "bg-accent text-muted-foreground"
@@ -49,7 +49,7 @@ function Stepper({ status }: { status: string }) {
               >
                 <Icon size={14} />
               </div>
-              <span className={`mt-1 text-center text-[10px] leading-tight ${active ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{step.label}</span>
+              <span className={`mt-1 max-w-full text-center text-[9px] leading-tight sm:text-[10px] ${active ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{step.label}</span>
             </div>
           );
         })}

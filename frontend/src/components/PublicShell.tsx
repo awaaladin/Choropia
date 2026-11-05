@@ -26,9 +26,9 @@ export function PublicShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border bg-panel backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-4 px-4 lg:px-8">
+        <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-2 px-3 sm:gap-4 sm:px-4 lg:px-8">
           <Link to="/" className="flex shrink-0 items-center" aria-label="Choropia home">
-            <img src="/logo.png" alt="Choropia" className="h-7 w-auto dark:invert dark:opacity-90" />
+            <img src="/logo.png" alt="Choropia" className="h-6 w-auto sm:h-7 dark:invert dark:opacity-90" />
           </Link>
 
           <nav aria-label="Main navigation" className="hidden items-center gap-6 lg:flex">
@@ -41,20 +41,20 @@ export function PublicShell({ children }: { children: ReactNode }) {
 
           <div className="ml-auto flex items-center gap-2">
             <DownloadAppLink compact className="hidden lg:inline-flex" />
-            <Button variant="icon" aria-label="Display settings" title="Display settings" onClick={() => setSettingsOpen(true)} className="size-9 p-0">
+            <Button variant="icon" aria-label="Display settings" title="Display settings" onClick={() => setSettingsOpen(true)} className="hidden size-9 p-0 sm:inline-flex">
               <Settings size={16} />
             </Button>
             {loggedIn ? (
-              <LinkButton to="/feed" className="hidden sm:inline-flex">
-                Go to your feed
+              <LinkButton to="/feed" className="h-9 px-3 text-sm sm:h-10 sm:px-4">
+                Your feed
               </LinkButton>
             ) : (
               <>
-                <LinkButton to="/login" variant="ghost" className="hidden sm:inline-flex">
+                <LinkButton to="/login" variant="ghost" className="h-9 px-3 text-sm sm:h-10 sm:px-4">
                   Log in
                 </LinkButton>
-                <LinkButton to="/register" className="hidden sm:inline-flex">
-                  Join Choropia
+                <LinkButton to="/register" className="h-9 px-3 text-sm sm:h-10 sm:px-4">
+                  Sign up
                 </LinkButton>
               </>
             )}
@@ -71,30 +71,19 @@ export function PublicShell({ children }: { children: ReactNode }) {
         </div>
 
         {mobileOpen && (
-          <nav aria-label="Mobile navigation" className="page-enter grid gap-1 border-t border-border px-5 py-4 lg:hidden">
+          <nav aria-label="Mobile navigation" className="page-enter grid gap-1 border-t border-border bg-panel px-4 py-3 lg:hidden">
             {PUBLIC_LINKS.map((item) => (
-              <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)} className="py-2 text-sm">
+              <Link key={item.to} to={item.to} onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-3 text-base hover:bg-accent">
                 {item.label}
               </Link>
             ))}
-            <Link to="/marketplace" onClick={() => setMobileOpen(false)} className="py-2 text-sm text-primary">
-              Marketplace
+            <Link to="/marketplace" onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-3 text-base font-medium text-primary hover:bg-accent">
+              Browse the marketplace
             </Link>
-            <DownloadAppLink className="py-2" />
-            {loggedIn ? (
-              <Link to="/feed" onClick={() => setMobileOpen(false)} className="py-2 text-sm font-semibold text-primary">
-                Go to your feed
-              </Link>
-            ) : (
-              <>
-                <Link to="/login" onClick={() => setMobileOpen(false)} className="py-2 text-sm">
-                  Log in
-                </Link>
-                <Link to="/register" onClick={() => setMobileOpen(false)} className="py-2 text-sm font-semibold text-primary">
-                  Join Choropia
-                </Link>
-              </>
-            )}
+            <DownloadAppLink className="rounded-lg px-3 py-3 text-base" />
+            <button type="button" onClick={() => { setMobileOpen(false); setSettingsOpen(true); }} className="rounded-lg px-3 py-3 text-left text-base hover:bg-accent">
+              Display settings
+            </button>
           </nav>
         )}
       </header>
