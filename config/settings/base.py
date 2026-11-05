@@ -422,4 +422,5 @@ LOGGING = {
 }
 
 # Public SHA-256 fingerprint(s) of the app signing certificate: lets Android open choropia.vercel.app links in the app.
+ANDROID_MIN_VERSION_CODE = env_int("ANDROID_MIN_VERSION_CODE", 0)
 ANDROID_CERT_FINGERPRINTS = ["D0:81:99:31:3A:FB:F5:58:1B:61:B8:27:1B:FE:BB:5C:2F:DC:4C:D5:17:A0:64:B2:69:E8:10:E7:41:DA:DE:84"]

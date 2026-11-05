@@ -263,6 +263,9 @@ class ChoropiaRepository(
         return apiCall { api.addListingPhotos(listingId, parts) }
     }
 
+    /** The newest published build, for the in-app update prompt. */
+    suspend fun latestAppVersion() = apiCall { api.appUpdateInfo() }
+
     suspend fun walletSummary() = apiCall { api.walletSummary() }
 
     suspend fun walletTransactions() = apiCall { api.walletTransactions() }.results

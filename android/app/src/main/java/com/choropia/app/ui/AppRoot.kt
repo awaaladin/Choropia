@@ -59,7 +59,12 @@ fun ChoropiaRoot(repository: ChoropiaRepository, session: Session) {
                     transitionSpec = { fadeIn(tween(420)) togetherWith fadeOut(tween(320)) },
                     label = "splash",
                 ) { done ->
-                    if (done) ChoropiaNavHost() else BrandSplash()
+                    if (done) {
+                        ChoropiaNavHost()
+                        UpdatePrompt()
+                    } else {
+                        BrandSplash()
+                    }
                 }
             }
         }

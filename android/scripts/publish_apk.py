@@ -2,7 +2,11 @@
 Publish a signed Android build to the website.
 
     set BLOB_READ_WRITE_TOKEN=...      (vercel env pull a scratch file and copy just this value)
-    python android/scripts/publish_apk.py <path-to-apk> <version-name> <version-code>
+    python android/scripts/publish_apk.py <path-to-apk> <version-name> <version-code> [--required] [--notes "what is new"]
+
+--required  phones older than this build must update (they cannot dismiss the prompt).
+--notes     one line shown in the update prompt.
+Phones check this file on launch and show "Update available" automatically; no push service is involved.
 
 Uploads two files to the Vercel Blob store under FIXED names (the `vercel blob put` CLI always adds
 a random suffix, so this talks to the Blob API directly):
@@ -24,9 +28,17 @@ API = "https://vercel.com/api/blob"
 
 
 def main():
-    if len(sys.argv) != 4:
+    args = sys.argv[1:]
+    required = "--required" in args
+    args = [a for a in args if a != "--required"]
+    notes = ""
+    if "--notes" in args:
+        i = args.index("--notes")
+        notes = args[i + 1] if i + 1 < len(args) else ""
+        del args[i : i + 2]
+    if len(args) != 3:
         sys.exit(__doc__)
-    apk_path, version, version_code = sys.argv[1], sys.argv[2], int(sys.argv[3])
+    apk_path, version, version_code = args[0], args[1], int(args[2])
     token = os.environ.get("BLOB_READ_WRITE_TOKEN")
     if not token:
         sys.exit("Set BLOB_READ_WRITE_TOKEN first.")
@@ -37,6 +49,8 @@ def main():
         "version_code": version_code,
         "size_bytes": len(data),
         "sha256": hashlib.sha256(data).hexdigest(),
+        "min_version_code": version_code if required else 0,
+        "notes": notes,
     }
     base_headers = {"Authorization": f"Bearer {token}", "x-api-version": "12"}
 

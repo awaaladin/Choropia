@@ -69,6 +69,10 @@ class AndroidAppInfoView(APIView):
             "sha256": raw.get("sha256", ""),
             "min_android": MIN_ANDROID,
             "download_url": "/downloads/choropia.apk",
+            # Phones older than this cannot dismiss the update prompt. Set by publishing with --required, or
+            # forced from the server with ANDROID_MIN_VERSION_CODE.
+            "min_version_code": max(int(raw.get("min_version_code") or 0), int(settings.ANDROID_MIN_VERSION_CODE)),
+            "notes": raw.get("notes", ""),
         }
 
 
