@@ -114,6 +114,7 @@ class CreateListingViewModel(private val repo: ChoropiaRepository) : ViewModel()
         location: String,
         photos: List<Uri>,
         quantity: Int,
+        campus: Boolean,
         onCreated: (Int) -> Unit,
     ) {
         val local = mutableMapOf<String, String>()
@@ -132,7 +133,7 @@ class CreateListingViewModel(private val repo: ChoropiaRepository) : ViewModel()
         fieldErrors = emptyMap()
         viewModelScope.launch {
             try {
-                val created = repo.createListing(title, description, price, condition, category!!.id, location, photos, quantity)
+                val created = repo.createListing(title, description, price, condition, category!!.id, location, photos, quantity, campus)
                 onCreated(created.id)
             } catch (e: ApiException) {
                 error = e.message
@@ -152,6 +153,7 @@ fun CreateListingScreen(onBack: () -> Unit, onCreated: (Int) -> Unit) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var quantityText by remember { mutableStateOf("1") }
+    var onCampus by remember { mutableStateOf(false) }
     var price by remember { mutableStateOf("") }
     var condition by remember { mutableStateOf("used") }
     var category by remember { mutableStateOf<Category?>(null) }
@@ -220,6 +222,21 @@ fun CreateListingScreen(onBack: () -> Unit, onCreated: (Int) -> Unit) {
                 )
 
                 ChoropiaField(title, { title = it }, "Title", error = vm.fieldErrors["title"])
+                androidx.compose.foundation.layout.Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    androidx.compose.material3.Checkbox(checked = onCampus, onCheckedChange = { onCampus = it })
+                    androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
+                        Text("Sell on the UniUyo campus market", style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            "Students on campus can filter to listings like this one.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                 ChoropiaField(
                     description, { description = it }, "Description",
                     singleLine = false, minLines = 4, imeAction = ImeAction.Default,
@@ -277,7 +294,7 @@ fun CreateListingScreen(onBack: () -> Unit, onCreated: (Int) -> Unit) {
             Box(Modifier.padding(16.dp)) {
                 PrimaryButton(
                     "Post listing",
-                    { vm.submit(title, description, price, condition, category, location, photos, (quantityText.toIntOrNull() ?: 1).coerceIn(1, 999), onCreated) },
+                    { vm.submit(title, description, price, condition, category, location, photos, (quantityText.toIntOrNull() ?: 1).coerceIn(1, 999), onCampus, onCreated) },
                     enabled = !vm.busy,
                 )
             }

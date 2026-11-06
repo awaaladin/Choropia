@@ -9,7 +9,7 @@ import { api, rows } from "@/lib/api";
 import { usePrefs } from "@/lib/prefs";
 import { cn } from "@/lib/utils";
 
-const KEYS = ["search", "condition", "min_price", "max_price", "ordering", "category"] as const;
+const KEYS = ["search", "condition", "min_price", "max_price", "ordering", "category", "campus"] as const;
 
 export function MarketplacePage() {
   const prefs = usePrefs();
@@ -56,7 +56,19 @@ export function MarketplacePage() {
         </LinkButton>
       </div>
 
-      <div className="editorial-enter mt-5 flex items-center gap-2 overflow-x-auto pb-1" style={prefs.stagger(0)}>
+      <div className="editorial-enter mt-5 flex items-center gap-2" style={prefs.stagger(0)}>
+        <Pill active={!active.campus} onClick={() => commit({ campus: "" })}>
+          All of Uyo
+        </Pill>
+        <Pill active={active.campus === "uniuyo"} onClick={() => commit({ campus: "uniuyo" })}>
+          UniUyo campus market
+        </Pill>
+      </div>
+      {active.campus === "uniuyo" && (
+        <p className="mt-2 text-xs text-muted-foreground">Listings from students and sellers on the University of Uyo campus.</p>
+      )}
+
+      <div className="editorial-enter mt-3 flex items-center gap-2 overflow-x-auto pb-1" style={prefs.stagger(0)}>
         <Pill active={!active.category} onClick={() => commit({ category: "" })}>
           All categories
         </Pill>

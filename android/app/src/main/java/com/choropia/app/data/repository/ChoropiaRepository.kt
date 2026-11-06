@@ -74,6 +74,8 @@ data class ListingQuery(
     val merchantId: Int? = null,
     /** Only the signed-in user's own listings (including sold ones). */
     val mine: Boolean? = null,
+    /** "uniuyo" to see only the UniUyo campus market. */
+    val campus: String? = null,
 )
 
 /**
@@ -200,6 +202,7 @@ class ChoropiaRepository(
             maxPrice = query.maxPrice,
             merchantId = query.merchantId,
             mine = query.mine,
+            campus = query.campus,
         ).let { Page(it.results, it.next) }
     }
 
@@ -223,6 +226,7 @@ class ChoropiaRepository(
         location: String,
         photoUris: List<Uri>,
         quantity: Int = 1,
+        campus: Boolean = false,
     ): Listing {
         val parts = withContext(Dispatchers.IO) {
             photoUris.take(MAX_PHOTOS).mapIndexed { index, uri ->
@@ -243,6 +247,7 @@ class ChoropiaRepository(
             put("condition", field(condition))
             put("quantity", field(quantity.coerceIn(1, 999).toString()))
             put("category", field(categoryId.toString()))
+            if (campus) put("campus", field("uniuyo"))
             if (location.isNotBlank()) put("location", field(location.trim()))
         }
         return apiCall { api.createListing(fields, parts) }
@@ -455,8 +460,8 @@ class ChoropiaRepository(
 
     suspend fun cancelOrder(orderId: Int): Order = apiCall { api.cancelOrder(orderId) }
 
-    suspend fun updateListing(id: Int, title: String, description: String, price: String, quantity: Int, condition: String, showPriceChange: Boolean): Listing =
-        apiCall { api.updateListing(id, com.choropia.app.data.network.UpdateListingRequest(title.trim(), description.trim(), price.trim(), quantity, condition, showPriceChange)) }
+    suspend fun updateListing(id: Int, title: String, description: String, price: String, quantity: Int, condition: String, showPriceChange: Boolean, campus: Boolean = false): Listing =
+        apiCall { api.updateListing(id, com.choropia.app.data.network.UpdateListingRequest(title.trim(), description.trim(), price.trim(), quantity, condition, showPriceChange, if (campus) "uniuyo" else "")) }
 
     suspend fun markInTransit(orderId: Int): Order = apiCall { api.markInTransit(orderId) }
 

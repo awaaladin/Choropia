@@ -35,4 +35,7 @@ urlpatterns = [
     path("listings/", views.listing_list, name="listing_list"),
     path("listings/<int:pk>/toggle/", views.listing_toggle, name="listing_toggle"),
     path("audit/", views.audit_log, name="audit"),
+    path("keys/", views.key_backup, name="key_backup"),
+    path("keys/create/", views.key_backup_create, name="key_backup_create"),
+    path("keys/recover/", views.key_backup_recover, name="key_backup_recover"),
 ]

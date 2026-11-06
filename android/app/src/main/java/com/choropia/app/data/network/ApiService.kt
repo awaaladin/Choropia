@@ -86,6 +86,7 @@ data class UpdateListingRequest(
     val quantity: Int,
     val condition: String,
     val show_price_change: Boolean,
+    val campus: String = "",
 )
 
 @Serializable
@@ -307,6 +308,7 @@ interface ChoropiaApi {
         @Query("max_price") maxPrice: String? = null,
         @Query("merchant") merchantId: Int? = null,
         @Query("mine") mine: Boolean? = null,
+        @Query("campus") campus: String? = null,
     ): PaginatedResponse<Listing>
 
     @GET

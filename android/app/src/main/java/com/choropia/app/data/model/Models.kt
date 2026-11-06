@@ -83,6 +83,7 @@ data class Listing(
     val seller_id: Int? = null,
     val seller_name: String = "",
     val seller_avatar: String? = null,
+    val campus: String = "",
     val views_count: Int = 0,
     val likes_count: Int = 0,
     val comments_count: Int = 0,

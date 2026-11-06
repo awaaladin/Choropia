@@ -14,7 +14,7 @@ const PUBLIC_LINKS = [
   { to: "/contact", label: "Contact" },
 ] as const;
 
-const FOOTER_LINKS = [...PUBLIC_LINKS, { to: "/privacy", label: "Privacy" }] as const;
+const FOOTER_LINKS = [...PUBLIC_LINKS, { to: "/privacy", label: "Privacy" }, { to: "/get-app", label: "App and QR codes" }] as const;
 
 /** The marketing-site shell (landing, about, how-it-works, contact, privacy) — a simpler header
  * and a real footer, as opposed to AppShell's logged-in app chrome. */

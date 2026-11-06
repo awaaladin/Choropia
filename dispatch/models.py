@@ -87,6 +87,12 @@ class DriverDocument(TimeStampedModel):
         VEHICLE_PAPERS = "vehicle_papers", "Vehicle papers"
 
     REQUIRED = (Kind.PASSPORT_PHOTO, Kind.ID_CARD, Kind.GUARANTOR, Kind.VEHICLE_PAPERS)
+    # Any two of the four are enough: a driver's licence and a passport photo, a national ID and vehicle papers, and so on.
+    MIN_REQUIRED = 2
+
+    @classmethod
+    def is_complete(cls, kinds):
+        return len({k for k in kinds if k in {r.value for r in cls.REQUIRED}}) >= cls.MIN_REQUIRED
 
     driver = models.ForeignKey(DriverProfile, on_delete=models.CASCADE, related_name="documents")
     kind = models.CharField(max_length=20, choices=Kind.choices)

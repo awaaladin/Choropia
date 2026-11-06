@@ -148,7 +148,7 @@ class DriverMeView(DispatchView):
         staff_alerts.alert(
             "New driver application", "A new driver applied",
             [f"{profile.full_name} ({request.user.email}), {profile.get_vehicle_type_display()}.",
-             "They still need to upload their 4 documents; you will be emailed again when they are complete."],
+             "They still need to upload 2 documents; you will be emailed again when they are complete."],
             f"/staff/drivers/{profile.pk}/",
         )
         return Response(payloads.driver_me(profile), status=200)
@@ -187,19 +187,19 @@ class DriverDocumentsView(DispatchView):
         if not crypto.keys_configured():
             raise DispatchError("Document uploads are temporarily unavailable.", code="unavailable", status=503)
 
-        had_all = all(profile.documents.filter(kind=k.value).exists() for k in DriverDocument.REQUIRED)
+        had_all = DriverDocument.is_complete(profile.documents.values_list("kind", flat=True))
         DriverDocument.objects.update_or_create(
             driver=profile,
             kind=kind,
             defaults={"content_type": real_type, "size_bytes": len(content), "encrypted_data": crypto.encrypt(content)},
         )
-        has_all = all(profile.documents.filter(kind=k.value).exists() for k in DriverDocument.REQUIRED)
+        has_all = DriverDocument.is_complete(profile.documents.values_list("kind", flat=True))
         if has_all and (not had_all or profile.status == DriverProfile.Status.APPROVED):
             from notifications import staff_alerts
 
             staff_alerts.alert(
                 "Driver documents ready to check", "A driver is ready for review",
-                [f"{profile.full_name} ({profile.user.email}) has uploaded all 4 documents.",
+                [f"{profile.full_name} ({profile.user.email}) has uploaded the documents needed (any 2).",
                  "Open their page, look at each document, call the guarantor, then approve or reject."],
                 f"/staff/drivers/{profile.pk}/",
             )

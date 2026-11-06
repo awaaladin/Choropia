@@ -119,5 +119,6 @@ def driver_me(profile):
             {"kind": kind.value, "label": kind.label, "uploaded": kind.value in uploaded}
             for kind in DriverDocument.REQUIRED
         ],
-        "documents_complete": all(k.value in uploaded for k in DriverDocument.REQUIRED),
+        "documents_complete": DriverDocument.is_complete(uploaded),
+        "documents_needed": DriverDocument.MIN_REQUIRED,
     }

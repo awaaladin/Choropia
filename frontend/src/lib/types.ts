@@ -44,6 +44,8 @@ export interface Listing {
   price: string;
   /** How many are left. Each paid order takes one; at zero the listing is sold. */
   quantity?: number;
+  /** "uniuyo" when the listing is on the UniUyo campus market. */
+  campus?: string;
   status?: "active" | "sold" | "removed";
   /** Set when the seller chose to show a price change: the old price, to be shown crossed out. */
   previous_price?: string | null;

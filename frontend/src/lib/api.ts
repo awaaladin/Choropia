@@ -33,27 +33,37 @@ import type {
  */
 const BASE_URL = "/api/v1";
 
-const ACCESS_KEY = "choropia_access";
-const REFRESH_KEY = "choropia_refresh";
+// Sign-in state. The short-lived access token lives only in memory, and the long-lived refresh token is an HttpOnly cookie that
+// page scripts cannot read, so a script injected into the page cannot steal a login. "choropia_session" is only a hint that
+// this browser has signed in before, so a returning visitor knows to ask for a fresh access token.
+const LEGACY_ACCESS_KEY = "choropia_access";
+const LEGACY_REFRESH_KEY = "choropia_refresh";
+const SESSION_HINT = "choropia_session";
+
+let accessToken: string | null = null;
 
 export const tokens = {
   get access() {
-    return localStorage.getItem(ACCESS_KEY);
+    return accessToken;
   },
-  get refresh() {
-    return localStorage.getItem(REFRESH_KEY);
+  get hasSession() {
+    return Boolean(accessToken) || localStorage.getItem(SESSION_HINT) === "1" || Boolean(localStorage.getItem(LEGACY_REFRESH_KEY));
   },
-  set(access?: string, refresh?: string) {
-    if (access) localStorage.setItem(ACCESS_KEY, access);
-    if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+  set(access?: string, _refresh?: string) {
+    if (access) {
+      accessToken = access;
+      localStorage.setItem(SESSION_HINT, "1");
+    }
   },
   clear() {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
+    accessToken = null;
+    localStorage.removeItem(SESSION_HINT);
+    localStorage.removeItem(LEGACY_ACCESS_KEY);
+    localStorage.removeItem(LEGACY_REFRESH_KEY);
   },
 };
 
-export const isAuthenticated = () => Boolean(tokens.access);
+export const isAuthenticated = () => tokens.hasSession;
 
 export class ApiError extends Error {
   status: number;
@@ -78,21 +88,35 @@ function extractErrorMessage(data: unknown): string | null {
   return null;
 }
 
-async function refreshAccessToken() {
-  const refresh = tokens.refresh;
-  if (!refresh) return false;
-  const response = await fetch(`${BASE_URL}/auth/refresh/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh }),
-  });
-  if (!response.ok) {
-    tokens.clear();
-    return false;
+let refreshing: Promise<boolean> | null = null;
+
+/** Asks for a new access token using the cookie (one request at a time, however many calls are waiting). */
+function refreshAccessToken(): Promise<boolean> {
+  if (!refreshing) {
+    refreshing = (async () => {
+      // A browser that signed in before this change still holds its refresh token in storage: hand it over once so it
+      // moves into the protected cookie, then delete it.
+      const legacy = localStorage.getItem(LEGACY_REFRESH_KEY);
+      const response = await fetch(`${BASE_URL}/auth/refresh/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Client": "web" },
+        body: JSON.stringify(legacy ? { refresh: legacy } : {}),
+      }).catch(() => null);
+      if (!response) return false; // offline: keep the session, try again later
+      if (!response.ok) {
+        tokens.clear();
+        return false;
+      }
+      const data = await response.json();
+      localStorage.removeItem(LEGACY_ACCESS_KEY);
+      localStorage.removeItem(LEGACY_REFRESH_KEY);
+      tokens.set(data.access);
+      return true;
+    })().finally(() => {
+      refreshing = null;
+    });
   }
-  const data = await response.json();
-  tokens.set(data.access);
-  return true;
+  return refreshing;
 }
 
 interface RequestOptions {
@@ -105,8 +129,9 @@ interface RequestOptions {
 
 async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, auth = true, retry = true, formData = false } = opts;
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = { "X-Client": "web" };
   if (!formData) headers["Content-Type"] = "application/json";
+  if (auth && !tokens.access && tokens.hasSession) await refreshAccessToken(); // a reload: get a fresh access token first
   if (auth && tokens.access) headers.Authorization = `Bearer ${tokens.access}`;
 
   const response = await fetch(`${BASE_URL}${path}`, {
@@ -176,8 +201,8 @@ export const api = {
     return data.user;
   },
   async logout() {
-    const refresh = tokens.refresh;
-    if (refresh) await request("/auth/logout/", { method: "POST", body: { refresh } }).catch(() => {});
+    // The refresh token travels in the cookie; the server blacklists it and clears the cookie.
+    if (tokens.hasSession) await request("/auth/logout/", { method: "POST", body: {} }).catch(() => {});
     tokens.clear();
   },
   async logoutEverywhere() {

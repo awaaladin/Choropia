@@ -5,6 +5,7 @@ from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 import accounts.urls
+from core import seo
 import chat.urls
 import core.urls
 import delivery.urls
@@ -52,6 +53,8 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     # The Android app lives in object storage; this path (linked from the landing page) redirects to it.
     # Must come before core.urls, whose catch-all would otherwise answer with the SPA shell.
+    path("robots.txt", seo.robots_txt, name="robots"),
+    path("sitemap.xml", seo.sitemap_xml, name="sitemap"),
     path(".well-known/assetlinks.json", app_download.assetlinks, name="assetlinks"),
     path("downloads/choropia.apk", app_download.apk_redirect, name="android-apk"),
     path("api/v1/app/android/", app_download.AndroidAppInfoView.as_view(), name="android-app-info"),

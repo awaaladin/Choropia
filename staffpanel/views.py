@@ -329,7 +329,7 @@ def driver_list(request):
 
 def _docs_complete(driver):
     have = set(driver.documents.values_list("kind", flat=True))
-    return all(kind.value in have for kind in DriverDocument.REQUIRED)
+    return DriverDocument.is_complete(have)
 
 
 @staff_required
@@ -584,3 +584,71 @@ def seller_remove(request, pk):
     approved.delete()
     messages.success(request, "Removed. Their existing listings stay up; they cannot post new ones.")
     return redirect("staff:sellers")
+
+
+# ---- backup of the driver-document key (superusers only) -------------------------------------------------------------
+KEY_ATTEMPTS = 5
+
+
+def _key_page(request, revealed=None):
+    from .models import KeyBackup
+
+    response = render(request, "staff/key_backup.html", {
+        "nav": "keys", "backup": KeyBackup.objects.select_related("created_by").first(), "configured": crypto.keys_configured(),
+        "min_length": 14, "revealed": revealed,
+    })
+    response["Cache-Control"] = "private, no-store"
+    return response
+
+
+@superuser_required
+def key_backup(request):
+    return _key_page(request)
+
+
+@superuser_required
+@require_POST
+def key_backup_create(request):
+    from . import keybackup
+
+    password = request.POST.get("password", "")
+    passphrase = request.POST.get("passphrase", "")
+    if not request.user.check_password(password):
+        messages.error(request, "Your login password was not right.")
+    elif passphrase != request.POST.get("passphrase2", ""):
+        messages.error(request, "The two backup passphrases do not match.")
+    elif passphrase == password:
+        messages.error(request, "The backup passphrase must be different from your login password.")
+    else:
+        try:
+            keybackup.create_backup(passphrase, request.user)
+        except keybackup.BackupError as exc:
+            messages.error(request, str(exc))
+        else:
+            audit(request, "keys.backup_created")
+            messages.success(request, "Backup saved. Write the passphrase down and keep it somewhere safe: nobody can recover it for you.")
+    return redirect("staff:key_backup")
+
+
+@superuser_required
+@require_POST
+def key_backup_recover(request):
+    from . import keybackup
+
+    attempts_key = f"key-recover:{request.user.pk}"
+    if cache.get(attempts_key, 0) >= KEY_ATTEMPTS:
+        messages.error(request, "Too many wrong tries. Wait 15 minutes and try again.")
+        return redirect("staff:key_backup")
+    if not request.user.check_password(request.POST.get("password", "")):
+        cache.set(attempts_key, cache.get(attempts_key, 0) + 1, 15 * 60)
+        messages.error(request, "Your login password was not right.")
+        return redirect("staff:key_backup")
+    try:
+        key = keybackup.recover_key(request.POST.get("passphrase", ""))
+    except keybackup.BackupError as exc:
+        cache.set(attempts_key, cache.get(attempts_key, 0) + 1, 15 * 60)
+        messages.error(request, str(exc))
+        return redirect("staff:key_backup")
+    cache.delete(attempts_key)
+    audit(request, "keys.recovered")
+    return _key_page(request, revealed=key)

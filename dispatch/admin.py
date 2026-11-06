@@ -70,7 +70,7 @@ class DriverProfileAdmin(admin.ModelAdmin):
     @admin.display(boolean=True, description="All 4 documents")
     def documents_complete(self, obj):
         have = set(obj.documents.values_list("kind", flat=True))
-        return all(kind.value in have for kind in DriverDocument.REQUIRED)
+        return DriverDocument.is_complete(have)
 
     def _review(self, request, queryset, status, note=""):
         count = 0
@@ -83,7 +83,7 @@ class DriverProfileAdmin(admin.ModelAdmin):
             count += 1
         return count
 
-    @admin.action(description="Approve selected drivers (needs all 4 documents)")
+    @admin.action(description="Approve selected drivers (needs 2 documents)")
     def approve(self, request, queryset):
         ok = []
         for driver in queryset:

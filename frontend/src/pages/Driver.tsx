@@ -77,7 +77,7 @@ function ApplyForm() {
   };
   return (
     <Card title="Apply to be a driver">
-      <p className="mb-4 text-sm text-muted-foreground">Individual drivers only for now. You will need your phone, WhatsApp, a guarantor, and clear photos of four documents.</p>
+      <p className="mb-4 text-sm text-muted-foreground">Individual drivers only for now. You will need your phone, WhatsApp, a guarantor, and clear photos of any two of these: driver's licence or ID, passport photograph, guarantor form, vehicle papers.</p>
       <div className="mb-5 rounded-xl border border-border bg-accent/50 p-4 text-sm">
         <p className="font-semibold">Your documents are private and encrypted</p>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-muted-foreground">
@@ -157,7 +157,7 @@ function Review({ profile }: { profile: DriverMe }) {
   const upload = useMutation({
     mutationFn: ({ kind, file }: { kind: string; file: File }) => api.dispatch.uploadDocument(kind, file),
     onSuccess: (updated) => {
-      toast.success(updated.documents_complete ? "That's all four. Your application is submitted." : "Document uploaded securely.");
+      toast.success(updated.documents_complete ? "That's enough. Your application is submitted." : "Document uploaded securely.");
       queryClient.setQueryData(["driver-me"], updated);
       queryClient.invalidateQueries({ queryKey: ["driver-me"] });
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -171,7 +171,7 @@ function Review({ profile }: { profile: DriverMe }) {
         ? profile.review_note || "Your driver account is suspended. Contact support."
         : profile.documents_complete
           ? "We have everything. Our team is checking your documents. You'll get an email when you're approved."
-          : "Upload all four documents below so we can verify you.";
+          : "Upload any two documents below so we can verify you.";
   const uploaded = profile.documents.filter((d) => d.uploaded).length;
   const submitted = profile.status === "pending" && profile.documents_complete;
   return (
@@ -187,7 +187,7 @@ function Review({ profile }: { profile: DriverMe }) {
           </div>
           <ol className="mt-5 space-y-3 text-sm">
             <li className="flex gap-3"><CheckCircle2 size={18} className="mt-0.5 shrink-0 text-success" /> <span><strong>Your details</strong> are saved.</span></li>
-            <li className="flex gap-3"><CheckCircle2 size={18} className="mt-0.5 shrink-0 text-success" /> <span><strong>All 4 documents</strong> are uploaded and locked away safely.</span></li>
+            <li className="flex gap-3"><CheckCircle2 size={18} className="mt-0.5 shrink-0 text-success" /> <span><strong>Your documents</strong> are uploaded and locked away safely.</span></li>
             <li className="flex gap-3"><span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full border-2 border-primary text-[10px] font-bold text-primary">3</span> <span><strong>We check your documents</strong> and call your guarantor. You'll get an email when you're approved.</span></li>
             <li className="flex gap-3"><span className="mt-0.5 grid size-[18px] shrink-0 place-items-center rounded-full border-2 border-border text-[10px] font-bold text-muted-foreground">4</span> <span><strong>Then you come back here</strong> to add your trips and prices, and start getting delivery jobs.</span></li>
           </ol>
@@ -200,7 +200,7 @@ function Review({ profile }: { profile: DriverMe }) {
         <Card>
           <div className="flex items-center gap-2">
             <Pill active>{profile.status_label}</Pill>
-            {profile.status === "pending" && <span className="text-sm text-muted-foreground">{uploaded} of 4 documents uploaded</span>}
+            {profile.status === "pending" && <span className="text-sm text-muted-foreground">{uploaded} documents uploaded (any 2 are enough)</span>}
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{message}</p>
         </Card>

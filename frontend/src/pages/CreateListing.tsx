@@ -54,6 +54,14 @@ export function CreateListingPage() {
           <Field label="Title">
             <Input name="title" required maxLength={120} />
           </Field>
+          <label className="flex items-start gap-3 rounded-lg border border-border bg-accent/40 p-3 text-sm">
+            <input type="checkbox" name="campus" value="uniuyo" className="mt-1" />
+            <span>
+              <strong>Sell on the UniUyo campus market</strong>
+              <br />
+              <span className="text-muted-foreground">Students on campus can filter to listings like this one.</span>
+            </span>
+          </label>
           <Field label="Description">
             <Textarea name="description" rows={3} />
           </Field>

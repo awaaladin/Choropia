@@ -76,6 +76,7 @@ data class MarketState(
     val condition: String? = null,
     val minPrice: String = "",
     val maxPrice: String = "",
+    val campus: Boolean = false,
     val loading: Boolean = true,
     val refreshing: Boolean = false,
     val loadingMore: Boolean = false,
@@ -105,6 +106,7 @@ class MarketplaceViewModel(private val repo: ChoropiaRepository) : ViewModel() {
         condition = s.condition,
         minPrice = s.minPrice.ifBlank { null },
         maxPrice = s.maxPrice.ifBlank { null },
+        campus = if (s.campus) "uniuyo" else null,
     )
 
     fun load(initial: Boolean = false) {
@@ -131,6 +133,11 @@ class MarketplaceViewModel(private val repo: ChoropiaRepository) : ViewModel() {
 
     fun submitSearch() {
         searchJob?.cancel()
+        load(initial = true)
+    }
+
+    fun setCampus(on: Boolean) {
+        _state.update { it.copy(campus = on) }
         load(initial = true)
     }
 
@@ -213,6 +220,14 @@ fun MarketplaceScreen(onOpenListing: (Int) -> Unit) {
             ),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         )
+
+        androidx.compose.foundation.layout.Row(
+            Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Chip("All of Uyo", !state.campus, { vm.setCampus(false) })
+            Chip("UniUyo campus market", state.campus, { vm.setCampus(true) })
+        }
 
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),

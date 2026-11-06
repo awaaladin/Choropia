@@ -23,7 +23,7 @@
     <table><tbody>
       {% for doc in documents %}<tr><td>{{ doc.get_kind_display }}<div class="small">{{ doc.content_type }} · {{ doc.size_bytes|filesizeformat }}</div></td><td class="right"><a class="btn small ghost" href="{% url 'staff:document_view' doc.pk %}" target="_blank" rel="noopener">Open</a></td></tr>{% empty %}<tr><td class="empty">Nothing uploaded yet.</td></tr>{% endfor %}
     </tbody></table>
-    {% if not complete %}<p class="small" style="margin-top:10px">All four documents are needed before approval.</p>{% endif %}
+    {% if not complete %}<p class="small" style="margin-top:10px">Any two documents are needed before approval.</p>{% endif %}
   </div>
 </div>
 

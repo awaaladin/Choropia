@@ -291,7 +291,7 @@ private fun ReviewStatus(vm: DriverViewModel, me: DriverMe) {
                         "rejected" -> me.review_note.ifBlank { "We couldn't verify your application. Fix the details and apply again." }
                         "suspended" -> me.review_note.ifBlank { "Your driver account is suspended. Contact support." }
                         else -> if (me.documents_complete) "We have everything. Our team is checking your documents. You'll get an email when you're approved."
-                        else "Upload all four documents below so we can verify you."
+                        else "Upload any two documents below so we can verify you."
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

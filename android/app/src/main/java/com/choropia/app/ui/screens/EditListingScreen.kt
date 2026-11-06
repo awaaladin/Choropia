@@ -125,7 +125,7 @@ class EditListingViewModel(private val listingId: Int, private val repo: Choropi
         }
     }
 
-    fun save(title: String, description: String, price: String, quantity: Int, condition: String, showChange: Boolean) {
+    fun save(title: String, description: String, price: String, quantity: Int, condition: String, showChange: Boolean, campus: Boolean) {
         if (busy) return
         if (title.isBlank()) { error = "Give your listing a title."; return }
         val parsed = price.trim().toBigDecimalOrNull()
@@ -134,7 +134,7 @@ class EditListingViewModel(private val listingId: Int, private val repo: Choropi
         error = null
         viewModelScope.launch {
             try {
-                repo.updateListing(listingId, title, description, price, quantity, condition, showChange)
+                repo.updateListing(listingId, title, description, price, quantity, condition, showChange, campus)
                 if (newPhotos.isNotEmpty()) repo.addListingPhotos(listingId, newPhotos)
                 saved = true
             } catch (e: ApiException) {
@@ -183,6 +183,7 @@ fun EditListingScreen(listingId: Int, onBack: () -> Unit, onSaved: () -> Unit, o
                     var quantityText by remember { mutableStateOf(item.quantity.toString()) }
                     var condition by remember { mutableStateOf(item.condition) }
                     var showChange by remember { mutableStateOf(false) }
+                    var onCampus by remember { mutableStateOf(item.campus == "uniuyo") }
                     val priceChanged = price.toBigDecimalOrNull()?.compareTo(item.price.toBigDecimalOrNull() ?: java.math.BigDecimal.ZERO) != 0
 
                     Column(
@@ -223,6 +224,21 @@ fun EditListingScreen(listingId: Int, onBack: () -> Unit, onSaved: () -> Unit, o
                             }
                         }
                         ChoropiaField(title, { title = it }, "Title")
+                androidx.compose.foundation.layout.Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    androidx.compose.material3.Checkbox(checked = onCampus, onCheckedChange = { onCampus = it })
+                    androidx.compose.foundation.layout.Column(Modifier.weight(1f)) {
+                        Text("On the UniUyo campus market", style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            "Students on campus can filter to listings like this one.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
                         ChoropiaField(description, { description = it }, "Description", singleLine = false, minLines = 4)
                         ChoropiaField(price, { price = it.filter { c -> c.isDigit() || c == '.' } }, "Price (₦)", keyboardType = KeyboardType.Decimal)
                         if (priceChanged) {
@@ -248,7 +264,7 @@ fun EditListingScreen(listingId: Int, onBack: () -> Unit, onSaved: () -> Unit, o
                         }
                         PrimaryButton(
                             "Save changes",
-                            { vm.save(title, description, price, (quantityText.toIntOrNull() ?: 1).coerceIn(1, 999), condition, priceChanged && showChange) },
+                            { vm.save(title, description, price, (quantityText.toIntOrNull() ?: 1).coerceIn(1, 999), condition, priceChanged && showChange, onCampus) },
                             enabled = !vm.busy,
                         )
                         TextButton(onClick = { confirmDelete = true }, enabled = !vm.busy, modifier = Modifier.fillMaxWidth()) {

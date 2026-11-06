@@ -75,7 +75,7 @@ class StaffAlertTests(Base):
             with self.captureOnCommitCallbacks(execute=True):
                 c.post("/api/v1/dispatch/driver/documents/", {"kind": kind.value, "file": png()}, format="multipart")
             ready = [s for s in subjects() if "Driver documents ready" in s]
-            self.assertEqual(len(ready), 1 if index == 3 else 0, f"after document {index + 1}")
+            self.assertEqual(len(ready), 1 if index >= 1 else 0, f"after document {index + 1}")  # any two documents are enough, and it is announced once
 
     def test_payouts_to_hand_over_and_stuck_payouts_email_the_admin(self):
         order = Order.objects.create(listing=self.listing, buyer=self.buyer, seller=self.seller, price=Decimal("20000.00"), status=OrderStatus.COMPLETED)

@@ -43,6 +43,7 @@ export function EditListingPage() {
       price: Number(price).toFixed(2),
       quantity: Number(form.get("quantity") ?? 1),
       condition: String(form.get("condition") ?? "used"),
+      campus: form.get("campus") ? "uniuyo" : "",
       show_price_change: priceChanged && showChange,
     };
     setSaving(true);
@@ -155,6 +156,14 @@ export function EditListingPage() {
             </span>
           </label>
         )}
+        <label className="flex items-start gap-3 rounded-lg border border-border bg-accent/40 p-3 text-sm">
+          <input type="checkbox" name="campus" value="uniuyo" className="mt-1" defaultChecked={item.campus === "uniuyo"} />
+          <span>
+            <strong>On the UniUyo campus market</strong>
+            <br />
+            <span className="text-muted-foreground">Students on campus can filter to listings like this one.</span>
+          </span>
+        </label>
         <Field label="Condition">
           <Select name="condition" defaultValue={item.condition}>
             <option value="used">Used</option>

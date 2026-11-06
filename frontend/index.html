@@ -3,11 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Choropia — Uyo's trusted marketplace</title>
+    <title>Choropia | Buy and sell safely in Uyo, with escrow protection</title>
     <meta
       name="description"
-      content="Discover local goods and verified sellers with escrow-protected payments across Uyo."
+      content="Choropia is Uyo's trusted marketplace. Buy and sell phones, fashion, gadgets and more from local sellers and the UniUyo campus market, with escrow-protected payment and optional delivery."
     />
+    <meta name="keywords" content="Choropia, Uyo marketplace, buy and sell Uyo, UniUyo market, escrow payment Nigeria, Akwa Ibom marketplace" />
+    <link rel="canonical" href="https://choropia.vercel.app/" />
+    <meta name="theme-color" content="#0b192c" />
+    <!-- Search Console: paste the verification code from Google Search Console here, e.g.
+         <meta name="google-site-verification" content="YOUR-CODE" /> -->
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Choropia" />
+    <meta property="og:title" content="Choropia | Uyo's trusted marketplace" />
+    <meta property="og:description" content="Buy and sell safely in Uyo. Every payment is held in escrow until you confirm delivery." />
+    <meta property="og:url" content="https://choropia.vercel.app/" />
+    <meta property="og:image" content="https://choropia.vercel.app/favicon-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Choropia | Uyo's trusted marketplace" />
+    <meta name="twitter:description" content="Buy and sell safely in Uyo, with escrow-protected payment." />
+    <meta name="twitter:image" content="https://choropia.vercel.app/favicon-512.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://choropia.vercel.app/#org",
+            "name": "Choropia",
+            "alternateName": "Choropia Marketplace",
+            "url": "https://choropia.vercel.app/",
+            "logo": "https://choropia.vercel.app/favicon-512.png",
+            "areaServed": { "@type": "City", "name": "Uyo" }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://choropia.vercel.app/#website",
+            "name": "Choropia",
+            "url": "https://choropia.vercel.app/",
+            "publisher": { "@id": "https://choropia.vercel.app/#org" },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://choropia.vercel.app/marketplace?search={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    </script>
+
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png" />
@@ -17,20 +63,12 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script>
-      // Applied before first paint so a dark-mode or reduced-motion user never sees a flash.
-      (function () {
-        try {
-          var p = JSON.parse(localStorage.getItem("choropia-preferences") || "{}");
-          var root = document.documentElement;
-          if (p.theme === "dark") root.classList.add("dark");
-          if (p.motion === "reduced") root.dataset.motion = "reduced";
-        } catch (e) {}
-      })();
-    </script>
+    <!-- Applied before first paint so a dark-mode or reduced-motion user never sees a flash. -->
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Choropia is Uyo's trusted marketplace. Please turn on JavaScript to browse listings.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

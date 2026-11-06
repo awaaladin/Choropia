@@ -51,3 +51,17 @@ def may_sell(user) -> bool:
     if not SiteSettings.load().seller_approval_required:
         return True
     return bool(user.is_authenticated and (user.is_staff or ApprovedSeller.objects.filter(user=user).exists()))
+
+
+class KeyBackup(models.Model):
+    """The driver-document encryption key, locked with a second passphrase (see staffpanel/keybackup.py). Without this, losing
+    the DOCUMENT_ENCRYPTION_KEY setting would make every stored identity document unreadable for good."""
+
+    salt = models.BinaryField()
+    iterations = models.PositiveIntegerField()
+    wrapped_key = models.BinaryField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

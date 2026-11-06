@@ -6,6 +6,7 @@ import exchange from "@/assets/choropia-exchange.jpg";
 import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
 import { BrandLoader } from "@/components/BrandLoader";
+import { AppDownloadCard } from "@/components/AppDownloadCard";
 import { Input } from "@/components/ui";
 import { errorMessage } from "@/lib/actions";
 import { useAuth } from "@/lib/auth";
@@ -116,6 +117,7 @@ export function LoginPage() {
             Register
           </Link>
         </p>
+        <AppDownloadCard />
       </div>
     </div>
   );

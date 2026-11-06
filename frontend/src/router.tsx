@@ -26,6 +26,7 @@ import { NotFoundPage } from "@/pages/NotFound";
 import { NotificationsPage } from "@/pages/Notifications";
 import { OrderDetailPage } from "@/pages/OrderDetail";
 import { OrdersPage } from "@/pages/Orders";
+import { GetAppPage } from "@/pages/GetApp";
 import { PrivacyPage } from "@/pages/Privacy";
 import { ProfilePage } from "@/pages/Profile";
 import { ReelsPage } from "@/pages/Reels";
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
   { path: "/how-it-works", element: <HowItWorksPage /> },
   { path: "/contact", element: <ContactPage /> },
   { path: "/privacy", element: <PrivacyPage /> },
+  { path: "/get-app", element: <GetAppPage /> },
 
   {
     element: <AppShell />,
