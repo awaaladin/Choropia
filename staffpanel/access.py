@@ -14,9 +14,7 @@ from django.shortcuts import resolve_url
 from .models import AuditLog
 
 
-def client_ip(request):
-    forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip()
-    return forwarded or request.META.get("REMOTE_ADDR") or None
+from common.net import client_ip  # noqa: E402,F401  (re-exported: the staff panel imports it from here)
 
 
 def audit(request, action, target="", detail=""):

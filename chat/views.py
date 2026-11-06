@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
+from common.throttling import ScopedWritesMixin
 
 
 class ConversationViewSet(
@@ -56,7 +57,8 @@ class ConversationViewSet(
         return Response(OrderSerializer(order).data, status=201)
 
 
-class MessageViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+class MessageViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    write_throttle_scope = "chat-send"
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
 

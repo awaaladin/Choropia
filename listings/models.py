@@ -58,6 +58,9 @@ class Listing(TimeStampedModel):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
+    # "uniuyo" puts the listing on the UniUyo campus market, a tab of the marketplace for students selling to students.
+    campus = models.CharField(max_length=20, blank=True, default="", db_index=True)
+
     views_count = models.PositiveIntegerField(default=0)
     # How many the seller has. Each paid order takes one; at zero the listing is marked sold. A refund or cancellation
     # after payment puts one back.

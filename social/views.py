@@ -12,11 +12,13 @@ from merchants.models import Merchant
 
 from .models import Comment, Follow, Like
 from .serializers import CommentSerializer, FollowSerializer, LikeSerializer
+from common.throttling import ScopedWritesMixin
 
 
-class FollowViewSet(
+class FollowViewSet(ScopedWritesMixin, 
     mixins.CreateModelMixin, mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
+    write_throttle_scope = "social"
     serializer_class = FollowSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -30,7 +32,8 @@ class FollowViewSet(
             raise ValidationError("Already following this target.")
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(ScopedWritesMixin, viewsets.ModelViewSet):
+    write_throttle_scope = "comments"
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -42,9 +45,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         return qs
 
 
-class LikeViewSet(
+class LikeViewSet(ScopedWritesMixin, 
     mixins.CreateModelMixin, mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
+    write_throttle_scope = "social"
     serializer_class = LikeSerializer
     permission_classes = [permissions.IsAuthenticated]
 

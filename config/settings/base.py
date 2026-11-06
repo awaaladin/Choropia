@@ -39,7 +39,8 @@ def env_list(key, default=""):
     return [item.strip() for item in val.split(",") if item.strip()]
 
 
-SECRET_KEY = env("DJANGO_SECRET_KEY", "insecure-key-override-in-env")
+# No fallback value on purpose: dev.py and test.py make a throwaway key, prod.py refuses to start without a strong one.
+SECRET_KEY = env("DJANGO_SECRET_KEY", "")
 
 AUTH_USER_MODEL = "accounts.User"
 
@@ -222,9 +223,21 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "common.exceptions.api_exception_handler",
     "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
         "rest_framework.throttling.ScopedRateThrottle",
     ),
     "DEFAULT_THROTTLE_RATES": {
+        # Everything is limited per caller; the scopes below tighten the actions that are easiest to abuse.
+        "anon": "120/min",
+        "user": "400/min",
+        "chat-send": "60/min",
+        "comments": "30/min",
+        "social": "120/hour",
+        "orders": "30/hour",
+        "reviews": "30/hour",
+        "reports": "20/hour",
+        "merchant-apply": "5/day",
         "auth": "10/min",
         "listing-create": "20/hour",
         "payout-account": "20/hour",
@@ -260,7 +273,8 @@ SPECTACULAR_SETTINGS = {
 
 # --- CORS -------------------------------------------------------------
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000")
-CORS_ALLOW_CREDENTIALS = True
+# Logins use Bearer tokens (or a same-site cookie on choropia.vercel.app itself), never cross-site cookies.
+CORS_ALLOW_CREDENTIALS = False
 
 # --- Channels -----------------------------------------------------------
 REDIS_URL = env("REDIS_URL", "redis://localhost:6379/0")

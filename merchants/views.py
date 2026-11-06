@@ -10,14 +10,16 @@ from .serializers import (
     MerchantApplicationSerializer,
     MerchantSerializer,
 )
+from common.throttling import ScopedWritesMixin
 
 
-class MerchantApplicationViewSet(
+class MerchantApplicationViewSet(ScopedWritesMixin, 
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
+    write_throttle_scope = "merchant-apply"
     serializer_class = MerchantApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
 

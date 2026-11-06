@@ -8,6 +8,7 @@ from common.permissions import IsOwnerOrReadOnly
 
 from .models import Reel, ReelComment, ReelLike
 from .serializers import ReelCommentSerializer, ReelLikeSerializer, ReelSerializer
+from common.throttling import ScopedWritesMixin
 
 
 class ReelViewSet(viewsets.ModelViewSet):
@@ -32,9 +33,10 @@ class ReelViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ReelLikeViewSet(
+class ReelLikeViewSet(ScopedWritesMixin, 
     mixins.CreateModelMixin, mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
+    write_throttle_scope = "social"
     serializer_class = ReelLikeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -48,7 +50,8 @@ class ReelLikeViewSet(
             raise ValidationError("Already liked.")
 
 
-class ReelCommentViewSet(viewsets.ModelViewSet):
+class ReelCommentViewSet(ScopedWritesMixin, viewsets.ModelViewSet):
+    write_throttle_scope = "comments"
     serializer_class = ReelCommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 

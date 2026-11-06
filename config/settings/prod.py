@@ -8,16 +8,23 @@ DEBUG = False
 ALLOWED_HOSTS = ["choropia.vercel.app", *env_list("DJANGO_ALLOWED_HOSTS")]
 
 SECRET_KEY = env("DJANGO_SECRET_KEY")
-if not SECRET_KEY:
-    raise RuntimeError("DJANGO_SECRET_KEY must be set in production")
+if not SECRET_KEY or "insecure" in SECRET_KEY.lower():
+    raise RuntimeError("DJANGO_SECRET_KEY must be set in production to a long random value")
+if len(SECRET_KEY) < 50:
+    # Not fatal (that would take the site down), but a short key is a real weakness: replace it with `python -c "import secrets;print(secrets.token_urlsafe(64))"`.
+    import logging
+
+    logging.getLogger("django.security").warning("DJANGO_SECRET_KEY is shorter than 50 characters; rotate it.")
 
 SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 60 * 60 * 24 * 30
+SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "")
 

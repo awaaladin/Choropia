@@ -1,6 +1,11 @@
 from .base import *  # noqa: F401,F403
 from .base import env, env_bool, env_list
 
+import secrets
+
+from .base import SECRET_KEY as _KEY
+
+SECRET_KEY = _KEY or secrets.token_urlsafe(50)  # a throwaway key for local work
 DEBUG = env_bool("DJANGO_DEBUG", True)
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0")

@@ -7,6 +7,7 @@ class ListingFilter(filters.FilterSet):
     min_price = filters.NumberFilter(field_name="price", lookup_expr="gte")
     max_price = filters.NumberFilter(field_name="price", lookup_expr="lte")
     category = filters.CharFilter(field_name="category__slug")
+    campus = filters.CharFilter(field_name="campus")
     owner = filters.NumberFilter(field_name="owner_id")
     mine = filters.BooleanFilter(method="filter_mine")
 

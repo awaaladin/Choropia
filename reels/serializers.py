@@ -80,6 +80,11 @@ class ReelSerializer(ReelEngagementMixin, serializers.ModelSerializer):
         )
         read_only_fields = ("id", "views_count", "created_at")
 
+    def validate_video(self, video):
+        if video and video.size > 40 * 1024 * 1024:
+            raise serializers.ValidationError("A reel must be under 40 MB.")
+        return video
+
     def validate_merchant(self, merchant):
         if merchant is None:
             return merchant

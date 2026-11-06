@@ -2,9 +2,11 @@ from rest_framework import mixins, permissions, viewsets
 
 from .models import Review
 from .serializers import ReviewSerializer
+from common.throttling import ScopedWritesMixin
 
 
-class ReviewViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class ReviewViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    write_throttle_scope = "reviews"
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 

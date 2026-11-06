@@ -39,6 +39,11 @@ class OrderViewSet(
             return [permissions.IsAuthenticated()]
         return super().get_permissions()
 
+    def get_throttles(self):
+        if self.action == "create":
+            self.throttle_scope = "orders"
+        return super().get_throttles()
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

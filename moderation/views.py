@@ -7,9 +7,11 @@ from common.permissions import IsStaffOrModerator
 
 from .models import Report
 from .serializers import ReportResolutionSerializer, ReportSerializer
+from common.throttling import ScopedWritesMixin
 
 
-class ReportViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class ReportViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    write_throttle_scope = "reports"
     serializer_class = ReportSerializer
     permission_classes = [permissions.IsAuthenticated]
 

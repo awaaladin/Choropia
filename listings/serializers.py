@@ -86,6 +86,7 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
             "previous_price",
             "show_price_change",
             "quantity",
+            "campus",
             "condition",
             "status",
             "location",
@@ -104,6 +105,19 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("id", "previous_price", "views_count", "created_at", "updated_at")
+
+    def validate_uploaded_photos(self, photos):
+        if len(photos) > 10:
+            raise serializers.ValidationError("You can add up to 10 photos.")
+        for photo in photos:
+            if photo.size > 8 * 1024 * 1024:
+                raise serializers.ValidationError("Each photo must be under 8 MB.")
+        return photos
+
+    def validate_campus(self, value):
+        if value not in ("", "uniuyo"):
+            raise serializers.ValidationError("Choose a valid campus market.")
+        return value
 
     def validate_quantity(self, value):
         if value < 1 or value > 999:
@@ -167,6 +181,7 @@ class ListingListSerializer(ListingEngagementMixin, serializers.ModelSerializer)
             "price",
             "previous_price",
             "quantity",
+            "campus",
             "condition",
             "status",
             "location",
