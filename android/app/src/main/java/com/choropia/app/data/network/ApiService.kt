@@ -13,6 +13,7 @@ import com.choropia.app.data.model.AuthResponse
 import com.choropia.app.data.model.Bank
 import com.choropia.app.data.model.CommissionPreview
 import com.choropia.app.data.model.Category
+import com.choropia.app.data.model.ChatOffer
 import com.choropia.app.data.model.PayoutAccount
 import com.choropia.app.data.model.Comment
 import com.choropia.app.data.model.Conversation
@@ -30,9 +31,11 @@ import com.choropia.app.data.model.Order
 import com.choropia.app.data.model.PaginatedResponse
 import com.choropia.app.data.model.PaymentInitResponse
 import com.choropia.app.data.model.PaymentVerifyResponse
+import com.choropia.app.data.model.PublicProfile
 import com.choropia.app.data.model.RefreshResponse
 import com.choropia.app.data.model.Report
 import com.choropia.app.data.model.Review
+import com.choropia.app.data.model.Reel
 import com.choropia.app.data.model.User
 import kotlinx.serialization.Serializable
 import okhttp3.MultipartBody
@@ -74,7 +77,16 @@ data class RegisterRequest(
 @Serializable data class EmailVerified(val email_verified: Boolean = false)
 @Serializable data class PasswordResetConfirmRequest(val uid: String, val token: String, val password: String)
 @Serializable data class CreateConversationRequest(val listing: Int)
+@Serializable data class OpenUserConversationRequest(val other_user_id: Int, val listing_id: Int? = null)
 @Serializable data class SendMessageRequest(val conversation: Int, val body: String)
+@Serializable
+data class CreateOfferRequest(
+    val listing_id: Int,
+    val amount_kobo: Long,
+    val allowed_delivery_methods: List<String>,
+    val note: String = "",
+    val pin: String,
+)
 @Serializable data class CreateOrderRequest(val listing: Int)
 @Serializable data class DisputeRequest(val reason: String)
 @Serializable data class InitializePaymentRequest(val order_id: Int, val source: String = "app")  // "app": Paystack returns to the app
@@ -138,6 +150,8 @@ data class CreateMerchantApplicationRequest(
 @Serializable data class CreateReportRequest(val target_type: String, val target_id: Int, val reason: String)
 
 @Serializable data class PayoutAccountRequest(val bank_code: String, val account_number: String)
+
+@Serializable data class SoldListingDurationRequest(val duration_days: Int)
 
 @Serializable data class AddAreaRequest(val name: String)
 
@@ -297,6 +311,15 @@ interface ChoropiaApi {
     @PATCH("users/me/")
     suspend fun updateProfile(@Body body: UpdateProfileRequest): User
 
+    @GET("users/{id}/profile/")
+    suspend fun publicProfile(@Path("id") id: Int): PublicProfile
+
+    @GET("users/{id}/listings/")
+    suspend fun publicProfileListings(@Path("id") id: Int): PaginatedResponse<Listing>
+
+    @GET
+    suspend fun publicProfileListingsPage(@Url url: String): PaginatedResponse<Listing>
+
     // --- listings & feed ----------------------------------------------------------------------
     @GET("listings/")
     suspend fun listListings(
@@ -356,7 +379,26 @@ interface ChoropiaApi {
     suspend fun walletTransactions(): PaginatedResponse<WalletTransaction>
 
     @POST("listings/{id}/mark_sold/")
-    suspend fun markSold(@Path("id") id: Int): Listing
+    suspend fun markSold(@Path("id") id: Int, @Body body: SoldListingDurationRequest): Listing
+
+    @POST("listings/{id}/extend_market_visibility/")
+    suspend fun extendMarketVisibility(@Path("id") id: Int, @Body body: SoldListingDurationRequest): Listing
+
+    @POST("listings/{id}/relist/")
+    suspend fun relist(@Path("id") id: Int): Listing
+
+    @GET("reels/")
+    suspend fun listReels(): PaginatedResponse<Reel>
+
+    @GET
+    suspend fun reelsPage(@Url url: String): PaginatedResponse<Reel>
+
+    @Multipart
+    @POST("reels/")
+    suspend fun createReel(
+        @PartMap fields: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part video: MultipartBody.Part,
+    ): Reel
 
     // --- social -------------------------------------------------------------------------------
     @GET("comments/")
@@ -399,6 +441,9 @@ interface ChoropiaApi {
     @POST("conversations/")
     suspend fun startConversation(@Body body: CreateConversationRequest): Conversation
 
+    @POST("conversations/open/")
+    suspend fun openUserConversation(@Body body: OpenUserConversationRequest): Conversation
+
     @GET("messages/")
     suspend fun getMessages(@Query("conversation") conversationId: Int): PaginatedResponse<Message>
 
@@ -407,6 +452,21 @@ interface ChoropiaApi {
 
     @POST("messages/")
     suspend fun sendMessage(@Body body: SendMessageRequest): Message
+
+    @GET("conversations/{id}/offers/")
+    suspend fun conversationOffers(@Path("id") id: Int): List<ChatOffer>
+
+    @POST("conversations/{id}/offers/")
+    suspend fun createOffer(@Path("id") id: Int, @Body body: CreateOfferRequest): ChatOffer
+
+    @GET("offers/{id}/")
+    suspend fun getOffer(@Path("id") id: String): ChatOffer
+
+    @POST("offers/{id}/cancel/")
+    suspend fun cancelOffer(@Path("id") id: String): ChatOffer
+
+    @POST("offers/{id}/decline/")
+    suspend fun declineOffer(@Path("id") id: String): ChatOffer
 
     @Multipart
     @POST("messages/")

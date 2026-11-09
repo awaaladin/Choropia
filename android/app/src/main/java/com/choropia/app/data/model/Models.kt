@@ -32,6 +32,18 @@ data class User(
 }
 
 @Serializable
+data class PublicProfile(
+            val id: Int,
+            val display_name: String = "Choropia member",
+            val username: String = "",
+            val avatar_url: String? = null,
+            val verified: Boolean = false,
+            val bio: String = "",
+            val joined_at: String = "",
+            val completed_sales: Int = 0,
+)
+
+@Serializable
 data class AuthResponse(val access: String, val refresh: String, val user: User)
 
 /** Login answer: tokens, or a second-factor challenge when the account has 2-step verification on. */
@@ -73,6 +85,8 @@ data class Listing(
     val previous_price: String? = null,
     val condition: String = "used",
     val status: String = "active",
+    val sold_at: String? = null,
+    val market_visible_until: String? = null,
     val location: String = "",
     val category: Int = 0,
     // Detail payload
@@ -103,6 +117,26 @@ data class Listing(
 }
 
 @Serializable
+data class Reel(
+    val id: Int,
+    val owner: Int,
+    val merchant: Int? = null,
+    val listing: Int? = null,
+    val listing_title: String? = null,
+    val listing_price: String? = null,
+    val video: String,
+    val caption: String = "",
+    val views_count: Int = 0,
+    val creator_id: Int = 0,
+    val creator_name: String = "",
+    val creator_avatar: String? = null,
+    val likes_count: Int = 0,
+    val comments_count: Int = 0,
+    val is_liked: Boolean = false,
+    val created_at: String = "",
+)
+
+@Serializable
 data class PaginatedResponse<T>(
     val count: Int = 0,
     val next: String? = null,
@@ -115,24 +149,74 @@ data class Message(
     val id: Int? = null,
     val conversation: Int,
     val sender_id: Int? = null,
+    val type: String = "text",
+    val offer: ChatOffer? = null,
     val body: String = "",
     val attachment: String? = null,
     val attachment_type: String = "",
+    val listing: Int? = null,
+    val listing_snapshot: ListingSnapshot? = null,
+    val listing_status: String? = null,
     val duration_seconds: Int? = null,
     val read_at: String? = null,
     val created_at: String? = null,
 )
 
 @Serializable
+data class ChatOffer(
+    val id: String,
+    val reference: String = "",
+    val conversation: Int,
+    val listing: OfferListing,
+    val seller: Int,
+    val buyer: Int,
+    val viewer_role: String? = null,
+    val amount_kobo: Long,
+    val listing_price_kobo: Long = 0,
+    val fee_kobo: Long? = null,
+    val seller_net_kobo: Long? = null,
+    val seller_verified_snapshot: Boolean? = null,
+    val allowed_delivery_methods: List<String> = emptyList(),
+    val note: String = "",
+    val status: String = "pending",
+    val expires_at: String = "",
+    val delivery_method: String = "",
+    val delivery_fee_kobo: Long = 0,
+    val total_kobo: Long = 0,
+    val order_id: Int? = null,
+    val created_at: String = "",
+    val updated_at: String = "",
+    val paid_at: String? = null,
+    val closed_at: String? = null,
+    val server_now: String = "",
+)
+
+@Serializable
+data class OfferListing(
+    val id: Int,
+    val title: String = "",
+    val photo: String? = null,
+)
+
+@Serializable
+data class ListingSnapshot(
+    val title: String = "",
+    val thumbnail: String? = null,
+    val price_kobo: Long? = null,
+    val status: String = "removed",
+)
+
+@Serializable
 data class Conversation(
     val id: Int,
-    val listing: Int,
-    val listing_title: String = "",
+    val listing: Int? = null,
+    val listing_title: String? = null,
     val buyer: Int? = null,
     val seller: Int? = null,
     val other_party_name: String? = null,
     val other_party_avatar: String? = null,
     val order: Int? = null,
+    val orders: List<Int> = emptyList(),
     val last_message: Message? = null,
     val created_at: String? = null,
     val updated_at: String? = null,
@@ -249,9 +333,19 @@ data class Comment(
     val id: Int,
     val listing: Int,
     val author_id: Int? = null,
+    val author: CommentAuthor? = null,
     val parent: Int? = null,
     val body: String,
     val created_at: String? = null,
+)
+
+@Serializable
+data class CommentAuthor(
+    val id: Int,
+    val display_name: String = "Deleted user",
+    val username: String = "",
+    val avatar_url: String? = null,
+    val verified: Boolean = false,
 )
 
 @Serializable

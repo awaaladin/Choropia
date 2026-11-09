@@ -16,6 +16,9 @@ if len(SECRET_KEY) < 50:
 
     logging.getLogger("django.security").warning("DJANGO_SECRET_KEY is shorter than 50 characters; rotate it.")
 
+if not CHAT_MESSAGE_ENCRYPTION_KEYS:
+    raise RuntimeError("CHAT_MESSAGE_ENCRYPTION_KEYS must be set before production chat can start.")
+
 SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

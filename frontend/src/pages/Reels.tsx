@@ -1,12 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { Clapperboard, Plus } from "lucide-react";
-import { ReelCard } from "@/components/ReelCard";
+import { ListingReelCard, ReelCard } from "@/components/ReelCard";
 import { LinkButton } from "@/components/Button";
 import { EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { api, rows } from "@/lib/api";
 
 export function ReelsPage() {
   const reels = useQuery({ queryKey: ["reels"], queryFn: async () => rows(await api.listReels()) });
+  const fallback = useQuery({
+    queryKey: ["reels-listing-fallback"],
+    queryFn: async () => rows(await api.listListings({ ordering: "-created_at" })).filter((listing) => Boolean(listing.cover_photo || listing.photos?.length)),
+    enabled: reels.isSuccess && reels.data.length === 0,
+  });
 
   return (
     <>
@@ -25,9 +30,19 @@ export function ReelsPage() {
           </div>
         )}
         {reels.isSuccess && reels.data.length === 0 && (
-          <div className="grid h-full place-items-center p-4">
-            <EmptyState icon={<Clapperboard size={20} />} title="No reels yet" hint="Be the first to post a short video of what you're selling." />
-          </div>
+          fallback.isPending ? (
+            <div className="p-4"><Skeleton className="h-full w-full" /></div>
+          ) : fallback.isError ? (
+            <div className="p-4"><ErrorState message={(fallback.error as Error).message} onRetry={() => fallback.refetch()} /></div>
+          ) : fallback.data.length === 0 ? (
+            <div className="grid h-full place-items-center p-4">
+              <EmptyState icon={<Clapperboard size={20} />} title="No reels yet" hint="Be the first to post a short video of what you're selling." />
+            </div>
+          ) : (
+            <div className="mx-auto flex h-full max-w-md snap-y snap-mandatory flex-col overflow-y-auto md:py-3">
+              {fallback.data.map((listing) => <ListingReelCard key={listing.id} listing={listing} />)}
+            </div>
+          )
         )}
         {reels.data && reels.data.length > 0 && (
           <div className="mx-auto flex h-full max-w-md snap-y snap-mandatory flex-col overflow-y-auto md:py-3">

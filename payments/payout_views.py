@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from rest_framework import generics, permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -90,6 +91,40 @@ class PayoutAccountView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+def _truthy(value) -> bool:
+    return str(value or "").strip().lower() in ("1", "true", "yes")
+
+
+class FeePreviewView(APIView):
+    """Public and read-only: the seller fee on an amount in kobo, for the offer composer.
+    GET fees/preview/?amount_kobo=1850000&verified=true -> {amount_kobo, fee_kobo, seller_net_kobo, verified, min_fee_kobo}.
+    The buyer never sees this number; the fee comes out of the seller's payout."""
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes: list = []
+    throttle_classes: list = []
+
+    @extend_schema(
+        parameters=[OpenApiParameter("amount_kobo", int, required=True), OpenApiParameter("verified", bool)],
+        responses=inline_serializer("FeePreview", {
+            "amount_kobo": serializers.IntegerField(), "fee_kobo": serializers.IntegerField(),
+            "seller_net_kobo": serializers.IntegerField(), "verified": serializers.BooleanField(),
+            "min_fee_kobo": serializers.IntegerField(),
+        }),
+    )
+    def get(self, request):
+        from . import fees
+
+        raw = str(request.query_params.get("amount_kobo", "")).strip()
+        if not raw.isdigit() or not (0 < int(raw) <= 100_000_000_000):
+            return Response({"amount_kobo": ["Enter a whole number of kobo between 1 and 100,000,000,000."]}, status=400)
+        amount = int(raw)
+        verified = _truthy(request.query_params.get("verified"))
+        fee, net = fees.split_kobo(amount, verified)
+        return Response({"amount_kobo": amount, "fee_kobo": fee, "seller_net_kobo": net, "verified": verified,
+                         "min_fee_kobo": fees.min_fee_kobo()})
+
+
 class CommissionPreviewView(APIView):
     """Public and read-only: what the seller would pay and receive for a price. The apps call it while a
     seller types the price, so the rate lives in one place (the server)."""
@@ -105,8 +140,8 @@ class CommissionPreviewView(APIView):
             return Response({"price": ["Enter a price in naira."]}, status=status.HTTP_400_BAD_REQUEST)
         if not (Decimal("0") < price <= Decimal("1000000000")):
             return Response({"price": ["Enter a price between 1 and 1,000,000,000."]}, status=status.HTTP_400_BAD_REQUEST)
-        preview = payouts.commission_preview(price)
-        return Response({key: str(value) for key, value in preview.items()})
+        preview = payouts.commission_preview(price, verified=_truthy(request.query_params.get("verified")))
+        return Response({key: value if isinstance(value, bool) else str(value) for key, value in preview.items()})
 
 
 class MyPayoutsView(generics.ListAPIView):
@@ -146,6 +181,7 @@ class RunScheduledJobsView(View):
 
     def run(self):
         from dispatch.services import nudge_stale_offers, purge_rejected_documents
+        from offers.services import expire_due_offers
         from staffpanel.digest import send_daily_digest
 
         from .services import retry_pending_refunds
@@ -159,6 +195,7 @@ class RunScheduledJobsView(View):
             ("pending_refunds", retry_pending_refunds),
             ("payouts", payouts.process_pending_payouts),
             ("dispatch_nudges", nudge_stale_offers),
+            ("chat_offers_expiry", expire_due_offers),
             ("purge_rejected_documents", purge_rejected_documents),
             ("staff_digest", send_daily_digest),
         ):

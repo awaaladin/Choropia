@@ -1,6 +1,9 @@
 from django.db import transaction
 from rest_framework import serializers
 
+from social.guest_likes import guest_id_from_request
+from social.models import GuestLike
+
 from .models import Category, Listing, ListingPhoto
 
 
@@ -42,7 +45,7 @@ class ListingEngagementMixin:
         return self._absolute(profile.avatar.url) if profile and profile.avatar else None
 
     def get_likes_count(self, obj):
-        return obj.likes.count()
+        return obj.likes.count() + obj.guest_likes.count()
 
     def get_comments_count(self, obj):
         return obj.comments.count()
@@ -50,9 +53,13 @@ class ListingEngagementMixin:
     def get_is_liked(self, obj):
         request = self.context.get("request")
         user = getattr(request, "user", None)
-        if not user or not user.is_authenticated:
-            return False
-        return obj.likes.filter(user=user).exists()
+        if user and user.is_authenticated:
+            return obj.likes.filter(user=user).exists()
+        guest_id = guest_id_from_request(request) if request else None
+        return bool(
+            guest_id
+            and GuestLike.objects.filter(guest_id=guest_id, listing=obj).exists()
+        )
 
 
 class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
@@ -89,6 +96,8 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
             "campus",
             "condition",
             "status",
+            "sold_at",
+            "market_visible_until",
             "location",
             "latitude",
             "longitude",
@@ -104,7 +113,10 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "previous_price", "views_count", "created_at", "updated_at")
+        read_only_fields = (
+            "id", "previous_price", "views_count", "sold_at", "market_visible_until",
+            "created_at", "updated_at",
+        )
 
     def validate_uploaded_photos(self, photos):
         if len(photos) > 10:
@@ -151,6 +163,8 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
             instance.previous_price = instance.price if show_change else None
         if validated_data.get("quantity", 0) > 0 and instance.status == Listing.Status.SOLD and instance.quantity == 0:
             instance.status = Listing.Status.ACTIVE  # restocked: back on sale
+            instance.sold_at = None
+            instance.market_visible_until = None
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -184,6 +198,8 @@ class ListingListSerializer(ListingEngagementMixin, serializers.ModelSerializer)
             "campus",
             "condition",
             "status",
+            "sold_at",
+            "market_visible_until",
             "location",
             "category",
             "merchant_id",

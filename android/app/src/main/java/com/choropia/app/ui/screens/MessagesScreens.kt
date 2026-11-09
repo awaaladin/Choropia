@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -29,11 +31,17 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +62,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import com.choropia.app.data.model.Conversation
+import com.choropia.app.data.model.ChatOffer
+import com.choropia.app.data.model.Listing
 import com.choropia.app.data.model.Message
 import com.choropia.app.data.network.ApiException
 import com.choropia.app.data.network.ChatSocket
@@ -68,6 +78,7 @@ import com.choropia.app.ui.components.ErrorState
 import com.choropia.app.ui.components.ScreenLoader
 import com.choropia.app.ui.rememberVm
 import com.choropia.app.ui.util.shortDateTime
+import com.choropia.app.ui.util.formatNaira
 import com.choropia.app.ui.util.timeAgo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,7 +138,7 @@ fun InboxScreen(onOpenChat: (Int) -> Unit) {
         val q = query.trim().lowercase()
         val matchesQuery = q.isEmpty() ||
             (c.other_party_name ?: "").lowercase().contains(q) ||
-            c.listing_title.lowercase().contains(q) ||
+            (c.listing_title ?: "").lowercase().contains(q) ||
             (last?.body ?: "").lowercase().contains(q)
         matchesFilter && matchesQuery
     }
@@ -208,14 +219,15 @@ fun InboxScreen(onOpenChat: (Int) -> Unit) {
                                     )
                                 }
                                 Text(
-                                    conversation.listing_title,
+                                    conversation.listing_title.orEmpty(),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.secondary,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
                                 Text(
-                                    if (last == null) "Say hello 👋" else (if (mine) "You: " else "") + last.body,
+                                    if (last == null) "Say hello 👋"
+                                    else (if (mine) "You: " else "") + (last.body.ifBlank { last.listing_snapshot?.title.orEmpty() }),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
@@ -269,8 +281,9 @@ class ChatViewModel(
             viewModelScope.launch {
                 repo.accessTokenOrNull()?.let { socket.connect(conversationId, it) }
                 socket.incoming.collect { incoming ->
-                    if (incoming.conversation == conversationId && server.none { it.id == incoming.id && incoming.id != null }) {
-                        server = server + incoming
+                    if (incoming.conversation == conversationId) {
+                        val existing = server.indexOfFirst { it.id != null && it.id == incoming.id }
+                        server = if (existing < 0) server + incoming else server.toMutableList().also { it[existing] = incoming }
                         publish()
                     }
                 }
@@ -286,7 +299,7 @@ class ChatViewModel(
     /** Called on a timer by the screen; failures are silent (a flaky network shouldn't nag). */
     suspend fun poll() {
         runCatching { repo.messages(conversationId) }.onSuccess { latest ->
-            if (latest.size != server.size || latest.lastOrNull()?.id != server.lastOrNull()?.id) {
+            if (latest != server) {
                 server = latest
                 publish()
             }
@@ -350,12 +363,13 @@ class ChatViewModel(
 }
 
 @Composable
-fun ChatScreen(conversationId: Int, onBack: () -> Unit) {
+fun ChatScreen(conversationId: Int, onBack: () -> Unit, onOpenListing: (Int) -> Unit) {
     val repo = LocalRepository.current
     val session = LocalSession.current
     val vm = rememberVm(key = "chat-$conversationId") { ChatViewModel(conversationId, repo) }
     val state by vm.state.collectAsState()
     val me by session.user.collectAsState()
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var draft by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val context = LocalContext.current
@@ -364,7 +378,68 @@ fun ChatScreen(conversationId: Int, onBack: () -> Unit) {
     val recorder = remember { com.choropia.app.ui.util.VoiceRecorder(context) }
     var recording by remember { mutableStateOf(false) }
     var recordedSeconds by remember { mutableStateOf(0) }
+    var offerDialogOpen by remember { mutableStateOf(false) }
+    var sellerListings by remember { mutableStateOf<List<Listing>>(emptyList()) }
+    var selectedOfferListingId by remember { mutableStateOf<Int?>(null) }
+    var listingMenuExpanded by remember { mutableStateOf(false) }
+    var offerAmount by remember { mutableStateOf("") }
+    var offerNote by remember { mutableStateOf("") }
+    var offerPin by remember { mutableStateOf("") }
+    var deliveryMethods by remember { mutableStateOf(setOf("meetup")) }
+    var riderAvailable by remember { mutableStateOf(false) }
+    var offerSending by remember { mutableStateOf(false) }
+    var busyOfferId by remember { mutableStateOf<String?>(null) }
+    val canMakeOffer = state.conversation?.let { it.listing != null && it.seller == me?.id } == true
+    val selectedOfferListing = sellerListings.firstOrNull { it.id == selectedOfferListingId }
     androidx.compose.runtime.DisposableEffect(Unit) { onDispose { recorder.cancel() } }
+
+    LaunchedEffect(selectedOfferListing?.id) {
+        selectedOfferListing?.let { listing ->
+            offerAmount = listing.price
+            riderAvailable = false
+            deliveryMethods = deliveryMethods - "rider"
+            val enabled = runCatching { repo.listingDelivery(listing.id).enabled }.getOrDefault(false)
+            riderAvailable = enabled
+            if (!enabled) deliveryMethods = deliveryMethods - "rider"
+        } ?: run { riderAvailable = false }
+    }
+
+    fun openOfferComposer() {
+        scope.launch {
+            runCatching { repo.myActiveListings() }
+                .onSuccess { listings ->
+                    sellerListings = listings
+                    if (listings.isEmpty()) {
+                        android.widget.Toast.makeText(context, "Create an active listing before making an offer.", android.widget.Toast.LENGTH_LONG).show()
+                    } else {
+                        selectedOfferListingId = listings.firstOrNull { it.id == state.conversation?.listing }?.id ?: listings.first().id
+                        offerNote = ""
+                        offerPin = ""
+                        deliveryMethods = setOf("meetup")
+                        offerDialogOpen = true
+                    }
+                }
+                .onFailure {
+                    android.widget.Toast.makeText(context, it.message ?: "Could not load your listings.", android.widget.Toast.LENGTH_LONG).show()
+                }
+        }
+    }
+
+    fun actOnOffer(offer: ChatOffer, cancel: Boolean) {
+        scope.launch {
+            busyOfferId = offer.id
+            try {
+                if (cancel) repo.cancelOffer(offer.id) else repo.declineOffer(offer.id)
+                vm.poll()
+                android.widget.Toast.makeText(context, if (cancel) "Offer cancelled." else "Offer declined.", android.widget.Toast.LENGTH_SHORT).show()
+            } catch (e: ApiException) {
+                android.widget.Toast.makeText(context, e.message ?: "Could not update the offer.", android.widget.Toast.LENGTH_LONG).show()
+                vm.poll()
+            } finally {
+                busyOfferId = null
+            }
+        }
+    }
 
     val photoPicker = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia(),
@@ -426,6 +501,14 @@ fun ChatScreen(conversationId: Int, onBack: () -> Unit) {
             }
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        if (canMakeOffer) {
+            TextButton(
+                onClick = { openOfferComposer() },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+            ) {
+                Text("Offer a different price")
+            }
+        }
 
         Box(Modifier.weight(1f)) {
             when {
@@ -450,9 +533,138 @@ fun ChatScreen(conversationId: Int, onBack: () -> Unit) {
                     }
                     items(reversed, key = { it.id ?: it.hashCode() }) { message ->
                         val mine = message.sender_id != null && message.sender_id == me?.id
-                        Bubble(message, mine)
+                        Bubble(message, mine, { draft = it }, onOpenListing, ::actOnOffer, busyOfferId)
                     }
                 }
+            }
+
+            if (offerDialogOpen) {
+                val amountKobo = parseOfferKobo(offerAmount)
+                AlertDialog(
+                    onDismissRequest = { if (!offerSending) offerDialogOpen = false },
+                    title = { Text("Offer a different price") },
+                    text = {
+                        Column(
+                            Modifier.verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Box {
+                                OutlinedTextField(
+                                    value = selectedOfferListing?.title.orEmpty(),
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Your listing") },
+                                    modifier = Modifier.fillMaxWidth().clickable { listingMenuExpanded = true },
+                                )
+                                DropdownMenu(
+                                    expanded = listingMenuExpanded,
+                                    onDismissRequest = { listingMenuExpanded = false },
+                                ) {
+                                    sellerListings.forEach { listing ->
+                                        DropdownMenuItem(
+                                            text = { Text(listing.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                            onClick = {
+                                                selectedOfferListingId = listing.id
+                                                listingMenuExpanded = false
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                            OutlinedTextField(
+                                value = offerAmount,
+                                onValueChange = { offerAmount = it },
+                                label = { Text("Offer amount (₦)") },
+                                singleLine = true,
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            Text("Handover methods", style = MaterialTheme.typography.labelLarge)
+                            val handoverMethods = buildList {
+                                if (riderAvailable) add("rider" to "Choropia rider")
+                                add("seller_delivers" to "Seller delivers")
+                                add("meetup" to "Meet up")
+                            }
+                            handoverMethods.forEach { (method, label) ->
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Checkbox(
+                                        checked = method in deliveryMethods,
+                                        onCheckedChange = { checked ->
+                                            deliveryMethods = if (checked) deliveryMethods + method else deliveryMethods - method
+                                        },
+                                    )
+                                    Text(label, style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
+                            if (!riderAvailable) {
+                                Text(
+                                    "Set up rider delivery in listing settings to offer that option.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            OutlinedTextField(
+                                value = offerNote,
+                                onValueChange = { if (it.length <= 300) offerNote = it },
+                                label = { Text("Note (optional)") },
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            OutlinedTextField(
+                                value = offerPin,
+                                onValueChange = { if (it.length <= 12) offerPin = it },
+                                label = { Text("Transaction PIN") },
+                                singleLine = true,
+                                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                                    keyboardType = androidx.compose.ui.text.input.KeyboardType.NumberPassword,
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            Text(
+                                "Your PIN approves this offer. Chat offers cannot currently be paid through escrow.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            enabled = !offerSending && amountKobo != null && deliveryMethods.isNotEmpty() && offerPin.isNotBlank() && selectedOfferListing != null,
+                            onClick = {
+                                val listingId = selectedOfferListing?.id ?: return@TextButton
+                                val amount = amountKobo ?: return@TextButton
+                                scope.launch {
+                                    offerSending = true
+                                    try {
+                                        repo.createOffer(
+                                            conversationId,
+                                            listingId,
+                                            amount,
+                                            deliveryMethods.toList(),
+                                            offerNote,
+                                            offerPin,
+                                        )
+                                        offerDialogOpen = false
+                                        offerPin = ""
+                                        vm.poll()
+                                        android.widget.Toast.makeText(context, "Offer sent.", android.widget.Toast.LENGTH_SHORT).show()
+                                    } catch (e: ApiException) {
+                                        android.widget.Toast.makeText(context, e.message ?: "Could not send this offer.", android.widget.Toast.LENGTH_LONG).show()
+                                    } finally {
+                                        offerSending = false
+                                    }
+                                }
+                            },
+                        ) {
+                            Text(if (offerSending) "Sending…" else "Send offer")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { offerDialogOpen = false }, enabled = !offerSending) { Text("Back") }
+                    },
+                )
             }
         }
 
@@ -528,6 +740,16 @@ fun ChatScreen(conversationId: Int, onBack: () -> Unit) {
     }
 }
 
+private fun parseOfferKobo(value: String): Long? {
+    val normalized = value.trim().replace(",", "")
+    if (!normalized.matches(Regex("""\d+(?:\.\d{1,2})?"""))) return null
+    val parts = normalized.split(".")
+    val naira = parts[0].toLongOrNull() ?: return null
+    if (naira > 1_000_000_000L) return null
+    val kobo = parts.getOrNull(1)?.padEnd(2, '0')?.toLongOrNull() ?: 0L
+    return (naira * 100 + kobo).takeIf { it > 0 }
+}
+
 /** Play/pause for a voice note streamed from its URL. */
 @Composable
 private fun VoiceNote(url: String?, durationSeconds: Int?, tint: androidx.compose.ui.graphics.Color) {
@@ -569,7 +791,14 @@ private fun VoiceNote(url: String?, durationSeconds: Int?, tint: androidx.compos
 }
 
 @Composable
-private fun Bubble(message: Message, mine: Boolean) {
+private fun Bubble(
+    message: Message,
+    mine: Boolean,
+    onQuickReply: (String) -> Unit,
+    onOpenListing: (Int) -> Unit,
+    onOfferAction: (ChatOffer, Boolean) -> Unit,
+    busyOfferId: String?,
+) {
     val pendingSend = (message.id ?: 0) < 0
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start) {
         Column(
@@ -586,11 +815,21 @@ private fun Bubble(message: Message, mine: Boolean) {
                             bottomEnd = if (mine) 4.dp else 18.dp,
                         )
                     )
-                    .background(if (mine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainer)
+                    .background(
+                        if (mine && message.type != "offer" && message.type != "listing_ref") {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        }
+                    )
                     .padding(horizontal = 14.dp, vertical = 9.dp),
             ) {
                 val textColor = if (mine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                when (message.attachment_type) {
+                if (message.type == "listing_ref") {
+                    ListingReferenceBubble(message, mine, onQuickReply, onOpenListing)
+                } else if (message.type == "offer" && message.offer != null) {
+                    ChatOfferBubble(message.offer, onOfferAction, busyOfferId == message.offer.id)
+                } else when (message.attachment_type) {
                     "uploading" -> Text("Sending attachment...", style = MaterialTheme.typography.bodyMedium, color = textColor)
                     "image" -> coil.compose.AsyncImage(
                         model = message.attachment,
@@ -604,7 +843,8 @@ private fun Bubble(message: Message, mine: Boolean) {
                     "audio" -> VoiceNote(message.attachment, message.duration_seconds, textColor)
                     "file" -> Text("Document attached", style = MaterialTheme.typography.bodyMedium, color = textColor)
                 }
-                if (message.body.isNotBlank()) {
+
+                if (message.body.isNotBlank() && message.type != "offer") {
                     Text(
                         message.body,
                         style = MaterialTheme.typography.bodyLarge,
@@ -623,3 +863,125 @@ private fun Bubble(message: Message, mine: Boolean) {
     }
 }
 
+@Composable
+private fun ChatOfferBubble(
+    offer: ChatOffer,
+    onAction: (ChatOffer, Boolean) -> Unit,
+    busy: Boolean,
+) {
+    val status = when (offer.status) {
+        "pending" -> "Waiting for buyer"
+        "payment_processing" -> "Payment in progress"
+        "paid" -> "Paid into escrow"
+        "declined" -> "Declined by buyer"
+        "cancelled" -> "Cancelled by seller"
+        "expired" -> "Expired"
+        "superseded" -> "Replaced by a newer offer"
+        else -> offer.status.replace("_", " ")
+    }
+    val methods = if (offer.delivery_method.isNotBlank()) {
+        listOf(offer.delivery_method)
+    } else offer.allowed_delivery_methods
+    val methodLabels = methods.map {
+        when (it) {
+            "rider" -> "Choropia rider"
+            "seller_delivers" -> "Seller delivers"
+            "meetup" -> "Meet up"
+            else -> it
+        }
+    }
+    Column(
+        Modifier.width(280.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Text(offer.listing.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(
+            formatNaira((offer.amount_kobo / 100.0).toString()),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            "Listed at ${formatNaira((offer.listing_price_kobo / 100.0).toString())}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text("Handover: ${methodLabels.joinToString().ifBlank { "Not set" }}", style = MaterialTheme.typography.bodySmall)
+        if (offer.note.isNotBlank()) Text(offer.note, style = MaterialTheme.typography.bodyMedium)
+        Text(status, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (offer.status == "pending" && offer.viewer_role == "buyer") {
+            Text(
+                "Chat offers cannot currently be paid through escrow.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            TextButton(onClick = { onAction(offer, false) }, enabled = !busy) {
+                Text(if (busy) "Updating…" else "Decline offer")
+            }
+        } else if (offer.status == "pending" && offer.viewer_role == "seller") {
+            TextButton(onClick = { onAction(offer, true) }, enabled = !busy) {
+                Text(if (busy) "Updating…" else "Cancel offer")
+            }
+        }
+    }
+}
+
+@Composable
+private fun ListingReferenceBubble(
+    message: Message,
+    showQuickReplies: Boolean,
+    onQuickReply: (String) -> Unit,
+    onOpenListing: (Int) -> Unit,
+) {
+    val snapshot = message.listing_snapshot
+    val status = when (message.listing_status ?: snapshot?.status) {
+        "active" -> "Available"
+        "sold" -> "Sold"
+        else -> "No longer listed"
+    }
+    Column(
+        Modifier.width(260.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .then(if (message.listing != null) Modifier.clickable { onOpenListing(message.listing) } else Modifier),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            if (snapshot?.thumbnail != null) {
+                coil.compose.AsyncImage(
+                    model = snapshot.thumbnail,
+                    contentDescription = snapshot.title,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier.width(64.dp).height(64.dp).clip(RoundedCornerShape(10.dp)),
+                )
+            }
+            Column(Modifier.weight(1f)) {
+                Text(snapshot?.title?.ifBlank { "Listing" } ?: "Listing", style = MaterialTheme.typography.titleSmall, maxLines = 2)
+                snapshot?.price_kobo?.let {
+                    Text(formatNaira((it / 100.0).toString()), style = MaterialTheme.typography.bodyMedium)
+                }
+                Text(status, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        if (showQuickReplies) {
+            Column(Modifier.padding(start = 10.dp, end = 10.dp, bottom = 10.dp)) {
+                listOf("Is this still available?", "Can you lower the price?").forEach { reply ->
+                    Text(
+                        reply,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable { onQuickReply(reply) }
+                            .padding(horizontal = 10.dp, vertical = 7.dp),
+                    )
+                }
+            }
+        }
+    }
+}

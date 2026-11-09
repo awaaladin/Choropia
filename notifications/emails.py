@@ -102,6 +102,15 @@ def send_verification_code(user, code: str) -> None:
     )
 
 
+def send_pin_reset_code(user, code: str) -> None:
+    send_email_after_commit(
+        user.email,
+        "Your Choropia PIN reset code",
+        "verify_code",
+        {"name": _display_name(user), "code": code, "minutes": settings.EMAIL_OTP_MINUTES},
+    )
+
+
 def send_password_reset(user, link: str) -> bool:
     return send_email(
         user.email,

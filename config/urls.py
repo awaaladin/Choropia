@@ -15,6 +15,7 @@ import listings.urls
 import merchants.urls
 import moderation.urls
 import notifications.urls
+import offers.urls
 import orders.urls
 import payments.urls
 import reels.urls
@@ -33,6 +34,7 @@ api_v1_patterns = (
     + merchants.urls.urlpatterns
     + reels.urls.urlpatterns
     + chat.urls.urlpatterns
+    + offers.urls.urlpatterns
     + orders.urls.urlpatterns
     + payments.urls.urlpatterns
     + delivery.urls.urlpatterns

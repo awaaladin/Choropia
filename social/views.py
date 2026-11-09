@@ -1,18 +1,66 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, permissions, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.throttling import ScopedRateThrottle
 
 from listings.models import Listing
 from listings.serializers import ListingListSerializer
 from merchants.models import Merchant
 
-from .models import Comment, Follow, Like
+from .guest_likes import guest_id_from_token, issue_guest_like_token
+from .models import Comment, Follow, GuestLike, Like
 from .serializers import CommentSerializer, FollowSerializer, LikeSerializer
 from common.throttling import ScopedWritesMixin
+
+
+class GuestLikeTokenView(APIView):
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "guest-like-token"
+
+    def post(self, request):
+        if request.user.is_authenticated:
+            raise ValidationError("Sign out before requesting a guest identity.")
+        return Response({"token": issue_guest_like_token()})
+
+
+class GuestLikeView(APIView):
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "guest-likes"
+
+    def _identity(self, request):
+        if request.user.is_authenticated:
+            raise ValidationError("Use the authenticated likes endpoint.")
+        try:
+            return guest_id_from_token(request.META.get("HTTP_X_GUEST_LIKE_TOKEN"))
+        except ValueError as exc:
+            raise ValidationError({"guest_token": str(exc)}) from exc
+
+    def _listing(self, request):
+        try:
+            listing_id = int(request.data.get("listing"))
+        except (TypeError, ValueError):
+            raise ValidationError({"listing": "A valid listing ID is required."})
+        return get_object_or_404(Listing, pk=listing_id)
+
+    def post(self, request):
+        guest_id = self._identity(request)
+        listing = self._listing(request)
+        GuestLike.objects.get_or_create(guest_id=guest_id, listing=listing)
+        return Response({"listing": listing.pk, "liked": True})
+
+    def delete(self, request):
+        guest_id = self._identity(request)
+        listing = self._listing(request)
+        GuestLike.objects.filter(guest_id=guest_id, listing=listing).delete()
+        return Response({"listing": listing.pk, "liked": False})
 
 
 class FollowViewSet(ScopedWritesMixin, 
@@ -38,11 +86,22 @@ class CommentViewSet(ScopedWritesMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        qs = Comment.objects.select_related("author")
+        qs = Comment.objects.select_related("author", "author__profile")
         listing_id = self.request.query_params.get("listing")
         if listing_id:
             qs = qs.filter(listing_id=listing_id)
         return qs
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def handle_exception(self, exc):
+        if self.request.method not in permissions.SAFE_METHODS and not self.request.user.is_authenticated:
+            return Response(
+                {"code": "AUTH_REQUIRED", "detail": "Sign in to post a comment."},
+                status=401,
+            )
+        return super().handle_exception(exc)
 
 
 class LikeViewSet(ScopedWritesMixin, 
@@ -81,7 +140,7 @@ class FeedView(ListAPIView):
         ).values_list("object_id", flat=True)
 
         return (
-            Listing.objects.filter(status=Listing.Status.ACTIVE)
+            Listing.objects.filter(Listing.public_visibility_filter())
             .annotate(
                 followed_first=Case(
                     When(Q(owner_id__in=followed_user_ids) | Q(merchant_id__in=followed_merchant_ids), then=Value(0)),

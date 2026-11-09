@@ -7,6 +7,7 @@ import android.net.Uri
 import com.choropia.app.data.TokenManager
 import com.choropia.app.data.model.AppNotification
 import com.choropia.app.data.model.Category
+import com.choropia.app.data.model.ChatOffer
 import com.choropia.app.data.model.Comment
 import com.choropia.app.data.model.Conversation
 import com.choropia.app.data.model.Listing
@@ -16,6 +17,7 @@ import com.choropia.app.data.model.Message
 import com.choropia.app.data.model.Order
 import com.choropia.app.data.model.PaymentInitResponse
 import com.choropia.app.data.model.PaymentVerifyResponse
+import com.choropia.app.data.model.Reel
 import com.choropia.app.data.model.Review
 import com.choropia.app.data.model.TwoFactorConfirmed
 import com.choropia.app.data.model.TwoFactorSetup
@@ -27,7 +29,9 @@ import com.choropia.app.data.network.TwoFactorVerifyRequest
 import com.choropia.app.data.network.ApiException
 import com.choropia.app.data.network.ChoropiaApi
 import com.choropia.app.data.network.CreateCommentRequest
+import com.choropia.app.data.network.CreateOfferRequest
 import com.choropia.app.data.network.CreateConversationRequest
+import com.choropia.app.data.network.OpenUserConversationRequest
 import com.choropia.app.data.network.CreateFollowRequest
 import com.choropia.app.data.network.CreateLikeRequest
 import com.choropia.app.data.network.CreateMerchantApplicationRequest
@@ -43,6 +47,7 @@ import com.choropia.app.data.network.PasswordResetRequest
 import com.choropia.app.data.network.ProfileUpdate
 import com.choropia.app.data.network.RegisterRequest
 import com.choropia.app.data.network.SendMessageRequest
+import com.choropia.app.data.network.SoldListingDurationRequest
 import com.choropia.app.data.network.UpdateProfileRequest
 import com.choropia.app.data.network.apiCall
 import kotlinx.coroutines.Dispatchers
@@ -208,7 +213,66 @@ class ChoropiaRepository(
 
     suspend fun listingsPage(url: String): Page<Listing> = apiCall { api.listingsPage(url).let { Page(it.results, it.next) } }
 
+    suspend fun reels(): Page<Reel> = apiCall { api.listReels().let { Page(it.results, it.next) } }
+
+    suspend fun reelsPage(url: String): Page<Reel> = apiCall { api.reelsPage(url).let { Page(it.results, it.next) } }
+
+    suspend fun createReel(uri: Uri, caption: String, listingId: Int?): Reel {
+        val (bytes, mimeType, extension) = withContext(Dispatchers.IO) {
+            val output = ByteArrayOutputStream()
+            val input = appContext.contentResolver.openInputStream(uri)
+                ?: throw ApiException("Could not read the selected video.")
+            input.use { stream ->
+                val buffer = ByteArray(8 * 1024)
+                var total = 0L
+                while (true) {
+                    val count = stream.read(buffer)
+                    if (count < 0) break
+                    total += count
+                    if (total > MAX_REEL_BYTES) {
+                        throw ApiException("Until large-video uploads are available, reels must be 4 MB or smaller.")
+                    }
+                    output.write(buffer, 0, count)
+                }
+            }
+            val mime = appContext.contentResolver.getType(uri)?.lowercase() ?: when {
+                uri.lastPathSegment?.endsWith(".mov", ignoreCase = true) == true -> "video/quicktime"
+                uri.lastPathSegment?.endsWith(".webm", ignoreCase = true) == true -> "video/webm"
+                uri.lastPathSegment?.endsWith(".mp4", ignoreCase = true) == true -> "video/mp4"
+                else -> null
+            }
+            val (supportedMime, suffix) = when (mime) {
+                "video/quicktime" -> "video/quicktime" to "mov"
+                "video/webm" -> "video/webm" to "webm"
+                "video/mp4" -> "video/mp4" to "mp4"
+                else -> throw ApiException("Choose an MP4, MOV, or WebM video.")
+            }
+            Triple(output.toByteArray(), supportedMime, suffix)
+        }
+        val text = "text/plain".toMediaType()
+        val fields = buildMap {
+            put("caption", caption.trim().toRequestBody(text))
+            if (listingId != null) put("listing", listingId.toString().toRequestBody(text))
+        }
+        val video = MultipartBody.Part.createFormData(
+            "video",
+            "reel.$extension",
+            bytes.toRequestBody(mimeType.toMediaType()),
+        )
+        return apiCall { api.createReel(fields, video) }
+    }
+
     suspend fun getListing(id: Int): Listing = apiCall { api.getListing(id) }
+
+    suspend fun publicProfile(id: Int) = apiCall { api.publicProfile(id) }
+
+    suspend fun publicProfileListings(id: Int): Page<Listing> = apiCall {
+        api.publicProfileListings(id).let { Page(it.results, it.next) }
+    }
+
+    suspend fun publicProfileListingsPage(url: String): Page<Listing> = apiCall {
+        api.publicProfileListingsPage(url).let { Page(it.results, it.next) }
+    }
 
     suspend fun categories(): List<Category> = apiCall { api.listCategories() }
 
@@ -253,7 +317,13 @@ class ChoropiaRepository(
         return apiCall { api.createListing(fields, parts) }
     }
 
-    suspend fun markSold(listingId: Int): Listing = apiCall { api.markSold(listingId) }
+    suspend fun markSold(listingId: Int, durationDays: Int): Listing =
+        apiCall { api.markSold(listingId, SoldListingDurationRequest(durationDays)) }
+
+    suspend fun extendMarketVisibility(listingId: Int, durationDays: Int): Listing =
+        apiCall { api.extendMarketVisibility(listingId, SoldListingDurationRequest(durationDays)) }
+
+    suspend fun relist(listingId: Int): Listing = apiCall { api.relist(listingId) }
 
     suspend fun deleteListing(listingId: Int) = apiCall { api.deleteListing(listingId) }
 
@@ -391,6 +461,9 @@ class ChoropiaRepository(
     suspend fun startConversation(listingId: Int): Conversation =
         apiCall { api.startConversation(CreateConversationRequest(listingId)) }
 
+    suspend fun openUserConversation(userId: Int): Conversation =
+        apiCall { api.openUserConversation(OpenUserConversationRequest(other_user_id = userId)) }
+
     /** Messages come back newest-last from the API; pages are followed so long threads are whole. */
     suspend fun messages(conversationId: Int): List<Message> = apiCall {
         val all = mutableListOf<Message>()
@@ -404,6 +477,32 @@ class ChoropiaRepository(
         }
         all
     }
+
+    suspend fun conversationOffers(conversationId: Int): List<ChatOffer> =
+        apiCall { api.conversationOffers(conversationId) }
+
+    suspend fun offer(offerId: String): ChatOffer = apiCall { api.getOffer(offerId) }
+
+    suspend fun createOffer(
+        conversationId: Int,
+        listingId: Int,
+        amountKobo: Long,
+        deliveryMethods: List<String>,
+        note: String,
+        pin: String,
+    ): ChatOffer = apiCall {
+        api.createOffer(
+            conversationId,
+            CreateOfferRequest(listingId, amountKobo, deliveryMethods, note.trim(), pin),
+        )
+    }
+
+    suspend fun cancelOffer(offerId: String): ChatOffer = apiCall { api.cancelOffer(offerId) }
+
+    suspend fun declineOffer(offerId: String): ChatOffer = apiCall { api.declineOffer(offerId) }
+
+    suspend fun myActiveListings(): List<Listing> = listings(ListingQuery(mine = true)).items
+        .filter { it.status == "active" && it.quantity > 0 }
 
     suspend fun sendMessage(conversationId: Int, body: String): Message =
         apiCall { api.sendMessage(SendMessageRequest(conversationId, body.trim())) }
@@ -590,6 +689,7 @@ class ChoropiaRepository(
 
     private companion object {
         const val MAX_PHOTOS = 6
+        const val MAX_REEL_BYTES = 4L * 1024 * 1024
         const val MAX_EDGE = 1600
         const val MAX_PHOTO_BYTES = 600_000
     }

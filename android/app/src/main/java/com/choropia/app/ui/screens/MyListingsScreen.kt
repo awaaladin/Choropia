@@ -42,12 +42,15 @@ import com.choropia.app.ui.components.EmptyState
 import com.choropia.app.ui.components.ErrorState
 import com.choropia.app.ui.components.GridListingCard
 import com.choropia.app.ui.components.ScreenLoader
+import com.choropia.app.ui.util.parseInstant
+import com.choropia.app.ui.util.shortDateTime
 import com.choropia.app.ui.rememberVm
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 
 data class MyListingsState(
     val items: List<Listing> = emptyList(),
@@ -77,6 +80,34 @@ class MyListingsViewModel(private val repo: ChoropiaRepository) : ViewModel() {
         }
     }
 
+    fun markSold(id: Int, durationDays: Int, onDone: (String) -> Unit) {
+        updateListing(onDone) { repo.markSold(id, durationDays) to "Marked sold for $durationDays days" }
+    }
+
+    fun extendVisibility(id: Int, durationDays: Int, onDone: (String) -> Unit) {
+        updateListing(onDone) {
+            repo.extendMarketVisibility(id, durationDays) to "Visibility extended for $durationDays days"
+        }
+    }
+
+    fun relist(id: Int, onDone: (String) -> Unit) {
+        updateListing(onDone) { repo.relist(id) to "Listing is back on the market" }
+    }
+
+    private fun updateListing(onDone: (String) -> Unit, action: suspend () -> Pair<Listing, String>) {
+        viewModelScope.launch {
+            try {
+                val (updated, message) = action()
+                _state.update { state ->
+                    state.copy(items = state.items.map { if (it.id == updated.id) updated else it })
+                }
+                onDone(message)
+            } catch (e: ApiException) {
+                onDone(e.message ?: "Could not update that listing")
+            }
+        }
+    }
+
     fun load(initial: Boolean = false) {
         viewModelScope.launch {
             _state.update { it.copy(loading = initial && it.items.isEmpty(), refreshing = !initial, error = null) }
@@ -97,7 +128,11 @@ fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (Int) -> Unit, onSell: (
     val state by vm.state.collectAsState()
     var tab by remember { mutableIntStateOf(0) }   // 0 active, 1 sold
     var pendingDelete by remember { mutableStateOf<Int?>(null) }
+    var pendingDuration by remember { mutableStateOf<Pair<Int, String>?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val showActionMessage: (String) -> Unit = {
+        android.widget.Toast.makeText(context, it, android.widget.Toast.LENGTH_SHORT).show()
+    }
     pendingDelete?.let { id ->
         androidx.compose.material3.AlertDialog(
             onDismissRequest = { pendingDelete = null },
@@ -110,6 +145,30 @@ fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (Int) -> Unit, onSell: (
                 }) { Text("Delete") }
             },
             dismissButton = { androidx.compose.material3.TextButton(onClick = { pendingDelete = null }) { Text("Keep it") } },
+        )
+    }
+    pendingDuration?.let { (id, action) ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { pendingDuration = null },
+            title = { Text(if (action == "extend") "Extend market visibility" else "How long should this stay visible?") },
+            text = {
+                Column {
+                    Text(
+                        if (action == "extend") "Buyers will continue to see the sold listing but cannot purchase it."
+                        else "Buyers can still see this listing and contact you, but cannot purchase it.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    listOf(1, 3, 7, 14, 30).forEach { days ->
+                        androidx.compose.material3.TextButton(onClick = {
+                            pendingDuration = null
+                            if (action == "extend") vm.extendVisibility(id, days, showActionMessage)
+                            else vm.markSold(id, days, showActionMessage)
+                        }) { Text("$days ${if (days == 1) "day" else "days"}") }
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { pendingDuration = null }) { Text("Cancel") } },
         )
     }
 
@@ -149,9 +208,22 @@ fun MyListingsScreen(onBack: () -> Unit, onOpenListing: (Int) -> Unit, onSell: (
                     items(visible, key = { it.id }) { listing ->
                         Column {
                             GridListingCard(listing, onClick = { onOpenListing(listing.id) })
+                            if (listing.status == "sold") {
+                                val stillVisible = parseInstant(listing.market_visible_until)?.isAfter(Instant.now()) == true
+                                Text(
+                                    if (stillVisible) "Visible until ${shortDateTime(listing.market_visible_until)}" else "No longer visible to buyers",
+                                    modifier = Modifier.padding(horizontal = 8.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                             Row {
                                 if (listing.status == "active") {
                                     androidx.compose.material3.TextButton(onClick = { onDelivery(listing.id) }) { Text("Delivery") }
+                                    androidx.compose.material3.TextButton(onClick = { pendingDuration = listing.id to "sold" }) { Text("Mark sold") }
+                                } else if (listing.status == "sold") {
+                                    androidx.compose.material3.TextButton(onClick = { pendingDuration = listing.id to "extend" }) { Text("Extend") }
+                                    androidx.compose.material3.TextButton(onClick = { vm.relist(listing.id, showActionMessage) }) { Text("Relist") }
                                 }
                                 androidx.compose.material3.TextButton(onClick = { pendingDelete = listing.id }) {
                                     Text("Delete", color = MaterialTheme.colorScheme.error)

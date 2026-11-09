@@ -297,7 +297,7 @@ class OrderAndPaymentEmailTests(TestCase):
         self.assertEqual(self.order.status, OrderStatus.DELIVERED)
 
 
-@override_settings(**SETTINGS, PAYSTACK_SECRET_KEY="sk_test_unit", PAYOUTS_ENABLED=True, COMMISSION_TIERS=[], PLATFORM_COMMISSION_PERCENT=Decimal("5"), PAYOUT_MAX_NGN=Decimal("2000000"))
+@override_settings(**SETTINGS, PAYSTACK_SECRET_KEY="sk_test_unit", PAYOUTS_ENABLED=True, PAYOUT_MAX_NGN=Decimal("2000000"))
 class PayoutEmailTests(TestCase):
     def setUp(self):
         self.order = make_order()
@@ -312,7 +312,7 @@ class PayoutEmailTests(TestCase):
             payouts.create_payout(self.payment)  # idempotent: no second email
         self.assertEqual([m.to[0] for m in mail.outbox], [self.order.seller.email])
         self.assertIn("Add your bank account", html_of(mail.outbox[0]))
-        self.assertIn("₦190,000.00", html_of(mail.outbox[0]))
+        self.assertIn("₦191,750.00", html_of(mail.outbox[0]))
 
     def test_a_paid_payout_emails_the_seller_the_breakdown_once(self):
         PayoutAccount.objects.create(
@@ -328,7 +328,7 @@ class PayoutEmailTests(TestCase):
         sent = [m for m in mail.outbox if "on its way" in m.subject]
         self.assertEqual(len(sent), 1)
         html = html_of(sent[0])
-        for expected in ("₦200,000.00", "₦10,000.00", "₦190,000.00", "5%", "Guaranty Trust Bank", "1234"):
+        for expected in ("₦200,000.00", "₦8,250.00", "₦191,750.00", "Guaranty Trust Bank", "1234"):
             self.assertIn(expected, html)
 
 

@@ -6,6 +6,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import generics, permissions, viewsets
+from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -162,6 +163,47 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.select_related("profile").filter(is_active=True)
     serializer_class = UserSerializer
     search_fields = ("email", "first_name", "last_name")
+
+    @action(detail=True, methods=["get"], url_path="profile", permission_classes=[permissions.AllowAny])
+    def public_profile(self, request, pk=None):
+        user = self.get_object()
+        from orders.models import Order
+
+        completed_sales = Order.objects.filter(seller=user, status=Order.Status.COMPLETED).count()
+        profile = getattr(user, "profile", None)
+        avatar = profile.avatar.url if profile and profile.avatar else None
+        if avatar:
+            avatar = request.build_absolute_uri(avatar)
+        display_name = f"{user.first_name} {user.last_name}".strip() or "Choropia member"
+        return Response(
+            {
+                "id": user.pk,
+                "display_name": display_name,
+                "username": f"user-{user.pk}",
+                "avatar_url": avatar,
+                "verified": bool(profile and profile.seller_verified),
+                "bio": profile.bio if profile else "",
+                "joined_at": user.date_joined,
+                "completed_sales": completed_sales,
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="listings", permission_classes=[permissions.AllowAny])
+    def public_listings(self, request, pk=None):
+        from listings.models import Listing
+        from listings.serializers import ListingListSerializer
+
+        user = self.get_object()
+        queryset = Listing.objects.filter(owner=user).filter(Listing.public_visibility_filter()).select_related(
+            "owner", "owner__profile", "merchant", "category"
+        ).prefetch_related("photos")
+        page = self.paginate_queryset(queryset)
+        serializer = ListingListSerializer(
+            page if page is not None else queryset,
+            many=True,
+            context=self.get_serializer_context(),
+        )
+        return self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)
 
 
 class EmailOTPRequestView(APIView):

@@ -556,10 +556,11 @@ class DeliveryAndPayoutTests(DispatchBase):
         payment = Payment.objects.get(order=order)
         self.assertEqual(payment.status, Payment.Status.RELEASED)
 
-        # buyer paid 20,000 + 500. The seller: 20,000 less 5% commission (1,000) less their 500 half of delivery.
+        # buyer paid 20,000 + 500. The seller: 20,000 less the fee (6% of the first 50,000 for an unverified seller: 1,200)
+        # less their 500 half of delivery.
         seller_payout = payment.payout
         self.assertEqual((seller_payout.gross_amount, seller_payout.commission_amount, seller_payout.delivery_deduction, seller_payout.net_amount),
-                         (Decimal("20000.00"), Decimal("1000.00"), Decimal("500.00"), Decimal("18500.00")))
+                         (Decimal("20000.00"), Decimal("1200.00"), Decimal("500.00"), Decimal("18300.00")))
         # The driver: the whole 1,000 fee less 2.5% (25).
         driver_payout = payment.driver_payout
         self.assertEqual((driver_payout.gross_amount, driver_payout.commission_amount, driver_payout.net_amount),
@@ -594,7 +595,7 @@ class DeliveryAndPayoutTests(DispatchBase):
         delivery.refresh_from_db()
         services.complete_delivery(delivery.pk, self.d1.user, delivery.handover_code, JPEG, "image/jpeg")
         payment.refresh_from_db()
-        self.assertEqual(payment.payout.net_amount, Decimal("18000.00"))  # 20,000 - 1,000 commission - 1,000 delivery
+        self.assertEqual(payment.payout.net_amount, Decimal("17800.00"))  # 20,000 - 1,200 fee - 1,000 delivery
         self.assertEqual(payment.driver_payout.net_amount, Decimal("975.00"))
 
     def test_a_driver_payout_waits_for_a_bank_account(self):

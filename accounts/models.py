@@ -58,9 +58,18 @@ class Profile(TimeStampedModel):
     theme_preference = models.CharField(
         max_length=10, choices=Theme.choices, default=Theme.LIGHT
     )
+    # Set by staff (staff panel → People) after checking who the seller is. Verified sellers pay a lower fee on the
+    # first two bands (payments/fees.py). Offers snapshot this at creation, so un-verifying never changes a live offer.
+    seller_verified = models.BooleanField(default=False)
+    seller_verified_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Profile<{self.user.email}>"
+
+
+def is_verified_seller(user) -> bool:
+    profile = getattr(user, "profile", None)
+    return bool(profile and profile.seller_verified)
 
 
 class SocialAccount(TimeStampedModel):
@@ -106,3 +115,18 @@ class EmailOTP(TimeStampedModel):
 
     class Meta:
         indexes = [models.Index(fields=["user", "purpose", "-created_at"])]
+
+
+class TransactionPin(models.Model):
+    """The PIN a person enters to approve money actions (creating an escrow offer). Only a password-hasher hash is
+    stored; the raw PIN is never saved or logged. See accounts/pin.py for the rules."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="transaction_pin")
+    pin_hash = models.CharField(max_length=128)
+    failed_attempts = models.PositiveSmallIntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"TransactionPin<{self.user_id}>"

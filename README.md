@@ -33,6 +33,19 @@ these need new backend endpoints, not just frontend work — even though Stitch 
 them: banking/wallet dashboard, P2P send money, linked-accounts settings, reels, and Google SSO
 login.
 
+## Chat privacy
+
+Chat message bodies are encrypted at rest in the database with Fernet using
+`CHAT_MESSAGE_ENCRYPTION_KEYS`. The server decrypts them for API responses, so this is **not
+end-to-end encryption** and server operators can read message content. Attachments are not
+covered by this setting. Do not treat chat as a confidential channel.
+
+Set the same key on every Django process that reads or writes chat messages. Keep the key outside
+the repository and backed up securely; without it, encrypted messages cannot be read. To rotate
+keys, add the new Fernet key first in the comma-separated setting, keep old keys after it, run
+`python manage.py rotate_chat_message_keys --apply --settings=config.settings.prod`, verify the
+messages, then remove the old key.
+
 ## Stack
 
 - Python 3.12, Django 5, Django REST Framework

@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .google import GoogleLoginView
+from .pin_views import PinResetCodeView, TransactionPinView
 from .two_factor import (
     TwoFactorConfirmView,
     TwoFactorDisableView,
@@ -45,4 +46,6 @@ urlpatterns = [
     path("auth/email-otp/confirm/", EmailOTPConfirmView.as_view(), name="email_otp_confirm"),
     path("users/me/", MeView.as_view(), name="me"),
     path("users/me/avatar/", AvatarView.as_view(), name="me-avatar"),
+    path("account/pin/", TransactionPinView.as_view(), name="account-pin"),
+    path("account/pin/reset-code/", PinResetCodeView.as_view(), name="account-pin-reset-code"),
 ] + router.urls

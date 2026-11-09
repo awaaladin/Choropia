@@ -75,6 +75,7 @@ LOCAL_APPS = [
     "chat",
     "orders",
     "payments",
+    "offers",
     "delivery",
     "reviews",
     "notifications",
@@ -205,6 +206,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Sign in with Google: the OAuth *web* client id the app/web request ID tokens for. Blank = the
 # /auth/google/ endpoint answers 503 and the clients hide the button.
 GOOGLE_OAUTH_CLIENT_ID = env("GOOGLE_OAUTH_CLIENT_ID", "")
+SOLD_LISTING_DURATIONS = (1, 3, 7, 14, 30)
+SOLD_LISTING_DEFAULT_DAYS = env_int("SOLD_LISTING_DEFAULT_DAYS", 3)
 
 # --- DRF ------------------------------------------------------------------
 REST_FRAMEWORK = {
@@ -235,6 +238,8 @@ REST_FRAMEWORK = {
         "chat-send": "60/min",
         "comments": "30/min",
         "social": "120/hour",
+        "guest-likes": "30/hour",
+        "guest-like-token": "20/hour",
         "orders": "30/hour",
         "reviews": "30/hour",
         "reports": "20/hour",
@@ -247,6 +252,8 @@ REST_FRAMEWORK = {
         "avatar": "30/hour",
         "dispatch-documents": "20/hour",
         "handover-code": "30/hour",
+        "pin": "20/hour",
+        "offers": "60/hour",
     },
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
@@ -318,26 +325,25 @@ CHOROPIA_SITE_URL = env("CHOROPIA_SITE_URL", "http://localhost:5173")
 # When an order's escrow is released the seller is paid by bank transfer (Paystack Transfers) and
 # Choropia keeps this commission. See payments/payouts.py.
 #
-# Tiered, so cheap items stay affordable and Paystack's flat fee never eats the margin:
-#   price below 10,000 pays 6%; up to and including 100,000 pays 5%; above that pays 4%.
-# COMMISSION_TIERS is "bound=percent,..." where a price BELOW the bound pays that percent; a price at or
-# above every bound pays PLATFORM_COMMISSION_PERCENT. For one flat rate, set COMMISSION_TIERS="" and
-# PLATFORM_COMMISSION_PERCENT=5.
-PLATFORM_COMMISSION_PERCENT = Decimal(env("PLATFORM_COMMISSION_PERCENT", "4"))
+# The fee is banded per slice of the price, lower for sellers staff have verified; the bands live in
+# payments/fees.py (one module, unit-tested). Only the minimum is a setting. Integer kobo.
+MIN_FEE_KOBO = env_int("MIN_FEE_KOBO", 20_000)  # ₦200
 
-
-def _parse_commission_tiers(raw):
-    tiers = []
-    for part in (p.strip() for p in raw.split(",")):
-        if part:
-            bound, _, percent = part.partition("=")
-            tiers.append((Decimal(bound), Decimal(percent)))
-    return sorted(tiers)
-
-
-COMMISSION_TIERS = _parse_commission_tiers(env("COMMISSION_TIERS", "10000=6,100000.01=5"))
-# Kill switch: with this off, releases still create payout records but no transfer is sent.
-PAYOUTS_ENABLED = env_bool("PAYOUTS_ENABLED", True)
+# --- Escrow offers in chat (see the offers app) -------------------------------------------------
+OFFER_TTL_HOURS = env_int("OFFER_TTL_HOURS", 24)
+# A checkout opened from an offer that hasn't been paid after this long frees the offer again (the seller can then
+# cancel or replace it). Paying the old link later still works if the offer is open, or is refunded if it isn't.
+OFFER_CHECKOUT_TIMEOUT_MINUTES = env_int("OFFER_CHECKOUT_TIMEOUT_MINUTES", 30)
+# An offer may be at most this percent of the listing price (100 = a seller can lower a price, never raise it).
+OFFER_MAX_PERCENT_OF_LISTING = env_int("OFFER_MAX_PERCENT_OF_LISTING", 100)
+# Transaction PIN: digits, and a lock after too many wrong tries.
+TRANSACTION_PIN_LENGTH = 4
+PIN_MAX_ATTEMPTS = env_int("PIN_MAX_ATTEMPTS", 5)
+PIN_LOCK_MINUTES = env_int("PIN_LOCK_MINUTES", 15)
+# Which PayoutService pays sellers and drivers (payments/payout_service.py). Off (the default) = ManualPayoutService:
+# releases create payout records in the staff panel queue and staff pay them by hand. On = Paystack Transfers, only
+# once Paystack has enabled Transfers on the account (Registered Business / KYC).
+PAYOUTS_ENABLED = env_bool("PAYOUTS_ENABLED", False)
 # A single payout above this (NGN, after commission) is held for a person to approve.
 PAYOUT_MAX_NGN = Decimal(env("PAYOUT_MAX_NGN", "2000000"))
 
@@ -353,6 +359,7 @@ DISPATCH_NUDGE_HOURS = env_int("DISPATCH_NUDGE_HOURS", 2)
 # without it the documents cannot be read again. Multiple keys (comma separated) allow rotation: the first
 # encrypts, all can decrypt.
 DOCUMENT_ENCRYPTION_KEYS = env("DOCUMENT_ENCRYPTION_KEY", "")
+CHAT_MESSAGE_ENCRYPTION_KEYS = env("CHAT_MESSAGE_ENCRYPTION_KEYS", "")
 DOCUMENT_MAX_BYTES = env_int("DOCUMENT_MAX_BYTES", 3 * 1024 * 1024)
 PROOF_PHOTO_MAX_BYTES = env_int("PROOF_PHOTO_MAX_BYTES", 3 * 1024 * 1024)
 HANDOVER_MAX_ATTEMPTS = env_int("HANDOVER_MAX_ATTEMPTS", 5)

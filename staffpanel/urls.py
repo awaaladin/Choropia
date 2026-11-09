@@ -32,6 +32,7 @@ urlpatterns = [
     path("people/", views.user_list, name="user_list"),
     path("people/<int:pk>/", views.user_detail, name="user_detail"),
     path("people/<int:pk>/toggle/", views.user_toggle, name="user_toggle"),
+    path("people/<int:pk>/verify-seller/", views.user_verify_seller, name="user_verify_seller"),
     path("listings/", views.listing_list, name="listing_list"),
     path("listings/<int:pk>/toggle/", views.listing_toggle, name="listing_toggle"),
     path("audit/", views.audit_log, name="audit"),

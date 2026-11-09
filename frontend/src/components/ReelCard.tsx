@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { errorMessage, useEnsureLogin } from "@/lib/actions";
 import { api, rows } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import type { Reel } from "@/lib/types";
+import type { Listing, Reel } from "@/lib/types";
 import { naira, timeAgo } from "@/lib/utils";
 import { Link } from "./AppLink";
 import { FollowButton } from "./FollowButton";
@@ -150,6 +150,33 @@ export function ReelCard({ reel }: { reel: Reel }) {
       </div>
 
       <ReelComments reelId={reel.id} open={commentsOpen} onClose={() => setCommentsOpen(false)} />
+    </div>
+  );
+}
+
+export function ListingReelCard({ listing }: { listing: Listing }) {
+  const image = listing.cover_photo ?? listing.photos?.[0]?.image;
+
+  return (
+    <div className="relative h-full w-full shrink-0 snap-start overflow-hidden bg-foreground md:rounded-xl">
+      {image ? (
+        <img src={image} alt={listing.title} className="h-full w-full object-cover" />
+      ) : (
+        <div className="grid h-full place-items-center bg-muted text-sm text-muted-foreground">Listing photo unavailable</div>
+      )}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/90 via-transparent to-foreground/20" />
+      <div className="absolute inset-x-4 bottom-6 flex flex-col gap-3 text-background md:right-20">
+        <p className="w-fit rounded-full bg-background/20 px-3 py-1 text-xs font-medium backdrop-blur-sm">Product preview</p>
+        <p className="line-clamp-2 text-lg font-semibold">{listing.title}</p>
+        <p className="text-sm text-background/80">{listing.seller_name}</p>
+        <Link
+          to={`/listings/${listing.id}`}
+          className="flex w-fit items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-semibold text-foreground"
+        >
+          <ShoppingBag size={16} />
+          {naira(listing.price)} · View listing
+        </Link>
+      </div>
     </div>
   );
 }

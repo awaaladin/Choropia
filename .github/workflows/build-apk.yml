@@ -2,8 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [master]
-    paths: ["android/**", ".github/workflows/build-apk.yml"]
+    branches: [master, feature/choropia-complete]
   workflow_dispatch:
 
 concurrency:
@@ -36,7 +35,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew --no-daemon assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
