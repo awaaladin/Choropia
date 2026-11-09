@@ -78,28 +78,32 @@ class MyListingsViewModel(private val repo: ChoropiaRepository) : ViewModel() {
                 onDone(e.message ?: "Could not delete that listing")
             }
         }
+    }
 
-        fun markSold(id: Int, durationDays: Int, onDone: (String) -> Unit) {
-            updateListing(onDone) { repo.markSold(id, durationDays) to "Marked sold for $durationDays days" }
+    fun markSold(id: Int, durationDays: Int, onDone: (String) -> Unit) {
+        updateListing(onDone) { repo.markSold(id, durationDays) to "Marked sold for $durationDays days" }
+    }
+
+    fun extendVisibility(id: Int, durationDays: Int, onDone: (String) -> Unit) {
+        updateListing(onDone) {
+            repo.extendMarketVisibility(id, durationDays) to "Visibility extended for $durationDays days"
         }
+    }
 
-        fun extendVisibility(id: Int, durationDays: Int, onDone: (String) -> Unit) {
-            updateListing(onDone) { repo.extendMarketVisibility(id, durationDays) to "Visibility extended for $durationDays days" }
-        }
+    fun relist(id: Int, onDone: (String) -> Unit) {
+        updateListing(onDone) { repo.relist(id) to "Listing is back on the market" }
+    }
 
-        fun relist(id: Int, onDone: (String) -> Unit) {
-            updateListing(onDone) { repo.relist(id) to "Listing is back on the market" }
-        }
-
-        private fun updateListing(onDone: (String) -> Unit, action: suspend () -> Pair<Listing, String>) {
-            viewModelScope.launch {
-                try {
-                    val (updated, message) = action()
-                    _state.update { state -> state.copy(items = state.items.map { if (it.id == updated.id) updated else it }) }
-                    onDone(message)
-                } catch (e: ApiException) {
-                    onDone(e.message ?: "Could not update that listing")
+    private fun updateListing(onDone: (String) -> Unit, action: suspend () -> Pair<Listing, String>) {
+        viewModelScope.launch {
+            try {
+                val (updated, message) = action()
+                _state.update { state ->
+                    state.copy(items = state.items.map { if (it.id == updated.id) updated else it })
                 }
+                onDone(message)
+            } catch (e: ApiException) {
+                onDone(e.message ?: "Could not update that listing")
             }
         }
     }
