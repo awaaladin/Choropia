@@ -147,3 +147,31 @@ class DirectThreadTests(TestCase):
         with override_settings(CHAT_MESSAGE_ENCRYPTION_KEYS=new_key):
             message.refresh_from_db()
             self.assertEqual(message.body, "rotate me")
+
+    def test_additional_key_decrypts_messages_without_changing_primary_encryption_key(self):
+        conversation, _ = Conversation.get_or_create_direct_thread(self.buyer, self.seller)
+        primary_key = Fernet.generate_key().decode("ascii")
+        additional_key = Fernet.generate_key().decode("ascii")
+        with override_settings(CHAT_MESSAGE_ENCRYPTION_KEYS=additional_key):
+            message = Message.objects.create(conversation=conversation, sender=self.buyer, body="secondary key")
+
+        with override_settings(
+            CHAT_MESSAGE_ENCRYPTION_KEYS=primary_key,
+            CHAT_MESSAGE_ENCRYPTION_KEYS_ADDITIONAL=additional_key,
+        ):
+            message.refresh_from_db()
+            self.assertEqual(message.body, "secondary key")
+            primary_message = Message.objects.create(
+                conversation=conversation, sender=self.buyer, body="primary key"
+            )
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"SELECT body FROM {connection.ops.quote_name(Message._meta.db_table)} WHERE id = %s",
+                [primary_message.pk],
+            )
+            primary_ciphertext = cursor.fetchone()[0]
+        self.assertEqual(
+            Fernet(primary_key.encode("ascii")).decrypt(primary_ciphertext[len("fernet:v1:") :].encode("ascii")),
+            b"primary key",
+        )
