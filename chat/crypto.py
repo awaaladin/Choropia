@@ -10,7 +10,17 @@ class MessageDecryptionError(Exception):
 
 
 def _fernet():
-    keys = [key.strip() for key in settings.CHAT_MESSAGE_ENCRYPTION_KEYS.split(",") if key.strip()]
+    keys = list(
+        dict.fromkeys(
+            key.strip()
+            for configured_keys in (
+                settings.CHAT_MESSAGE_ENCRYPTION_KEYS,
+                settings.CHAT_MESSAGE_ENCRYPTION_KEYS_ADDITIONAL,
+            )
+            for key in configured_keys.split(",")
+            if key.strip()
+        )
+    )
     if not keys:
         raise ImproperlyConfigured(
             "CHAT_MESSAGE_ENCRYPTION_KEYS must be configured before chat messages can be stored."
