@@ -106,29 +106,34 @@ export function LandingPage() {
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {listings.isPending && Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="aspect-[4/3] w-full" />)}
           {featured.map((item, index) => (
-            <Link key={item.id} to={`/listings/${item.id}`} className="group">
-              <div className="relative overflow-hidden rounded-md">
-                {item.cover_photo ? (
-                  <img
-                    src={item.cover_photo}
-                    alt={item.title}
-                    loading="lazy"
-                    className="aspect-[4/3] w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]"
-                  />
-                ) : (
-                  <div className="grid aspect-[4/3] w-full place-items-center bg-accent text-xs text-muted-foreground">No photo</div>
-                )}
-                <span className="absolute left-3 top-3 rounded-sm bg-panel px-2 py-1 text-xs backdrop-blur-md">0{index + 1}</span>
-              </div>
-              <div className="mt-4 flex items-start justify-between gap-3">
-                <h3 className="text-base font-semibold">{item.title}</h3>
-                <ArrowUpRight size={18} className="shrink-0 text-primary" />
-              </div>
+            <article key={item.id} className="group">
+              <Link to={`/listings/${item.id}`} className="block">
+                <div className="relative overflow-hidden rounded-md">
+                  {item.cover_photo ? (
+                    <img
+                      src={item.cover_photo}
+                      alt={item.title}
+                      loading="lazy"
+                      className="aspect-[4/3] w-full object-cover transition-transform duration-700 group-hover:scale-[1.035]"
+                    />
+                  ) : (
+                    <div className="grid aspect-[4/3] w-full place-items-center bg-accent text-xs text-muted-foreground">No photo</div>
+                  )}
+                  <span className="absolute left-3 top-3 rounded-sm bg-panel px-2 py-1 text-xs backdrop-blur-md">0{index + 1}</span>
+                </div>
+                <div className="mt-4 flex items-start justify-between gap-3">
+                  <h3 className="text-base font-semibold">{item.title}</h3>
+                  <ArrowUpRight size={18} className="shrink-0 text-primary" />
+                </div>
+                <p className="mt-3 text-sm font-semibold text-primary">{naira(item.price)}</p>
+              </Link>
               <p className="mt-2 text-xs text-muted-foreground">
-                {item.seller_name} · {item.location || "Uyo"}
+                <Link to={item.merchant ? `/merchants/${item.merchant}` : `/users/${item.seller_id}`} className="hover:text-foreground">
+                  {item.seller_name}
+                </Link>
+                {" · "}{item.location || "Uyo"}
               </p>
-              <p className="mt-3 text-sm font-semibold text-primary">{naira(item.price)}</p>
-            </Link>
+            </article>
           ))}
           {listings.isSuccess && featured.length === 0 && (
             <p className="col-span-full text-sm text-muted-foreground">No listings yet — be the first to post one.</p>

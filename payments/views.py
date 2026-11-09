@@ -146,7 +146,12 @@ class WalletSummaryView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        from accounts.models import is_verified_seller
+
+        from . import fees
+
         user = request.user
+        verified = is_verified_seller(user)
 
         def total(**filters):
             return Payment.objects.filter(**filters).aggregate(total=Sum("amount"))["total"] or Decimal("0")
@@ -154,11 +159,10 @@ class WalletSummaryView(APIView):
         return Response(
             {
                 "currency": "NGN",
-                "commission_percent": str(settings.PLATFORM_COMMISSION_PERCENT),
-                "commission_tiers": [
-                    *({"below": str(below), "percent": str(percent)} for below, percent in settings.COMMISSION_TIERS),
-                    {"below": None, "percent": str(settings.PLATFORM_COMMISSION_PERCENT)},
-                ],
+                # The fee bands that apply to this seller (each slice of a price at its own rate; see payments/fees.py).
+                "seller_verified": verified,
+                "min_fee_kobo": fees.min_fee_kobo(),
+                "fee_bands": fees.bands_table(verified),
                 "selling": {
                     "released_total": str(total(order__seller=user, status=Payment.Status.RELEASED)),
                     "held_total": str(total(order__seller=user, status=Payment.Status.PAID_HELD)),

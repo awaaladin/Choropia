@@ -167,8 +167,8 @@ class OneItemSoldOnceTests(TestCase):
         self.assertEqual(second_payment.status, Payment.Status.REFUNDED)
 
 
-@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYMENT_PROVIDER="paystack", PAYOUTS_ENABLED=True, COMMISSION_TIERS=[],
-                   PLATFORM_COMMISSION_PERCENT=Decimal("5"), PAYOUT_MAX_NGN=Decimal("2000000"), CHOROPIA_SITE_URL="https://choropia.test")
+@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYMENT_PROVIDER="paystack", PAYOUTS_ENABLED=True,
+                   PAYOUT_MAX_NGN=Decimal("2000000"), CHOROPIA_SITE_URL="https://choropia.test")
 class BuyerAndSellerStepsTests(TestCase):
     def setUp(self):
         self.listing = make_listing("20000.00")
@@ -192,7 +192,7 @@ class BuyerAndSellerStepsTests(TestCase):
         self.assertEqual(self.order.status, OrderStatus.COMPLETED)
         self.assertEqual(Payment.objects.get(pk=self.payment.pk).status, Payment.Status.RELEASED)
         ps.initiate_transfer.assert_called_once()
-        self.assertEqual(ps.initiate_transfer.call_args.kwargs["amount"], Decimal("19000.00"))  # 95% of 20,000
+        self.assertEqual(ps.initiate_transfer.call_args.kwargs["amount"], Decimal("18800.00"))  # 20,000 less the 6% fee (unverified seller)
 
     def test_the_skipped_courier_stages_are_recorded_in_the_history(self):
         self.confirm()
@@ -268,7 +268,7 @@ class BuyerAndSellerStepsTests(TestCase):
 
     def test_the_seller_sees_the_commission_the_buyer_does_not(self):
         self.confirm()
-        self.assertEqual(client_for(self.seller).get(self.url).json()["payout"]["commission_amount"], "1000.00")
+        self.assertEqual(client_for(self.seller).get(self.url).json()["payout"]["commission_amount"], "1200.00")
         self.assertIsNone(client_for(self.buyer).get(self.url).json()["payout"])
 
 

@@ -1,8 +1,13 @@
-from django.db.models import F
+from datetime import timedelta
+
+from django.conf import settings
+from django.db.models import F, Q
 from rest_framework.exceptions import PermissionDenied
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from django.utils import timezone
 
 from common.geo import haversine_km
 from common.permissions import IsOwnerOrReadOnly
@@ -49,9 +54,17 @@ class ListingViewSet(viewsets.ModelViewSet):
                 # Owners see their own sold listings too (just not ones they removed).
                 qs = qs.exclude(status=Listing.Status.REMOVED)
             else:
-                qs = qs.filter(status=Listing.Status.ACTIVE)
+                qs = qs.filter(Listing.public_visibility_filter())
         else:
-            qs = qs.exclude(status=Listing.Status.REMOVED)  # taken down by the owner: gone for everyone
+            visible = Listing.public_visibility_filter()
+            own = (Q(owner=self.request.user) & ~Q(status=Listing.Status.REMOVED)) \
+                if self.request.user.is_authenticated else Q(pk__in=[])
+            chats = (
+                (Q(conversations__user_low=self.request.user) | Q(conversations__user_high=self.request.user))
+                & ~Q(status=Listing.Status.REMOVED)
+            ) \
+                if self.request.user.is_authenticated else Q(pk__in=[])
+            qs = qs.filter(visible | own | chats).distinct()
         return qs
 
     def get_serializer_class(self):
@@ -114,7 +127,47 @@ class ListingViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated, IsOwnerOrReadOnly])
     def mark_sold(self, request, pk=None):
         listing = self.get_object()
+        duration_days = request.data.get("duration_days", settings.SOLD_LISTING_DEFAULT_DAYS)
+        if isinstance(duration_days, bool):
+            raise ValidationError({"duration_days": "Choose a valid sold duration."})
+        try:
+            duration_days = int(duration_days)
+        except (TypeError, ValueError):
+            raise ValidationError({"duration_days": "Choose a valid sold duration."})
+        if duration_days not in settings.SOLD_LISTING_DURATIONS:
+            raise ValidationError({"duration_days": "Choose 1, 3, 7, 14 or 30 days."})
+        now = timezone.now()
         listing.status = Listing.Status.SOLD
         listing.quantity = 0  # the seller is saying there are none left
-        listing.save(update_fields=["status", "quantity"])
+        listing.sold_at = now
+        listing.market_visible_until = now + timedelta(days=duration_days)
+        listing.save(update_fields=["status", "quantity", "sold_at", "market_visible_until", "updated_at"])
+        return Response(ListingSerializer(listing, context={"request": request}).data)
+
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated, IsOwnerOrReadOnly])
+    def extend_market_visibility(self, request, pk=None):
+        listing = self.get_object()
+        duration_days = request.data.get("duration_days")
+        if isinstance(duration_days, bool):
+            raise ValidationError({"duration_days": "Choose a valid sold duration."})
+        try:
+            duration_days = int(duration_days)
+        except (TypeError, ValueError):
+            raise ValidationError({"duration_days": "Choose a valid sold duration."})
+        if duration_days not in settings.SOLD_LISTING_DURATIONS:
+            raise ValidationError({"duration_days": "Choose 1, 3, 7, 14 or 30 days."})
+        if listing.status != Listing.Status.SOLD:
+            raise ValidationError({"status": "Only sold listings can be extended."})
+        listing.market_visible_until = timezone.now() + timedelta(days=duration_days)
+        listing.save(update_fields=["market_visible_until", "updated_at"])
+        return Response(ListingSerializer(listing, context={"request": request}).data)
+
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated, IsOwnerOrReadOnly])
+    def relist(self, request, pk=None):
+        listing = self.get_object()
+        listing.status = Listing.Status.ACTIVE
+        listing.quantity = max(listing.quantity, 1)
+        listing.sold_at = None
+        listing.market_visible_until = None
+        listing.save(update_fields=["status", "quantity", "sold_at", "market_visible_until", "updated_at"])
         return Response(ListingSerializer(listing, context={"request": request}).data)

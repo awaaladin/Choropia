@@ -48,6 +48,19 @@ class Like(TimeStampedModel):
         return f"{self.user} likes {self.listing_id}"
 
 
+class GuestLike(TimeStampedModel):
+    guest_id = models.UUIDField()
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="guest_likes")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["guest_id", "listing"], name="unique_guest_listing_like")
+        ]
+
+    def __str__(self):
+        return f"Guest {self.guest_id} likes {self.listing_id}"
+
+
 class Comment(TimeStampedModel):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments")

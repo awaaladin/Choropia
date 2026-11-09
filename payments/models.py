@@ -137,3 +137,47 @@ class Payout(TimeStampedModel):
 
     def __str__(self):
         return f"Payout<{self.payment_id}> {self.status} NGN {self.net_amount}"
+
+
+class LedgerEntry(models.Model):
+    """Append-only record of every movement of escrow money, in integer kobo. Positive = money into Choropia's escrow
+    balance, negative = money allocated or sent out of it. For a settled order, its entries sum to zero; whatever is left
+    over is visible as an UNALLOCATED entry for staff to settle (e.g. a delivery fee with no driver).
+
+    `key` makes every write idempotent: a webhook or a job that runs twice can never record the same movement twice."""
+
+    class Kind(models.TextChoices):
+        HELD = "held", "Buyer's payment held in escrow"
+        RECEIVED_FOR_REFUND = "received_for_refund", "Payment received that must be refunded"
+        SELLER_PAYABLE = "seller_payable", "Released: owed to the seller"
+        PLATFORM_FEE = "platform_fee", "Released: Choropia's fee"
+        DRIVER_PAYABLE = "driver_payable", "Released: owed to the driver"
+        DRIVER_FEE = "driver_fee", "Released: Choropia's cut of the delivery fee"
+        UNALLOCATED = "unallocated", "Released: not allocated (staff to settle)"
+        REFUNDED = "refunded", "Refunded to the buyer"
+        PAYOUT_SENT = "payout_sent", "Payout paid out (bank transfer or by hand)"
+
+    key = models.CharField(max_length=120, unique=True)
+    kind = models.CharField(max_length=24, choices=Kind.choices)
+    amount_kobo = models.BigIntegerField()
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="ledger_entries", null=True, blank=True)
+    payment = models.ForeignKey(Payment, on_delete=models.PROTECT, related_name="ledger_entries", null=True, blank=True)
+    payout = models.ForeignKey("Payout", on_delete=models.PROTECT, related_name="ledger_entries", null=True, blank=True)
+    reference = models.CharField(max_length=100, blank=True)
+    note = models.CharField(max_length=300, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        verbose_name_plural = "ledger entries"
+
+    def __str__(self):
+        return f"{self.kind} {self.amount_kobo}k (order {self.order_id})"
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            raise ValueError("Ledger entries are append-only.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValueError("Ledger entries are append-only.")

@@ -3,6 +3,7 @@ from django.urls import path
 from .payout_views import (
     BanksView,
     CommissionPreviewView,
+    FeePreviewView,
     MyPayoutsView,
     PayoutAccountView,
     RunScheduledJobsView,
@@ -22,6 +23,7 @@ urlpatterns = [
     path("payments/webhook/gaxtron/", GaxtronWebhookView.as_view(), name="payment-webhook"),
     path("payments/webhook/paystack/", PaystackWebhookView.as_view(), name="payment-webhook-paystack"),
     path("payouts/preview/", CommissionPreviewView.as_view(), name="payout-preview"),
+    path("fees/preview/", FeePreviewView.as_view(), name="fee-preview"),
     path("payouts/banks/", BanksView.as_view(), name="payout-banks"),
     path("payouts/account/", PayoutAccountView.as_view(), name="payout-account"),
     path("payouts/", MyPayoutsView.as_view(), name="payouts"),

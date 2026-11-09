@@ -21,6 +21,17 @@ export interface User {
   profile?: Profile;
 }
 
+export interface PublicProfile {
+  id: number;
+  display_name: string;
+  username: string;
+  avatar_url: string | null;
+  verified: boolean;
+  bio: string;
+  joined_at: string;
+  completed_sales: number;
+}
+
 export function displayName(user?: Pick<User, "first_name" | "last_name" | "email"> | null) {
   if (!user) return "";
   return `${user.first_name} ${user.last_name}`.trim() || user.email;
@@ -47,6 +58,8 @@ export interface Listing {
   /** "uniuyo" when the listing is on the UniUyo campus market. */
   campus?: string;
   status?: "active" | "sold" | "removed";
+  sold_at?: string | null;
+  market_visible_until?: string | null;
   /** Set when the seller chose to show a price change: the old price, to be shown crossed out. */
   previous_price?: string | null;
   condition: string;
@@ -68,7 +81,13 @@ export interface Listing {
 export interface Comment {
   id: number;
   author_id: number;
-  author_name?: string;
+  author: {
+    id: number;
+    display_name: string;
+    username: string;
+    avatar_url: string | null;
+    verified: boolean;
+  };
   body: string;
   created_at: string;
 }
@@ -76,6 +95,15 @@ export interface Comment {
 export interface Like {
   id: number;
   listing: number;
+}
+
+export interface GuestLikeToken {
+  token: string;
+}
+
+export interface GuestLikeState {
+  listing: number;
+  liked: boolean;
 }
 
 export interface Merchant {
@@ -121,14 +149,67 @@ export interface Message {
   conversation: number;
   sender_id: number;
   body: string;
+  type?: "text" | "offer" | "listing_ref";
+  event?: string;
+  offer?: ChatOffer | null;
+  listing?: number | null;
+  listing_snapshot?: {
+    title?: string;
+    thumbnail?: string | null;
+    price_kobo?: number;
+    status?: string;
+  };
+  listing_status?: "active" | "sold" | "removed";
   created_at: string;
+}
+
+export type OfferDeliveryMethod = "rider" | "seller_delivers" | "meetup";
+export type ChatOfferStatus =
+  | "pending"
+  | "payment_processing"
+  | "paid"
+  | "declined"
+  | "cancelled"
+  | "expired"
+  | "superseded";
+
+export interface ChatOffer {
+  id: string;
+  reference: string;
+  conversation: number;
+  listing: { id: number; title: string; photo: string | null };
+  seller: number;
+  buyer: number;
+  viewer_role: "seller" | "buyer" | null;
+  amount_kobo: number;
+  listing_price_kobo: number;
+  fee_kobo?: number;
+  seller_net_kobo?: number;
+  seller_verified_snapshot?: boolean;
+  allowed_delivery_methods: OfferDeliveryMethod[];
+  note: string;
+  status: ChatOfferStatus;
+  expires_at: string;
+  delivery_method: OfferDeliveryMethod | "";
+  delivery_fee_kobo: number;
+  total_kobo: number;
+  order_id: number | null;
+  created_at: string;
+  updated_at: string;
+  paid_at: string | null;
+  closed_at: string | null;
+  server_now: string;
 }
 
 export interface Conversation {
   id: number;
-  listing: number;
+  listing: number | null;
   listing_title?: string;
+  buyer?: number;
+  seller?: number;
+  orders?: number[];
   other_party_name?: string | null;
+  other_party_id?: number | null;
   other_party_avatar?: string | null;
   last_message: Message | null;
 }

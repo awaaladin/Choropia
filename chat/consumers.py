@@ -37,9 +37,29 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def chat_message(self, event):
         await self.send_json(event["message"])
 
+    async def offer_updated(self, event):
+        """An offer in this conversation changed. Sent as its chat message (same id) so a client replaces the card in
+        place; serialized for this connection's own user, so the buyer's copy never carries the fee."""
+        data = await self._offer_message(self.scope["user"], event["message_id"])
+        if data is not None:
+            await self.send_json({**data, "event": "offer.updated"})
+
+    @database_sync_to_async
+    def _offer_message(self, user, message_id):
+        message = (
+            Message.objects.filter(pk=message_id, conversation_id=self.conversation_id)
+            .select_related("offer__listing", "sender")
+            .first()
+        )
+        if message is None:
+            return None
+        return MessageSerializer(message, context={"viewer": user}).data
+
     @database_sync_to_async
     def _is_participant(self, user, conversation_id):
-        return Conversation.objects.filter(Q(buyer=user) | Q(seller=user), id=conversation_id).exists()
+        return Conversation.objects.filter(
+            Q(user_low=user) | Q(user_high=user), id=conversation_id
+        ).exists()
 
     @database_sync_to_async
     def _create_message(self, user, conversation_id, body):

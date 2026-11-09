@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
-import { api, ApiError, rows } from "./api";
+import { api, ApiError, isAuthenticated, rows } from "./api";
 import { useAuth } from "./auth";
 
 /** Sends logged-out users to /login and back again; returns true when the action may proceed. */
@@ -53,7 +53,10 @@ export function useListingActions() {
   /** Likes or unlikes; throws on failure so the caller can roll back its optimistic state. */
   const setLiked = useCallback(
     async (listingId: number, liked: boolean) => {
-      if (liked) {
+      if (!isAuthenticated()) {
+        if (liked) await api.likeListing(listingId);
+        else await api.unlikeGuestListing(listingId);
+      } else if (liked) {
         await api.likeListing(listingId);
       } else {
         const mine = rows(await api.listMyLikes());

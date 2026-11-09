@@ -1,5 +1,11 @@
 package com.choropia.app.ui.screens
 
+import android.media.MediaPlayer
+import android.net.Uri
+import android.widget.VideoView
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.filled.Bookmark
@@ -27,11 +33,22 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.PlayCircleOutline
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Icon
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,10 +59,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImage
 import com.choropia.app.data.model.Listing
+import com.choropia.app.data.model.Reel
 import com.choropia.app.data.network.ApiException
 import com.choropia.app.data.repository.ChoropiaRepository
 import com.choropia.app.data.repository.ListingQuery
@@ -67,10 +86,15 @@ import kotlinx.coroutines.launch
 
 data class ReelsState(
     val items: List<Listing> = emptyList(),
+    val reels: List<Reel> = emptyList(),
     val loading: Boolean = true,
     val error: String? = null,
     val next: String? = null,
+    val reelsNext: String? = null,
     val loadingMore: Boolean = false,
+    val uploading: Boolean = false,
+    val uploadError: String? = null,
+    val ownedListings: List<Listing> = emptyList(),
 )
 
 class ReelsViewModel(private val repo: ChoropiaRepository, private val session: Session) : ViewModel() {
@@ -85,10 +109,15 @@ class ReelsViewModel(private val repo: ChoropiaRepository, private val session: 
         viewModelScope.launch {
             _state.update { it.copy(loading = true, error = null) }
             try {
-                val page = repo.listings(ListingQuery(ordering = "-created_at"))
-                // Reels are visual: surface listings that have a photo first.
-                val sorted = page.items.sortedByDescending { it.cover_photo != null }
-                _state.update { it.copy(items = sorted, next = page.next, loading = false) }
+                val reelPage = repo.reels()
+                if (reelPage.items.isNotEmpty()) {
+                    _state.update { it.copy(reels = reelPage.items, reelsNext = reelPage.next, items = emptyList(), next = null, loading = false) }
+                } else {
+                    val page = repo.listings(ListingQuery(ordering = "-created_at"))
+                    val visualListings = page.items.filter { it.cover_photo != null || it.photos.isNotEmpty() }
+                        .sortedByDescending { it.cover_photo != null }
+                    _state.update { it.copy(reels = emptyList(), reelsNext = null, items = visualListings, next = page.next, loading = false) }
+                }
             } catch (e: ApiException) {
                 _state.update { it.copy(loading = false, error = e.message) }
             }
@@ -97,18 +126,55 @@ class ReelsViewModel(private val repo: ChoropiaRepository, private val session: 
 
     fun loadMore() {
         val s = _state.value
-        val next = s.next ?: return
         if (s.loadingMore) return
+        if (s.reels.isNotEmpty() && s.reelsNext == null) return
+        if (s.reels.isEmpty() && s.next == null) return
         viewModelScope.launch {
             _state.update { it.copy(loadingMore = true) }
             try {
-                val page = repo.listingsPage(next)
-                _state.update { cur ->
-                    val known = cur.items.map { it.id }.toSet()
-                    cur.copy(items = cur.items + page.items.filter { it.id !in known }, next = page.next, loadingMore = false)
+                if (s.reels.isNotEmpty()) {
+                    val next = s.reelsNext ?: return@launch
+                    val page = repo.reelsPage(next)
+                    _state.update { cur ->
+                        val known = cur.reels.map { it.id }.toSet()
+                        cur.copy(reels = cur.reels + page.items.filter { it.id !in known }, reelsNext = page.next, loadingMore = false)
+                    }
+                } else {
+                    val next = s.next ?: return@launch
+                    val page = repo.listingsPage(next)
+                    _state.update { cur ->
+                        val known = cur.items.map { it.id }.toSet()
+                        val visualListings = page.items.filter { (it.cover_photo != null || it.photos.isNotEmpty()) && it.id !in known }
+                        cur.copy(items = cur.items + visualListings, next = page.next, loadingMore = false)
+                    }
                 }
-            } catch (e: ApiException) {
+            } catch (e: Exception) {
                 _state.update { it.copy(loadingMore = false) }
+            }
+        }
+    }
+
+    fun loadOwnedListings() {
+        viewModelScope.launch {
+            runCatching { repo.listings(ListingQuery(mine = true)).items }
+                .onSuccess { listings -> _state.update { it.copy(ownedListings = listings) } }
+        }
+    }
+
+    fun clearUploadError() {
+        _state.update { it.copy(uploadError = null) }
+    }
+
+    fun createReel(uri: Uri, caption: String, listingId: Int?, onPosted: () -> Unit) {
+        if (_state.value.uploading) return
+        viewModelScope.launch {
+            _state.update { it.copy(uploading = true, uploadError = null) }
+            try {
+                val reel = repo.createReel(uri, caption, listingId)
+                _state.update { it.copy(reels = listOf(reel) + it.reels.filterNot { old -> old.id == reel.id }, uploading = false) }
+                onPosted()
+            } catch (e: Exception) {
+                _state.update { it.copy(uploading = false, uploadError = e.message ?: "Could not upload this reel.") }
             }
         }
     }
@@ -139,11 +205,39 @@ fun ReelsScreen(onOpenListing: (Int) -> Unit, onNeedsLogin: () -> Unit) {
     val saved by repo.savedIdsFlow.collectAsState(initial = emptySet())
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var selectedVideo by remember { mutableStateOf<Uri?>(null) }
+    var caption by remember { mutableStateOf("") }
+    var selectedListing by remember { mutableStateOf<Int?>(null) }
+    var listingMenuOpen by remember { mutableStateOf(false) }
+    val videoPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+        selectedVideo = it
+        if (it != null) {
+            selectedListing = null
+            vm.clearUploadError()
+            vm.loadOwnedListings()
+        }
+    }
+
+    LaunchedEffect(state.items.size, state.next, state.reels.size) {
+        if (state.reels.isEmpty() && state.items.isEmpty() && state.next != null && !state.loadingMore) vm.loadMore()
+    }
 
     Box(Modifier.fillMaxSize().background(Color.Black)) {
         when {
             state.loading -> ScreenLoader()
             state.error != null -> ErrorState(state.error ?: "", { vm.load() }, Modifier.fillMaxSize())
+            state.reels.isNotEmpty() -> {
+                val pager = rememberPagerState(pageCount = { state.reels.size })
+                LaunchedEffect(pager, state.reels.size) {
+                    snapshotFlow { pager.currentPage }.collect { page ->
+                        if (page >= state.reels.size - 3) vm.loadMore()
+                    }
+                }
+                VerticalPager(state = pager, modifier = Modifier.fillMaxSize()) { page ->
+                    val reel = state.reels[page]
+                    ReelVideoPage(reel, page == pager.currentPage, onOpenListing)
+                }
+            }
             state.items.isEmpty() -> EmptyState(
                 Icons.Outlined.PlayCircleOutline, "No reels yet", "New listings from sellers will show up here.",
             )
@@ -173,6 +267,121 @@ fun ReelsScreen(onOpenListing: (Int) -> Unit, onNeedsLogin: () -> Unit) {
             style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
             modifier = Modifier.statusBarsPadding().padding(16.dp),
         )
+        IconButton(
+            onClick = {
+                if (session.loggedIn.value) videoPicker.launch("video/*") else onNeedsLogin()
+            },
+            modifier = Modifier.align(Alignment.TopEnd).statusBarsPadding().padding(8.dp),
+        ) {
+            Icon(Icons.Outlined.Add, contentDescription = "Create reel", tint = Color.White)
+        }
+    }
+
+    selectedVideo?.let { uri ->
+        AlertDialog(
+            onDismissRequest = { if (!state.uploading) { selectedVideo = null; caption = "" } },
+            title = { Text("Create a reel") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(uri.lastPathSegment?.substringAfterLast('/') ?: "Video selected", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    OutlinedTextField(
+                        value = caption,
+                        onValueChange = { caption = it.take(500) },
+                        label = { Text("Caption") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Box {
+                        TextButton(onClick = { listingMenuOpen = true }) {
+                            Text(
+                                selectedListing?.let { id -> state.ownedListings.firstOrNull { it.id == id }?.title }
+                                    ?: "Tag a listing (optional)",
+                            )
+                        }
+                        DropdownMenu(expanded = listingMenuOpen, onDismissRequest = { listingMenuOpen = false }) {
+                            DropdownMenuItem(
+                                text = { Text("No listing") },
+                                onClick = { selectedListing = null; listingMenuOpen = false },
+                            )
+                            state.ownedListings.forEach { listing ->
+                                DropdownMenuItem(
+                                    text = { Text(listing.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                    onClick = { selectedListing = listing.id; listingMenuOpen = false },
+                                )
+                            }
+                        }
+                    }
+                    if (state.uploading) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                            Text("Uploading… Keep the app open until it finishes.")
+                        }
+                    }
+                    state.uploadError?.let { Text("Upload failed: $it. Your video is still selected; retry below.") }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = !state.uploading,
+                    onClick = { vm.createReel(uri, caption, selectedListing) { selectedVideo = null; caption = ""; selectedListing = null } },
+                ) { Text(if (state.uploading) "Uploading…" else if (state.uploadError != null) "Retry" else "Post") }
+            },
+            dismissButton = {
+                TextButton(enabled = !state.uploading, onClick = { selectedVideo = null; caption = ""; selectedListing = null }) { Text("Cancel") }
+            },
+        )
+    }
+}
+
+@Composable
+private fun ReelVideoPage(reel: Reel, active: Boolean, onOpenListing: (Int) -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val videoView = remember(reel.video) { VideoView(context) }
+    DisposableEffect(videoView, reel.video, active) {
+        videoView.setOnPreparedListener { player: MediaPlayer ->
+            player.isLooping = true
+            if (active) videoView.start()
+        }
+        if (videoView.tag != reel.video) {
+            videoView.stopPlayback()
+            videoView.tag = reel.video
+            videoView.setVideoURI(Uri.parse(reel.video))
+        } else if (active) {
+            videoView.start()
+        } else if (videoView.isPlaying) {
+            videoView.pause()
+        }
+        onDispose { if (videoView.isPlaying) videoView.pause() }
+    }
+
+    Box(Modifier.fillMaxSize().background(Color(0xFF0B192C))) {
+        AndroidView(factory = { videoView }, modifier = Modifier.fillMaxSize())
+        Box(
+            Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(300.dp)
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)))),
+        )
+        Column(
+            Modifier.align(Alignment.BottomStart).fillMaxWidth().navigationBarsPadding().padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(reel.creator_name.ifBlank { "Choropia creator" }, color = Color.White, fontWeight = FontWeight.SemiBold)
+            if (reel.caption.isNotBlank()) Text(reel.caption, color = Color.White, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            val listingId = reel.listing
+            if (listingId != null) {
+                Row(
+                    Modifier.clip(RoundedCornerShape(50)).background(Color.White).clickable { onOpenListing(listingId) }
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(Icons.Outlined.ShoppingBag, null, tint = Color(0xFF0B192C), modifier = Modifier.size(18.dp))
+                    Text(
+                        listOfNotNull(reel.listing_title, reel.listing_price?.let(::formatNaira)).joinToString(" · ").ifBlank { "View listing" },
+                        color = Color(0xFF0B192C),
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -186,9 +395,10 @@ private fun ReelPage(
     onShare: () -> Unit,
 ) {
     Box(Modifier.fillMaxSize().background(Color(0xFF0B192C))) {
-        if (listing.cover_photo != null) {
+        val image = listing.cover_photo ?: listing.photos.firstOrNull()?.image
+        if (image != null) {
             AsyncImage(
-                model = listing.cover_photo,
+                model = image,
                 contentDescription = listing.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize().clickable(onClick = onOpen),

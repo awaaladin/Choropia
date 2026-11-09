@@ -81,6 +81,7 @@ import com.choropia.app.ui.screens.NotificationsScreen
 import com.choropia.app.ui.screens.OrderDetailScreen
 import com.choropia.app.ui.screens.OrdersScreen
 import com.choropia.app.ui.screens.ProfileScreen
+import com.choropia.app.ui.screens.PublicProfileScreen
 import com.choropia.app.ui.screens.RegisterScreen
 import com.choropia.app.ui.screens.ReelsScreen
 import kotlinx.coroutines.launch
@@ -112,6 +113,7 @@ object Routes {
     const val CHAT = "chat/{id}"
     const val ORDER = "order/{id}"
     const val MERCHANT = "merchant/{id}"
+    const val PUBLIC_PROFILE = "user/{id}"
 
     fun listing(id: Int) = "listing/$id"
     fun editListing(id: Int) = "listing/$id/edit"
@@ -120,6 +122,7 @@ object Routes {
     fun order(id: Int) = "order/$id"
     fun listingDelivery(id: Int) = "listing/$id/delivery"
     fun merchant(id: Int) = "merchant/$id"
+    fun publicProfile(id: Int) = "user/$id"
 
     val tabs = setOf(FEED, REELS, MARKET, INBOX, ME)
 }
@@ -235,7 +238,8 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onOpenSeller = { listing ->
                         val merchantId = listing.merchantRef
                         if (merchantId != null) navController.navigate(Routes.merchant(merchantId))
-                        else navController.navigate(Routes.listing(listing.id))
+                        else listing.sellerUserId?.let { navController.navigate(Routes.publicProfile(it)) }
+                            ?: navController.navigate(Routes.listing(listing.id))
                     },
                     onSell = { openSell() },
                     onProfile = { if (loggedIn) navController.navigate(Routes.ME) else needsLogin() },
@@ -336,6 +340,7 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onOpenChat = { navController.navigate(Routes.chat(it)) },
                     onOpenOrder = { navController.navigate(Routes.order(it)) },
                     onOpenMerchant = { navController.navigate(Routes.merchant(it)) },
+                    onOpenUser = { navController.navigate(Routes.publicProfile(it)) },
                     onNeedsLogin = needsLogin,
                     showMessage = showMessage,
                     onEdit = { navController.navigate(Routes.editListing(it)) },
@@ -377,7 +382,11 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                 ),
             ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: return@composable
-                ChatScreen(conversationId = id, onBack = { navController.popBackStack() })
+                ChatScreen(
+                    conversationId = id,
+                    onBack = { navController.popBackStack() },
+                    onOpenListing = { navController.navigate(Routes.listing(it)) },
+                )
             }
             composable(Routes.ORDERS) {
                 OrdersScreen(
@@ -458,6 +467,24 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     onBack = { navController.popBackStack() },
                     onOpenListing = { navController.navigate(Routes.listing(it)) },
                     onNeedsLogin = needsLogin,
+                )
+            }
+            composable(
+                Routes.PUBLIC_PROFILE,
+                arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                deepLinks = listOf(
+                    navDeepLink { uriPattern = "https://choropia.vercel.app/users/{id}" },
+                    navDeepLink { uriPattern = "choropia://user/{id}" },
+                ),
+            ) { entry ->
+                val id = entry.arguments?.getInt("id") ?: return@composable
+                PublicProfileScreen(
+                    userId = id,
+                    onBack = { navController.popBackStack() },
+                    onOpenListing = { navController.navigate(Routes.listing(it)) },
+                    onOpenChat = { navController.navigate(Routes.chat(it)) },
+                    onNeedsLogin = needsLogin,
+                    showMessage = showMessage,
                 )
             }
             composable(Routes.APPLY_MERCHANT) { ApplyMerchantScreen(onBack = { navController.popBackStack() }) }

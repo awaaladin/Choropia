@@ -4,7 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
-import { EmptyState, ErrorState, Pill, Skeleton } from "@/components/ui";
+import { EmptyState, ErrorState, Modal, Pill, Skeleton } from "@/components/ui";
 import { errorMessage } from "@/lib/actions";
 import { api, rows } from "@/lib/api";
 import { naira } from "@/lib/utils";
@@ -13,11 +13,33 @@ import { naira } from "@/lib/utils";
 export function MyListingsPage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<"active" | "sold">("active");
+  const [durationAction, setDurationAction] = useState<{ id: number; action: "sold" | "extend" } | null>(null);
+  const [durationDays, setDurationDays] = useState(3);
   const listings = useQuery({ queryKey: ["my-listings"], queryFn: async () => rows(await api.myListings()) });
   const sold = useMutation({
-    mutationFn: (id: number) => api.markSold(id),
+    mutationFn: ({ id, days }: { id: number; days: number }) => api.markSold(id, days),
     onSuccess: () => {
+      setDurationAction(null);
       toast.success("Marked as sold.");
+      queryClient.invalidateQueries({ queryKey: ["my-listings"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+  const extend = useMutation({
+    mutationFn: ({ id, days }: { id: number; days: number }) => api.extendMarketVisibility(id, days),
+    onSuccess: () => {
+      setDurationAction(null);
+      toast.success("Market visibility extended.");
+      queryClient.invalidateQueries({ queryKey: ["my-listings"] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+  const relist = useMutation({
+    mutationFn: (id: number) => api.relist(id),
+    onSuccess: () => {
+      toast.success("Listing is back on the market.");
       queryClient.invalidateQueries({ queryKey: ["my-listings"] });
       queryClient.invalidateQueries({ queryKey: ["feed"] });
     },
@@ -82,14 +104,31 @@ export function MyListingsPage() {
                 <p className="text-sm text-muted-foreground">
                   {l.status === "sold" ? "Sold out" : l.quantity === 1 ? "1 left" : `${l.quantity ?? 1} left`} · {l.likes_count ?? 0} likes
                 </p>
+                {l.status === "sold" && l.market_visible_until && (
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(l.market_visible_until) > new Date()
+                      ? `Visible to buyers until ${new Date(l.market_visible_until).toLocaleDateString()}`
+                      : "No longer visible to buyers"}
+                  </p>
+                )}
                 <div className="mt-3 flex flex-wrap gap-2">
                   {l.status === "active" && (
                     <>
                     <Link to={`/listings/${l.id}/edit`} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-accent"><Pencil size={14} /> Edit</Link>
                     <Link to={`/listings/${l.id}/delivery`} className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-accent"><Truck size={14} /> Delivery</Link>
-                    <Button variant="secondary" loading={sold.isPending && sold.variables === l.id} onClick={() => window.confirm("Mark this listing as sold? It will stop showing to buyers.") && sold.mutate(l.id)}>
+                    <Button variant="secondary" onClick={() => { setDurationDays(3); setDurationAction({ id: l.id, action: "sold" }); }}>
                       Mark sold
                     </Button>
+                    </>
+                  )}
+                  {l.status === "sold" && (
+                    <>
+                      <Button variant="secondary" onClick={() => { setDurationDays(3); setDurationAction({ id: l.id, action: "extend" }); }}>
+                        Extend visibility
+                      </Button>
+                      <Button variant="secondary" loading={relist.isPending && relist.variables === l.id} onClick={() => relist.mutate(l.id)}>
+                        Relist
+                      </Button>
                     </>
                   )}
                   <Button variant="danger" loading={remove.isPending && remove.variables === l.id} onClick={() => window.confirm("Delete this listing for good? Buyers will no longer see it.") && remove.mutate(l.id)}>
@@ -101,6 +140,41 @@ export function MyListingsPage() {
           ))}
         </ul>
       )}
+      <Modal
+        open={durationAction !== null}
+        onClose={() => setDurationAction(null)}
+        title={durationAction?.action === "extend" ? "Extend market visibility" : "How long should this stay on the market?"}
+      >
+        <p className="mb-4 text-sm text-muted-foreground">
+          The listing will show a Sold badge for this duration. Buyers can still message you, but cannot buy it.
+        </p>
+        <div className="grid grid-cols-5 gap-2">
+          {[1, 3, 7, 14, 30].map((days) => (
+            <button
+              key={days}
+              type="button"
+              aria-pressed={durationDays === days}
+              onClick={() => setDurationDays(days)}
+              className={`min-h-11 rounded-lg border px-2 text-sm ${durationDays === days ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-accent"}`}
+            >
+              {days}d
+            </button>
+          ))}
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="secondary" onClick={() => setDurationAction(null)}>Cancel</Button>
+          <Button
+            loading={sold.isPending || extend.isPending}
+            onClick={() => {
+              if (!durationAction) return;
+              if (durationAction.action === "sold") sold.mutate({ id: durationAction.id, days: durationDays });
+              else extend.mutate({ id: durationAction.id, days: durationDays });
+            }}
+          >
+            {durationAction?.action === "extend" ? "Extend" : "Mark sold"}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

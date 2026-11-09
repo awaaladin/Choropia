@@ -437,6 +437,26 @@ def user_toggle(request, pk):
 
 
 @staff_required
+@require_POST
+def user_verify_seller(request, pk):
+    """Marks a seller as verified (lower fee on the first two bands, see payments/fees.py) or takes it away.
+    Live offers keep the status they were made with."""
+    from django.utils import timezone
+
+    person = get_object_or_404(User.objects.select_related("profile"), pk=pk)
+    if person.pk == request.user.pk:
+        messages.error(request, "Ask another staff member to verify your own account.")
+        return redirect("staff:user_detail", pk=pk)
+    profile = person.profile
+    profile.seller_verified = not profile.seller_verified
+    profile.seller_verified_at = timezone.now() if profile.seller_verified else None
+    profile.save(update_fields=["seller_verified", "seller_verified_at", "updated_at"])
+    audit(request, "seller.verify" if profile.seller_verified else "seller.unverify", f"user {person.pk}", person.email)
+    messages.success(request, f"{person.email} is {'now a verified seller' if profile.seller_verified else 'no longer a verified seller'}.")
+    return redirect("staff:user_detail", pk=pk)
+
+
+@staff_required
 def listing_list(request):
     q = request.GET.get("q", "").strip()
     qs = Listing.objects.select_related("owner").order_by("-created_at")

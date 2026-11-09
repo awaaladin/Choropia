@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 
 from common.models import TimeStampedModel
@@ -53,6 +54,8 @@ class Listing(TimeStampedModel):
     price = models.DecimalField(max_digits=12, decimal_places=2)
     condition = models.CharField(max_length=10, choices=Condition.choices, default=Condition.USED)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    sold_at = models.DateTimeField(null=True, blank=True)
+    market_visible_until = models.DateTimeField(null=True, blank=True)
 
     location = models.CharField(max_length=150, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -73,10 +76,18 @@ class Listing(TimeStampedModel):
         indexes = [
             models.Index(fields=["status", "category"]),
             models.Index(fields=["-created_at"]),
+            models.Index(fields=["status", "market_visible_until"], name="listing_market_visible"),
         ]
 
     def __str__(self):
         return self.title
+
+    @classmethod
+    def public_visibility_filter(cls, now=None):
+        now = now or timezone.now()
+        return models.Q(status=cls.Status.ACTIVE) | models.Q(
+            status=cls.Status.SOLD, market_visible_until__gt=now
+        )
 
     @property
     def seller(self):

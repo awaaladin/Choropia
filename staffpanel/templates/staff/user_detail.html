@@ -12,7 +12,13 @@
       <dt>Phone</dt><dd>{{ person.phone_number|default:"none" }}</dd>
       <dt>Joined</dt><dd>{{ person.date_joined }}</dd>
       <dt>Role</dt><dd>{% if person.is_superuser %}Superuser{% elif person.is_staff %}Staff{% elif person.is_moderator %}Moderator{% else %}Member{% endif %}</dd>
+      <dt>Seller</dt><dd>{% if person.profile.seller_verified %}<span class="pill good">verified</span> since {{ person.profile.seller_verified_at|date:"j M Y" }}{% else %}<span class="pill warn">not verified</span>{% endif %}</dd>
     </dl>
+    {% if person.pk != request.user.pk %}
+    <form method="post" action="{% url 'staff:user_verify_seller' person.pk %}" style="margin-top:16px" onsubmit="return confirm('{% if person.profile.seller_verified %}Remove verified seller status? Their fee goes up on new sales.{% else %}Mark as a verified seller? Only do this after checking who they are. Their fee goes down on new sales.{% endif %}');">{% csrf_token %}
+      <button class="btn ghost" type="submit">{% if person.profile.seller_verified %}Remove verified seller{% else %}Mark as verified seller{% endif %}</button>
+    </form>
+    {% endif %}
     {% if request.user.is_superuser and not person.is_superuser and person.pk != request.user.pk %}
     <form method="post" action="{% url 'staff:user_toggle' person.pk %}" style="margin-top:16px" onsubmit="return confirm('{% if person.is_active %}Suspend this account? They will not be able to sign in.{% else %}Let this person sign in again?{% endif %}');">{% csrf_token %}
       <button class="btn {% if person.is_active %}danger{% else %}ghost{% endif %}" type="submit">{% if person.is_active %}Suspend this account{% else %}Reactivate this account{% endif %}</button>

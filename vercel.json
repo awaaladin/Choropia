@@ -17,5 +17,10 @@
       "path": "/api/v1/internal/jobs/run/",
       "schedule": "0 4 * * *"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "feature/choropia-complete": false
+    }
+  }
 }

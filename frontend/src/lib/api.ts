@@ -8,15 +8,20 @@ import type {
   PublicDriver,
   RoutePrice,
   Category,
+  ChatOffer,
   Comment,
   Conversation,
   Follow,
+  GuestLikeState,
+  GuestLikeToken,
   Like,
   Listing,
   Merchant,
   Message,
+  OfferDeliveryMethod,
   Order,
   Paginated,
+  PublicProfile,
   Reel,
   ReelComment,
   ReelLike,
@@ -39,8 +44,10 @@ const BASE_URL = "/api/v1";
 const LEGACY_ACCESS_KEY = "choropia_access";
 const LEGACY_REFRESH_KEY = "choropia_refresh";
 const SESSION_HINT = "choropia_session";
+const GUEST_LIKE_TOKEN_KEY = "choropia_guest_like_token";
 
 let accessToken: string | null = null;
+let guestLikeTokenRequest: Promise<string> | null = null;
 
 export const tokens = {
   get access() {
@@ -131,6 +138,9 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, auth = true, retry = true, formData = false } = opts;
   const headers: Record<string, string> = { "X-Client": "web" };
   if (!formData) headers["Content-Type"] = "application/json";
+  const includesListingEngagement = path.startsWith("/listings/") || path === "/feed/" || path === "/likes/guest/";
+  const guestLikeToken = includesListingEngagement ? localStorage.getItem(GUEST_LIKE_TOKEN_KEY) : null;
+  if (guestLikeToken) headers["X-Guest-Like-Token"] = guestLikeToken;
   if (auth && !tokens.access && tokens.hasSession) await refreshAccessToken(); // a reload: get a fresh access token first
   if (auth && tokens.access) headers.Authorization = `Bearer ${tokens.access}`;
 
@@ -161,6 +171,25 @@ const qs = (params: Record<string, string | number | undefined | null>) => {
   const text = search.toString();
   return text ? `?${text}` : "";
 };
+
+async function getGuestLikeToken(): Promise<string> {
+  const existing = localStorage.getItem(GUEST_LIKE_TOKEN_KEY);
+  if (existing) return existing;
+  if (!guestLikeTokenRequest) {
+    guestLikeTokenRequest = request<GuestLikeToken>("/likes/guest-token/", {
+      method: "POST",
+      auth: false,
+    })
+      .then(({ token }) => {
+        localStorage.setItem(GUEST_LIKE_TOKEN_KEY, token);
+        return token;
+      })
+      .finally(() => {
+        guestLikeTokenRequest = null;
+      });
+  }
+  return guestLikeTokenRequest;
+}
 
 /** List endpoints are paginated when the server has pagination on; normalise both shapes. */
 export const rows = <T,>(data: Paginated<T> | T[] | null | undefined): T[] =>
@@ -266,11 +295,15 @@ export const api = {
   // --- profile ---
   me: () => request<User>("/users/me/"),
   updateProfile: (data: unknown) => request<User>("/users/me/", { method: "PATCH", body: data }),
+  publicProfile: (id: number) => request<PublicProfile>(`/users/${id}/profile/`, { auth: false }),
+  publicProfileListings: (id: number, page = 1) =>
+    request<Paginated<Listing> | Listing[]>(`/users/${id}/listings/${page > 1 ? `?page=${page}` : ""}`, { auth: false }),
 
   // --- listings ---
   listCategories: () => request<Category[]>("/categories/", { auth: false }),
   listListings: (params: Record<string, string | undefined> = {}) =>
     request<Paginated<Listing> | Listing[]>(`/listings/${qs(params)}`, { auth: false }),
+  listMyListings: () => request<Paginated<Listing> | Listing[]>("/listings/?mine=true"),
   listMerchantListings: (merchantId: number) =>
     request<Paginated<Listing> | Listing[]>(`/listings/?merchant=${merchantId}`, { auth: false }),
   getListing: (id: number) => request<Listing>(`/listings/${id}/`),
@@ -288,7 +321,14 @@ export const api = {
   },
   removeAvatar: () => request("/users/me/avatar/", { method: "DELETE" }),
   myListings: () => request<Paginated<Listing> | Listing[]>("/listings/?mine=true"),
-  markSold: (id: number) => request<Listing>(`/listings/${id}/mark_sold/`, { method: "POST" }),
+  markSold: (id: number, durationDays?: number) =>
+    request<Listing>(`/listings/${id}/mark_sold/`, {
+      method: "POST",
+      body: durationDays === undefined ? {} : { duration_days: durationDays },
+    }),
+  extendMarketVisibility: (id: number, durationDays: number) =>
+    request<Listing>(`/listings/${id}/extend_market_visibility/`, { method: "POST", body: { duration_days: durationDays } }),
+  relist: (id: number) => request<Listing>(`/listings/${id}/relist/`, { method: "POST" }),
   getFeed: () => request<Paginated<Listing> | Listing[]>("/feed/"),
   updateListing: (id: number, data: unknown) => request<Listing>(`/listings/${id}/`, { method: "PATCH", body: data }),
   createListing: (formData: FormData) => request<Listing>("/listings/", { method: "POST", body: formData, formData: true }),
@@ -298,8 +338,26 @@ export const api = {
   createComment: (listingId: number, body: string) =>
     request<Comment>("/comments/", { method: "POST", body: { listing: listingId, body, parent: null } }),
   listMyLikes: () => request<Paginated<Like> | Like[]>("/likes/"),
-  likeListing: (listingId: number) => request<Like>("/likes/", { method: "POST", body: { listing: listingId } }),
+  async likeListing(listingId: number): Promise<Like | GuestLikeState> {
+    if (tokens.hasSession) {
+      return request<Like>("/likes/", { method: "POST", body: { listing: listingId } });
+    }
+    await getGuestLikeToken();
+    return request<GuestLikeState>("/likes/guest/", {
+      method: "POST",
+      body: { listing: listingId },
+      auth: false,
+    });
+  },
   unlikeListing: (likeId: number) => request(`/likes/${likeId}/`, { method: "DELETE" }),
+  async unlikeGuestListing(listingId: number): Promise<GuestLikeState> {
+    await getGuestLikeToken();
+    return request<GuestLikeState>("/likes/guest/", {
+      method: "DELETE",
+      body: { listing: listingId },
+      auth: false,
+    });
+  },
   listMyFollows: () => request<Paginated<Follow> | Follow[]>("/follows/"),
   follow: (targetType: string, targetId: number) =>
     request<Follow>("/follows/", { method: "POST", body: { target_type: targetType, target_id: targetId } }),
@@ -320,9 +378,25 @@ export const api = {
   // --- chat ---
   listConversations: () => request<Paginated<Conversation> | Conversation[]>("/conversations/"),
   startConversation: (listingId: number) => request<Conversation>("/conversations/", { method: "POST", body: { listing: listingId } }),
+  openConversation: (otherUserId: number, listingId?: number) =>
+    request<Conversation>("/conversations/open/", { method: "POST", body: { other_user_id: otherUserId, listing_id: listingId } }),
   getMessages: (conversationId: number) => request<Paginated<Message> | Message[]>(`/messages/?conversation=${conversationId}`),
   sendMessage: (conversationId: number, body: string) =>
     request<Message>("/messages/", { method: "POST", body: { conversation: conversationId, body } }),
+  offers: (conversationId: number) => request<ChatOffer[]>(`/conversations/${conversationId}/offers/`),
+  createOffer: (
+    conversationId: number,
+    body: {
+      listing_id: number;
+      amount_kobo: number;
+      allowed_delivery_methods: OfferDeliveryMethod[];
+      note?: string;
+      pin: string;
+    },
+  ) => request<ChatOffer>(`/conversations/${conversationId}/offers/`, { method: "POST", body }),
+  getOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/`),
+  cancelOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/cancel/`, { method: "POST" }),
+  declineOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/decline/`, { method: "POST" }),
 
   // --- orders & payments ---
   listOrders: () => request<Paginated<Order> | Order[]>("/orders/"),

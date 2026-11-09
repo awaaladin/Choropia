@@ -4,7 +4,7 @@ Automatic seller payouts, and Choropia's commission.
 When a buyer confirms receipt (or the escrow window passes) the order's payment is RELEASED. This
 module then pays the seller by bank transfer (Paystack Transfers) and keeps a commission:
 
-    buyer paid (gross)  =  commission (PLATFORM_COMMISSION_PERCENT, default 5%)  +  sent to seller (net)
+    buyer paid (gross)  =  commission (banded seller fee, payments/fees.py)  +  sent to seller (net)
 
 Money going OUT is the dangerous direction, so the rules here are strict:
 
@@ -58,29 +58,45 @@ def _email_seller(send, payout):
 # --- money maths ----------------------------------------------------------------------------
 
 
-def commission_percent_for(gross):
-    """The commission rate (percent) for an item price, from the tiers in settings."""
-    gross = Decimal(gross)
-    for below, percent in settings.COMMISSION_TIERS:
-        if gross < below:
-            return percent
-    return settings.PLATFORM_COMMISSION_PERCENT
+def seller_fee(gross, verified=False):
+    """Choropia's fee on an item price (naira Decimal in, naira Decimal out), from the kobo bands in fees.py."""
+    from .fees import fee_kobo
+    from .paystack import from_kobo, to_kobo
+
+    return from_kobo(fee_kobo(to_kobo(Decimal(gross).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)), bool(verified)))
 
 
-def commission_preview(gross):
+def commission_percent_for(gross, verified=False):
+    """The effective fee as a percent of the price (for display and the payout record; the amount is what counts)."""
+    gross = Decimal(gross).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
+    if gross <= 0:
+        return Decimal("0")
+    return (seller_fee(gross, verified) * 100 / gross).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
+
+
+def commission_preview(gross, verified=False):
     """What a seller would be charged and receive for this price: shown while they write a listing."""
     gross = Decimal(gross).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
-    percent = commission_percent_for(gross)
-    commission, net = commission_split(gross, percent)
-    return {"price": gross, "commission_percent": percent, "commission_amount": commission, "you_receive": net}
+    commission, net = commission_split(gross, verified=verified)
+    return {
+        "price": gross,
+        "commission_percent": commission_percent_for(gross, verified),
+        "commission_amount": commission,
+        "you_receive": net,
+        "verified": bool(verified),
+    }
 
 
-def commission_split(gross, percent=None):
-    """(commission, net) for a gross amount. Commission is rounded to the kobo (half up) and the
-    seller gets exactly the remainder, so commission + net always equals gross."""
-    percent = commission_percent_for(gross) if percent is None else Decimal(percent)
+def commission_split(gross, percent=None, *, verified=False):
+    """(commission, net) for a gross amount, so commission + net always equals gross.
+
+    With no percent this is the seller fee (banded, see fees.py). With a percent it is that flat rate, rounded to the
+    kobo half up: used for the driver's commission on a delivery fee."""
     gross = Decimal(gross).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
-    commission = (gross * percent / Decimal(100)).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
+    if percent is None:
+        commission = seller_fee(gross, verified)
+    else:
+        commission = (gross * Decimal(percent) / Decimal(100)).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
     return commission, gross - commission
 
 
@@ -93,6 +109,19 @@ def _delivery_for(payment):
     if delivery is None or delivery.status == "cancelled" or delivery.fee <= 0:
         return None
     return delivery
+
+
+def _offer_fee(payment, gross):
+    """The fee snapshotted on the chat offer this order came from, if any (and if it was for this exact price)."""
+    offer = getattr(payment.order, "source_offer", None)
+    if offer is None:
+        return None
+    from .paystack import from_kobo
+
+    if from_kobo(offer.amount_kobo) != gross:
+        logger.error("Order %s: offer amount %s != item price %s; using the live fee", payment.order_id, offer.amount_kobo, gross)
+        return None
+    return from_kobo(offer.fee_kobo)
 
 
 def create_payout(payment):
@@ -112,8 +141,14 @@ def create_payout(payment):
     deduction = delivery.seller_share if delivery is not None and delivery.driver_id else Decimal("0")
     if delivery is not None and not delivery.driver_id:
         logger.warning("Order %s was released with a delivery fee but no driver; the fee stays with Choropia for staff to settle", payment.order_id)
-    rate = commission_percent_for(gross)
-    commission, net = commission_split(gross, rate)
+    from accounts.models import is_verified_seller
+
+    offer_fee = _offer_fee(payment, gross)
+    if offer_fee is not None:
+        commission, net = offer_fee, gross - offer_fee  # locked when the offer was made
+    else:
+        commission, net = commission_split(gross, verified=is_verified_seller(seller))
+    rate = (commission * 100 / gross).quantize(TWO_PLACES, rounding=ROUND_HALF_UP) if gross > 0 else Decimal("0")
     net -= deduction
     has_account = PayoutAccount.objects.filter(user=seller).exists()
     payout = Payout.objects.create(
@@ -160,19 +195,16 @@ def release_hook(payment):
     """Called from release_escrow inside the caller's transaction. Records the payouts, then sends
     the transfers only once that transaction has committed (so a rollback can never leave money sent
     for a release that didn't happen)."""
-    payout = create_payout(payment)
-    transaction.on_commit(lambda: process_payout_safely(payout.pk))
-    driver_payout = create_driver_payout(payment)
-    if not settings.PAYOUTS_ENABLED:
-        # Automatic transfers are off, so this money is for a person to hand over.
-        from notifications import staff_alerts
+    from . import ledger
+    from .payout_service import get_payout_service
 
-        lines = [f"Pay the seller {payout.seller.get_full_name()} {staff_alerts.money(payout.net_amount)} (Choropia keeps {staff_alerts.money(payout.commission_amount)})."]
-        if driver_payout:
-            lines.append(f"Pay the driver {driver_payout.seller.get_full_name()} {staff_alerts.money(driver_payout.net_amount)}.")
-        staff_alerts.alert(f"Pay out order #{payment.order_id}", "Money to hand over", lines, f"/staff/payouts/{payout.pk}/")
+    payout = create_payout(payment)
+    driver_payout = create_driver_payout(payment)
+    ledger.released(payment, payout, driver_payout)
+    service = get_payout_service()
+    service.submit(payout)
     if driver_payout is not None:
-        transaction.on_commit(lambda: process_payout_safely(driver_payout.pk))
+        service.submit(driver_payout)
     return payout
 
 
@@ -216,6 +248,9 @@ def _succeed(payout, transfer_code=""):
         payout.paystack_transfer_code = transfer_code
     payout.save(update_fields=["status", "completed_at", "failure_reason", "paystack_transfer_code", "updated_at"])
     Payment.objects.filter(pk=payout.payment_id).update(transfer_reference=payout.transfer_reference or "")
+    from . import ledger
+
+    ledger.payout_sent(payout)
     logger.info("Payout %s paid: NGN %s to %s", payout.pk, payout.net_amount, payout.account_name)
     if first_time and payout.kind == Payout.Kind.SELLER:
         _email_seller(emails.send_payout_sent, payout)
@@ -362,6 +397,9 @@ def mark_paid_manually(payout_id, staff, reference, note=""):
         payout.manual_reference = reference[:100]
         payout.manual_note = (note or "")[:300]
         payout.save()
+        from . import ledger
+
+        ledger.payout_sent(payout, reference=f"manual:{reference[:80]}")
         Payment.objects.filter(pk=payout.payment_id).update(transfer_reference=f"manual:{reference[:80]}")
     if payout.kind == Payout.Kind.SELLER:
         _email_seller(emails.send_payout_sent, payout)

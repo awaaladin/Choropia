@@ -135,6 +135,12 @@ export function ListingDetailPage() {
           <p className="mt-1 text-sm capitalize text-muted-foreground">
             {item.condition} · {item.location || "Uyo"}
           </p>
+          {item.status === "sold" && (
+            <p className="mt-2 text-sm font-medium text-muted-foreground">
+              Sold · visible to buyers until{" "}
+              {item.market_visible_until ? new Date(item.market_visible_until).toLocaleDateString() : "the visibility period ends"}
+            </p>
+          )}
           {isMine && (
             <Link to={`/listings/${item.id}/edit`} className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
               Edit this listing
@@ -151,7 +157,7 @@ export function ListingDetailPage() {
           <p className="mt-4 whitespace-pre-line text-muted-foreground">{item.description}</p>
 
           <Link
-            to={item.merchant ? `/merchants/${item.merchant}` : "#"}
+            to={item.merchant ? `/merchants/${item.merchant}` : `/users/${item.seller_id}`}
             className="mt-6 flex items-center justify-between gap-3 rounded-xl bg-accent p-4 transition-colors hover:bg-accent/70"
           >
             <div className="flex min-w-0 items-center gap-3">
@@ -170,7 +176,7 @@ export function ListingDetailPage() {
           </Link>
 
           <div className="mt-6 flex gap-3">
-            <Button onClick={() => buy(item.id)} disabled={isMine}>
+            <Button onClick={() => buy(item.id)} disabled={isMine || item.status === "sold"}>
               <Lock size={15} /> Buy with escrow
             </Button>
             <Button variant="secondary" onClick={() => messageSeller(item.id)} disabled={isMine}>
@@ -180,7 +186,7 @@ export function ListingDetailPage() {
 
           <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
             <button
-              onClick={() => ensureLogin() && toggleLike.mutate()}
+              onClick={() => toggleLike.mutate()}
               aria-pressed={item.is_liked}
               className="flex items-center gap-1 font-medium transition-colors hover:text-destructive data-[liked=true]:text-destructive"
               data-liked={item.is_liked}
@@ -202,9 +208,13 @@ export function ListingDetailPage() {
           {comments.data?.length === 0 && <p className="text-sm text-muted-foreground">No comments yet.</p>}
           {comments.data?.map((c) => (
             <div key={c.id} className="flex items-start gap-3 border-b border-border py-2 text-sm">
-              <Avatar name={c.author_name} size={28} />
+              <Link to={`/users/${c.author.id}`} aria-label={`View ${c.author.display_name}'s profile`}>
+                <Avatar src={c.author.avatar_url} name={c.author.display_name} size={28} />
+              </Link>
               <div className="min-w-0">
-                <span className="font-medium">{c.author_name || `User #${c.author_id}`}</span>
+                <Link to={`/users/${c.author.id}`} className="font-medium hover:underline">
+                  {c.author.display_name || "Deleted user"}
+                </Link>
                 <span className="text-muted-foreground"> · {timeAgo(c.created_at)}</span>
                 <p className="mt-0.5 text-muted-foreground">{c.body}</p>
               </div>

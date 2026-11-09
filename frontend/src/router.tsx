@@ -29,6 +29,7 @@ import { OrdersPage } from "@/pages/Orders";
 import { GetAppPage } from "@/pages/GetApp";
 import { PrivacyPage } from "@/pages/Privacy";
 import { ProfilePage } from "@/pages/Profile";
+import { PublicProfilePage } from "@/pages/PublicProfile";
 import { ReelsPage } from "@/pages/Reels";
 import { RegisterPage } from "@/pages/Register";
 import { ResetPasswordPage } from "@/pages/ResetPassword";
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
       { path: "marketplace", element: <MarketplacePage /> },
       { path: "reels", element: <ReelsPage /> },
       { path: "listings/:id", element: <ListingDetailPage /> },
+      { path: "users/:id", element: <PublicProfilePage /> },
       { path: "merchants/:id", element: <MerchantProfilePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "register", element: <RegisterPage /> },

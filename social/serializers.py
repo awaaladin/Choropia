@@ -42,13 +42,33 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    author = serializers.SerializerMethodField()
     author_id = serializers.IntegerField(source="author.id", read_only=True)
 
     class Meta:
         model = Comment
         fields = ("id", "listing", "author", "author_id", "parent", "body", "created_at")
-        read_only_fields = ("id", "created_at")
+        read_only_fields = ("id", "author", "author_id", "created_at")
+
+    def get_author(self, comment):
+        user = comment.author
+        profile = getattr(user, "profile", None)
+        name = f"{user.first_name} {user.last_name}".strip()
+        if not user.is_active:
+            name = "Deleted user"
+        elif not name:
+            name = "Choropia member"
+        avatar = profile.avatar.url if profile and profile.avatar else None
+        request = self.context.get("request")
+        if avatar and request is not None:
+            avatar = request.build_absolute_uri(avatar)
+        return {
+            "id": user.pk,
+            "display_name": name,
+            "username": f"user-{user.pk}",
+            "avatar_url": avatar,
+            "verified": bool(profile and profile.seller_verified),
+        }
 
 
 class LikeSerializer(serializers.ModelSerializer):

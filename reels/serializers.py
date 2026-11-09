@@ -2,6 +2,8 @@ from rest_framework import serializers
 
 from .models import Reel, ReelComment, ReelLike
 
+MAX_REEL_UPLOAD_BYTES = 40 * 1024 * 1024
+
 
 class ReelEngagementMixin:
     """Creator identity + like/comment counts — same pattern as listings.ListingEngagementMixin,
@@ -81,8 +83,8 @@ class ReelSerializer(ReelEngagementMixin, serializers.ModelSerializer):
         read_only_fields = ("id", "views_count", "created_at")
 
     def validate_video(self, video):
-        if video and video.size > 40 * 1024 * 1024:
-            raise serializers.ValidationError("A reel must be under 40 MB.")
+        if video and video.size > MAX_REEL_UPLOAD_BYTES:
+            raise serializers.ValidationError("A reel must be 40 MB or smaller.")
         return video
 
     def validate_merchant(self, merchant):

@@ -1,8 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from rest_framework import serializers
 from rest_framework.test import APIClient, APITestCase
 
 from reels.models import Reel
+from reels.serializers import MAX_REEL_UPLOAD_BYTES, ReelSerializer
 
 User = get_user_model()
 
@@ -34,6 +36,11 @@ class ReelApiTests(APITestCase):
         response = self.client.get("/api/v1/reels/")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["count"], 1)
+
+    def test_upload_size_limit_matches_client_limit(self):
+        oversized_file = type("OversizedFile", (), {"size": MAX_REEL_UPLOAD_BYTES + 1})()
+        with self.assertRaises(serializers.ValidationError):
+            ReelSerializer().validate_video(oversized_file)
 
     def test_like_unlike_cycle(self):
         reel = Reel.objects.create(owner=self.user, video=tiny_mp4(), caption="x")

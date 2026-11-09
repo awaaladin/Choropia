@@ -47,44 +47,31 @@ def transfer_ok(status="pending", code="TRF_123"):
     return ps
 
 
-class TieredCommissionTests(SimpleTestCase):
-    """The launch rates: 6% under 10,000; 5% up to and including 100,000; 4% above."""
-
-    def rate(self, price):
-        return payouts.commission_percent_for(price)
-
-    def test_the_rate_steps_down_with_the_price(self):
-        self.assertEqual(self.rate("1000"), Decimal("6"))
-        self.assertEqual(self.rate("9999.99"), Decimal("6"))
-        self.assertEqual(self.rate("10000"), Decimal("5"))
-        self.assertEqual(self.rate("100000"), Decimal("5"))
-        self.assertEqual(self.rate("100000.01"), Decimal("4"))
-        self.assertEqual(self.rate("310000"), Decimal("4"))
+class BandedFeeCommissionTests(SimpleTestCase):
+    """The seller fee in naira, as payouts use it (the kobo maths itself is tested in test_fees.py)."""
 
     def test_the_numbers_quoted_to_the_owner(self):
-        for price, commission in (("1000", "60.00"), ("5000", "300.00"), ("20000", "1000.00"), ("100000", "5000.00"), ("150000", "6000.00"), ("310000", "12400.00")):
-            got, net = payouts.commission_split(price)
-            self.assertEqual(got, Decimal(commission), price)
+        for price, verified, commission in (
+            ("2000", True, "200.00"), ("8000", True, "400.00"), ("8000", False, "480.00"),
+            ("185000", True, "6550.00"), ("185000", False, "7725.00"), ("4500000", False, "27500.00"),
+        ):
+            got, net = payouts.commission_split(price, verified=verified)
+            self.assertEqual(got, Decimal(commission), (price, verified))
             self.assertEqual(got + net, Decimal(price))
+
+    def test_effective_percent_is_for_display(self):
+        self.assertEqual(payouts.commission_percent_for("8000"), Decimal("6.00"))
+        self.assertEqual(payouts.commission_percent_for("185000", verified=True), Decimal("3.54"))
 
     def test_the_preview_matches_what_a_payout_will_use(self):
         preview = payouts.commission_preview("15000")
-        self.assertEqual((preview["commission_percent"], preview["commission_amount"], preview["you_receive"]),
-                         (Decimal("5"), Decimal("750.00"), Decimal("14250.00")))
-
-    @override_settings(COMMISSION_TIERS=[], PLATFORM_COMMISSION_PERCENT=Decimal("5"))
-    def test_flat_rate_is_one_setting_away(self):
-        self.assertEqual({self.rate(p) for p in ("500", "50000", "900000")}, {Decimal("5")})
-
-    @override_settings(COMMISSION_TIERS=[(Decimal("10000"), Decimal("8"))], PLATFORM_COMMISSION_PERCENT=Decimal("3"))
-    def test_tiers_are_configurable(self):
-        self.assertEqual((self.rate("9999"), self.rate("10000")), (Decimal("8"), Decimal("3")))
+        self.assertEqual((preview["commission_amount"], preview["you_receive"]), (Decimal("900.00"), Decimal("14100.00")))
 
 
 class TieredPayoutTests(TestCase):
     @override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True)
-    def test_a_payout_records_the_rate_that_applied(self):
-        for price, rate, commission in (("5000.00", "6.00", "300.00"), ("200000.00", "4.00", "8000.00")):
+    def test_a_payout_records_the_fee_that_applied(self):
+        for price, rate, commission in (("5000.00", "6.00", "300.00"), ("200000.00", "4.13", "8250.00")):
             payment = held_payment(price)
             payment.status = Payment.Status.RELEASED
             payment.save()
@@ -92,23 +79,38 @@ class TieredPayoutTests(TestCase):
             self.assertEqual((payout.commission_rate, payout.commission_amount), (Decimal(rate), Decimal(commission)), price)
             self.assertEqual(payout.commission_amount + payout.net_amount, payout.gross_amount)
 
+    @override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True)
+    def test_a_verified_seller_pays_the_lower_fee(self):
+        payment = held_payment("200000.00")
+        profile = payment.order.seller.profile
+        profile.seller_verified = True
+        profile.save()
+        payment.status = Payment.Status.RELEASED
+        payment.save()
+        self.assertEqual(payouts.create_payout(payment).commission_amount, Decimal("7000.00"))  # 2,500 + 4,500
+
     def test_the_preview_endpoint_is_public_and_validates(self):
         client = APIClient()
         body = client.get("/api/v1/payouts/preview/?price=15000").json()
-        self.assertEqual(body, {"price": "15000.00", "commission_percent": "5", "commission_amount": "750.00", "you_receive": "14250.00"})
-        self.assertEqual(client.get("/api/v1/payouts/preview/?price=1,500").json()["commission_amount"], "90.00")  # commas are fine
+        self.assertEqual(body, {"price": "15000.00", "commission_percent": "6.00", "commission_amount": "900.00",
+                                "you_receive": "14100.00", "verified": False})
+        self.assertEqual(client.get("/api/v1/payouts/preview/?price=15000&verified=true").json()["commission_amount"], "750.00")
+        self.assertEqual(client.get("/api/v1/payouts/preview/?price=1,500").json()["commission_amount"], "200.00")  # minimum
         for bad in ("", "abc", "0", "-5", "99999999999"):
             self.assertEqual(client.get(f"/api/v1/payouts/preview/?price={bad}").status_code, 400, bad)
 
-    def test_the_wallet_summary_lists_the_tiers(self):
-        user = held_payment().order.seller
+    def test_the_fee_preview_endpoint_works_in_kobo(self):
         client = APIClient()
-        client.force_authenticate(user)
-        tiers = client.get("/api/v1/wallet/summary/").json()["commission_tiers"]
-        self.assertEqual(tiers, [{"below": "10000", "percent": "6"}, {"below": "100000.01", "percent": "5"}, {"below": None, "percent": "4"}])
+        body = client.get("/api/v1/fees/preview/?amount_kobo=18500000&verified=true").json()
+        self.assertEqual(body, {"amount_kobo": 18500000, "fee_kobo": 655000, "seller_net_kobo": 17845000, "verified": True,
+                                "min_fee_kobo": 20000})
+        for bad in ("", "1.5", "-1", "0", "abc"):
+            self.assertEqual(client.get(f"/api/v1/fees/preview/?amount_kobo={bad}").status_code, 400, bad)
 
 
 class CommissionTests(SimpleTestCase):
+    """A flat percent: only the driver's cut of a delivery fee uses this now."""
+
     def test_five_percent_of_a_round_amount(self):
         self.assertEqual(payouts.commission_split("200000.00", 5), (Decimal("10000.00"), Decimal("190000.00")))
 
@@ -123,12 +125,8 @@ class CommissionTests(SimpleTestCase):
     def test_other_percentages(self):
         self.assertEqual(payouts.commission_split("1000", "7.5"), (Decimal("75.00"), Decimal("925.00")))
 
-    @override_settings(COMMISSION_TIERS=[], PLATFORM_COMMISSION_PERCENT=Decimal("5"))
-    def test_default_comes_from_settings(self):
-        self.assertEqual(payouts.commission_split("100")[0], Decimal("5.00"))
 
-
-@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True, COMMISSION_TIERS=[], PLATFORM_COMMISSION_PERCENT=Decimal("5"),
+@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True,
                    PAYOUT_MAX_NGN=Decimal("2000000"), PAYOUT_MAX_ATTEMPTS=3)
 class ReleaseCreatesPayoutTests(TestCase):
     def release(self, payment, ps=None):
@@ -142,10 +140,10 @@ class ReleaseCreatesPayoutTests(TestCase):
         payout = self.release(payment, ps)
         self.assertEqual(payout.status, Payout.Status.AWAITING_ACCOUNT)
         self.assertEqual((payout.gross_amount, payout.commission_amount, payout.net_amount),
-                         (Decimal("200000.00"), Decimal("10000.00"), Decimal("190000.00")))
+                         (Decimal("200000.00"), Decimal("8250.00"), Decimal("191750.00")))
         ps.initiate_transfer.assert_not_called()
 
-    def test_with_an_account_the_seller_gets_95_percent_and_choropia_keeps_5(self):
+    def test_with_an_account_the_seller_gets_the_price_less_the_fee(self):
         payment = held_payment()
         add_account(payment.order.seller)
         ps = transfer_ok("pending")
@@ -153,7 +151,7 @@ class ReleaseCreatesPayoutTests(TestCase):
 
         ps.initiate_transfer.assert_called_once()
         kwargs = ps.initiate_transfer.call_args.kwargs
-        self.assertEqual(kwargs["amount"], Decimal("190000.00"))
+        self.assertEqual(kwargs["amount"], Decimal("191750.00"))
         self.assertEqual(kwargs["recipient_code"], "RCP_abc")
         self.assertRegex(kwargs["reference"], r"^choropia-payout-\d{8}-[0-9a-f]{12}$")
         self.assertEqual(kwargs["reference"], kwargs["reference"].lower())  # Paystack: transfer refs are lowercase
@@ -227,7 +225,7 @@ class ReleaseCreatesPayoutTests(TestCase):
         ps.initiate_transfer.assert_not_called()
 
 
-@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True, COMMISSION_TIERS=[], PLATFORM_COMMISSION_PERCENT=Decimal("5"), PAYOUT_MAX_NGN=Decimal("2000000"), PAYOUT_MAX_ATTEMPTS=3)
+@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True, PAYOUT_MAX_NGN=Decimal("2000000"), PAYOUT_MAX_ATTEMPTS=3)
 class FailureHandlingTests(TestCase):
     def setUp(self):
         self.payment = held_payment()
@@ -318,7 +316,7 @@ class FailureHandlingTests(TestCase):
         ps.initiate_transfer.assert_not_called()
 
 
-@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True, COMMISSION_TIERS=[], PLATFORM_COMMISSION_PERCENT=Decimal("5"), PAYOUT_MAX_NGN=Decimal("2000000"), PAYOUT_MAX_ATTEMPTS=3)
+@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True, PAYOUT_MAX_NGN=Decimal("2000000"), PAYOUT_MAX_ATTEMPTS=3)
 class TransferWebhookTests(TestCase):
     def setUp(self):
         payment = held_payment()
@@ -369,7 +367,7 @@ class TransferWebhookTests(TestCase):
         self.assertEqual(self.payout.status, Payout.Status.SUCCESS)
 
 
-@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True, COMMISSION_TIERS=[], PLATFORM_COMMISSION_PERCENT=Decimal("5"), PAYOUT_MAX_NGN=Decimal("2000000"), PAYOUT_MAX_ATTEMPTS=3)
+@override_settings(PAYSTACK_SECRET_KEY=SECRET, PAYOUTS_ENABLED=True, PAYOUT_MAX_NGN=Decimal("2000000"), PAYOUT_MAX_ATTEMPTS=3)
 class PayoutAccountApiTests(TestCase):
     def setUp(self):
         cache.clear()
@@ -447,7 +445,7 @@ class PayoutAccountApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         payout.refresh_from_db()
         self.assertEqual(payout.status, Payout.Status.PROCESSING)
-        self.assertEqual(self.ps.initiate_transfer.call_args.kwargs["amount"], Decimal("190000.00"))
+        self.assertEqual(self.ps.initiate_transfer.call_args.kwargs["amount"], Decimal("191750.00"))
 
     def test_delete_removes_the_account(self):
         self.put()
@@ -460,7 +458,7 @@ class PayoutAccountApiTests(TestCase):
         payouts.create_payout(self.payment)
         mine = self.client.get("/api/v1/payouts/").json()["results"]
         self.assertEqual(len(mine), 1)
-        self.assertEqual((mine[0]["commission_amount"], mine[0]["net_amount"]), ("10000.00", "190000.00"))
+        self.assertEqual((mine[0]["commission_amount"], mine[0]["net_amount"]), ("8250.00", "191750.00"))
         other = APIClient()
         other.force_authenticate(self.payment.order.buyer)
         self.assertEqual(other.get("/api/v1/payouts/").json()["results"], [])
@@ -471,13 +469,15 @@ class PayoutAccountApiTests(TestCase):
         payouts.create_payout(self.payment)
         url = f"/api/v1/orders/{self.payment.order_id}/"
         seller_view = self.client.get(url).json()["payout"]
-        self.assertEqual(seller_view["net_amount"], "190000.00")
+        self.assertEqual(seller_view["net_amount"], "191750.00")
         buyer = APIClient()
         buyer.force_authenticate(self.payment.order.buyer)
         self.assertIsNone(buyer.get(url).json()["payout"])
 
-    def test_wallet_summary_states_the_commission(self):
-        self.assertEqual(self.client.get("/api/v1/wallet/summary/").json()["commission_percent"], "5")
+    def test_wallet_summary_states_the_fee_bands(self):
+        body = self.client.get("/api/v1/wallet/summary/").json()
+        self.assertEqual((body["seller_verified"], body["min_fee_kobo"]), (False, 20000))
+        self.assertEqual([b["rate_bp"] for b in body["fee_bands"]], [600, 350, 50, 5])
 
 
 class ScheduledJobsEndpointTests(TestCase):
@@ -500,7 +500,7 @@ class ScheduledJobsEndpointTests(TestCase):
             for method in (self.client.post, self.client.get):
                 response = method(self.URL, HTTP_AUTHORIZATION="Bearer s3cret")
                 self.assertEqual(response.status_code, 200)
-                self.assertEqual(set(response.json()), {"paystack_payments", "auto_release", "auto_refund_undispatched", "pending_refunds", "payouts", "dispatch_nudges", "purge_rejected_documents", "staff_digest"})
+                self.assertEqual(set(response.json()), {"paystack_payments", "auto_release", "auto_refund_undispatched", "pending_refunds", "payouts", "dispatch_nudges", "chat_offers_expiry", "purge_rejected_documents", "staff_digest"})
 
     @override_settings(CRON_SECRET="s3cret")
     def test_one_failing_job_does_not_stop_the_others(self):

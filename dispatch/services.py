@@ -154,7 +154,9 @@ def choose_delivery(order, user, dropoff_area, driver, note=""):
     buyer_share, seller_share = split_fee(fee, options.payer)
     from payments.payouts import commission_split
 
-    if commission_split(Decimal(order.price))[1] - seller_share < 0:
+    from accounts.models import is_verified_seller
+
+    if commission_split(Decimal(order.price), verified=is_verified_seller(order.seller))[1] - seller_share < 0:
         raise DispatchError("This item costs too little for the seller to cover that delivery fee. Pick a different option.")
 
     delivery, _ = OrderDelivery.objects.update_or_create(

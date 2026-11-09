@@ -10,7 +10,7 @@ import { Button } from "./Button";
 import { Avatar, Badge } from "./ui";
 
 export function ListingCard({ item, view, density, style }: { item: Listing; view: View; density: Density; style?: CSSProperties }) {
-  const { ensureLogin, buy, messageSeller, setLiked } = useListingActions();
+  const { buy, messageSeller, setLiked } = useListingActions();
   const compact = density === "compact";
   const [liked, setLikedState] = useState(item.is_liked);
   const [likes, setLikes] = useState(item.likes_count);
@@ -22,7 +22,6 @@ export function ListingCard({ item, view, density, style }: { item: Listing; vie
   }, [item.is_liked, item.likes_count]);
 
   const toggleLike = async () => {
-    if (!ensureLogin()) return;
     const next = !liked;
     setLikedState(next);
     setLikes((n) => n + (next ? 1 : -1));
@@ -66,15 +65,25 @@ export function ListingCard({ item, view, density, style }: { item: Listing; vie
             {item.title}
           </Link>
           <Badge tone="success">Escrow</Badge>
+          {item.status === "sold" && <Badge tone="muted">Sold</Badge>}
         </div>
         <p className={cn("mt-1 text-xs leading-relaxed text-muted-foreground", compact ? "line-clamp-1" : "line-clamp-2")}>
           {item.description || `${item.condition} · ${item.location || "Uyo"}`}
         </p>
+        {item.status === "sold" && item.market_visible_until && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            Visible to buyers until {new Date(item.market_visible_until).toLocaleDateString()}
+          </p>
+        )}
 
         <div className="mt-auto flex flex-wrap items-center gap-2 pt-3 text-xs text-muted-foreground">
-          <Avatar src={item.seller_avatar} name={item.seller_name} size={24} />
-          <Link to={item.merchant ? `/merchants/${item.merchant}` : href} className="hover:text-foreground">
-            {item.seller_name}
+          <Link
+            to={item.merchant ? `/merchants/${item.merchant}` : `/users/${item.seller_id}`}
+            className="flex items-center gap-2 hover:text-foreground"
+            aria-label={`View ${item.seller_name}'s profile`}
+          >
+            <Avatar src={item.seller_avatar} name={item.seller_name} size={24} />
+            <span>{item.seller_name}</span>
           </Link>
           <span>· {item.location || "Uyo"}</span>
           <span className="capitalize">· {item.condition}</span>
@@ -98,9 +107,10 @@ export function ListingCard({ item, view, density, style }: { item: Listing; vie
           {item.quantity !== undefined && item.quantity > 0 && item.quantity <= 5 && (
             <span className="self-center text-xs font-medium text-muted-foreground">{item.quantity === 1 ? "Only 1 left" : `${item.quantity} left`}</span>
           )}
-          <Button onClick={() => buy(item.id)}>
-            Buy{" "}
-            {item.previous_price && Number(item.previous_price) !== Number(item.price) && <s className="opacity-70">{naira(item.previous_price)}</s>} {naira(item.price)}
+          <Button onClick={() => buy(item.id)} disabled={item.status === "sold"}>
+            {item.status === "sold" ? "Sold" : <>Buy{" "}
+              {item.previous_price && Number(item.previous_price) !== Number(item.price) && <s className="opacity-70">{naira(item.previous_price)}</s>} {naira(item.price)}
+            </>}
           </Button>
         </div>
       </div>

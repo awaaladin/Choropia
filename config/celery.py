@@ -34,6 +34,10 @@ app.conf.beat_schedule = {
         "task": "dispatch.tasks.nudge_stale_offers_task",
         "schedule": 900.0,
     },
+    "expire-chat-offers-every-5-minutes": {
+        "task": "offers.tasks.expire_offers_task",
+        "schedule": 300.0,
+    },
     "poll-gaxtron-payments-every-2-minutes": {
         "task": "payments.tasks.poll_gaxtron_payments_task",
         "schedule": 120.0,

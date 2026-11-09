@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 from decimal import Decimal
 
 from django.conf import settings
@@ -130,7 +131,26 @@ def reserve_listing(order):
     listing.quantity -= 1
     if listing.quantity == 0:
         listing.status = Listing.Status.SOLD
-    listing.save(update_fields=["quantity", "status", "updated_at"])
+        listing.sold_at = timezone.now()
+        days = settings.SOLD_LISTING_DEFAULT_DAYS
+        if days not in settings.SOLD_LISTING_DURATIONS:
+            raise ValueError("SOLD_LISTING_DEFAULT_DAYS must be one of the configured sold durations.")
+        listing.market_visible_until = listing.sold_at + timedelta(days=days)
+    update_fields = ["quantity", "status", "updated_at"]
+    if listing.quantity == 0:
+        update_fields.extend(["sold_at", "market_visible_until"])
+        from django.contrib.contenttypes.models import ContentType
+        from notifications.models import Notification
+
+        Notification.objects.create(
+            recipient=order.seller,
+            actor=order.buyer,
+            notification_type=Notification.Type.ORDER_STATUS,
+            verb=f'Your listing "{listing.title}" sold. Choose how long it stays visible in the market.',
+            target_content_type=ContentType.objects.get_for_model(order),
+            target_object_id=order.pk,
+        )
+    listing.save(update_fields=update_fields)
     return True
 
 
@@ -144,10 +164,12 @@ def reopen_listing(order):
     listing.quantity += 1
     if listing.status == Listing.Status.SOLD:
         listing.status = Listing.Status.ACTIVE
-    listing.save(update_fields=["quantity", "status", "updated_at"])
+        listing.sold_at = None
+        listing.market_visible_until = None
+    listing.save(update_fields=["quantity", "status", "sold_at", "market_visible_until", "updated_at"])
 
 
-def _hold_for_refund(payment, data, raw_payload):
+def _hold_for_refund(payment, data, raw_payload, note="Item no longer available"):
     """A buyer paid for an item that sold to someone else a moment earlier. Cancel their order and
     give the money straight back; a scheduler retries if Paystack is unavailable."""
     payment.status = Payment.Status.REFUND_PENDING
@@ -155,8 +177,11 @@ def _hold_for_refund(payment, data, raw_payload):
     payment.paystack_transaction_id = str(data.get("id") or "")
     payment.raw_webhook_payload = raw_payload or data
     payment.save(update_fields=["status", "paid_at", "paystack_transaction_id", "raw_webhook_payload"])
+    from . import ledger
+
+    ledger.received_for_refund(payment, note=note)
     if payment.order.status != OrderStatus.CANCELLED:  # already cancelled by the buyer or seller: nothing more to change
-        payment.order.transition_to(OrderStatus.CANCELLED, note="Item no longer available; payment is being refunded")
+        payment.order.transition_to(OrderStatus.CANCELLED, note=f"{note}; payment is being refunded")
     transaction.on_commit(lambda pid=payment.pk: process_pending_refund(pid))
     logger.warning("Payment %s arrived for an unavailable item; refunding", payment.reference)
     return payment
@@ -180,10 +205,15 @@ def process_pending_refund(payment_id):
             if not _already_refunded(exc):
                 logger.error("Refund for payment %s failed (will retry): %s", payment.reference, exc)
                 return payment
-        Payment.objects.filter(pk=payment.pk, status=Payment.Status.REFUND_PENDING).update(
-            status=Payment.Status.REFUNDED, refunded_at=timezone.now()
-        )
-        payment.refresh_from_db()
+        with transaction.atomic():
+            changed = Payment.objects.filter(pk=payment.pk, status=Payment.Status.REFUND_PENDING).update(
+                status=Payment.Status.REFUNDED, refunded_at=timezone.now()
+            )
+            payment.refresh_from_db()
+            if changed:
+                from . import ledger
+
+                ledger.refunded(payment)
         return payment
     except Exception:  # noqa: BLE001 - never raise into a webhook or a scheduler
         logger.exception("Unexpected error refunding payment %s", payment_id)
@@ -197,9 +227,12 @@ def retry_pending_refunds():
 
 
 def _mark_held(payment, note):
+    from . import ledger
+
     payment.status = Payment.Status.PAID_HELD
     payment.paid_at = timezone.now()
     payment.order.transition_to(OrderStatus.PAID_ESCROW, note=note)
+    ledger.held(payment)
     try:
         from dispatch import services as dispatch_services
 
@@ -329,4 +362,7 @@ def refund_escrow(order):
     payment.status = Payment.Status.REFUNDED
     payment.refunded_at = timezone.now()
     payment.save(update_fields=["status", "refunded_at"])
+    from . import ledger
+
+    ledger.refunded(payment)
     return payment

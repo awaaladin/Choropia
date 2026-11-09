@@ -81,12 +81,14 @@ import com.choropia.app.ui.components.SurfaceCard
 import com.choropia.app.ui.rememberVm
 import com.choropia.app.ui.theme.MoneyStyle
 import com.choropia.app.ui.util.formatNaira
+import com.choropia.app.ui.util.shortDateTime
 import com.choropia.app.ui.util.timeAgo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 
 data class DetailState(
     val listing: Listing? = null,
@@ -197,10 +199,24 @@ class ListingDetailViewModel(
         guarded(onNeedsLogin) { onOpenOrder(repo.createOrder(id).id) }
     }
 
-    fun markSold() {
+    fun markSold(durationDays: Int) {
         guarded({}) {
-            val updated = repo.markSold(id)
-            _state.update { it.copy(listing = _state.value.listing?.copy(status = updated.status), message = "Marked as sold") }
+            val updated = repo.markSold(id, durationDays)
+            _state.update { it.copy(listing = updated, message = "Marked sold for $durationDays days") }
+        }
+    }
+
+    fun extendMarketVisibility(durationDays: Int) {
+        guarded({}) {
+            val updated = repo.extendMarketVisibility(id, durationDays)
+            _state.update { it.copy(listing = updated, message = "Visibility extended for $durationDays days") }
+        }
+    }
+
+    fun relist() {
+        guarded({}) {
+            val updated = repo.relist(id)
+            _state.update { it.copy(listing = updated, message = "Listing is back on the market") }
         }
     }
 
@@ -221,6 +237,7 @@ fun ListingDetailScreen(
     onOpenChat: (Int) -> Unit,
     onOpenOrder: (Int) -> Unit,
     onOpenMerchant: (Int) -> Unit,
+    onOpenUser: (Int) -> Unit = {},
     onNeedsLogin: () -> Unit,
     showMessage: (String) -> Unit,
     onEdit: (Int) -> Unit = {},
@@ -236,6 +253,7 @@ fun ListingDetailScreen(
     }
 
     var confirmBuy by remember { mutableStateOf(false) }
+    var durationAction by remember { mutableStateOf<String?>(null) }
     var replyTo by remember { mutableStateOf<Comment?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val saved by repo.savedIdsFlow.collectAsState(initial = emptySet())
@@ -302,6 +320,15 @@ fun ListingDetailScreen(
                                         StatusPill(listing.status, MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
                                     }
                                 }
+                                if (listing.status == "sold") {
+                                    val stillVisible = com.choropia.app.ui.util.parseInstant(listing.market_visible_until)?.isAfter(Instant.now()) == true
+                                    Text(
+                                        if (stillVisible) "Sold · visible to buyers until ${shortDateTime(listing.market_visible_until)}"
+                                        else "Sold · no longer visible to buyers",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                                 Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
                                     if (listing.location.isNotBlank()) {
                                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -320,7 +347,8 @@ fun ListingDetailScreen(
                         item(key = "seller") {
                             SurfaceCard(
                                 Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-                                onClick = listing.merchantRef?.let { id -> { onOpenMerchant(id) } },
+                                onClick = listing.merchantRef?.let { id -> { onOpenMerchant(id) } }
+                                    ?: listing.sellerUserId?.let { id -> { onOpenUser(id) } },
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                     Avatar(listing.seller_name.ifBlank { "Seller" }, listing.seller_avatar, size = 46.dp)
@@ -407,11 +435,11 @@ fun ListingDetailScreen(
                             .groupBy { rootOf(it) }
                         roots.forEach { root ->
                             item(key = "c${root.id}") {
-                                CommentRow(root, listing.owner_id, me?.id, depth = 0) { replyTo = root }
+                                CommentRow(root, me?.id, depth = 0) { replyTo = root }
                             }
                             repliesByRoot[root.id].orEmpty().forEach { reply ->
                                 item(key = "c${reply.id}") {
-                                    CommentRow(reply, listing.owner_id, me?.id, depth = 1) { replyTo = root }
+                                    CommentRow(reply, me?.id, depth = 1) { replyTo = root }
                                 }
                             }
                         }
@@ -446,7 +474,11 @@ fun ListingDetailScreen(
                     ) {
                         when {
                             isOwner && listing.status == "active" ->
-                                SecondaryButton("Mark as sold", { vm.markSold() }, Modifier.weight(1f), enabled = !state.busy)
+                                SecondaryButton("Mark as sold", { durationAction = "sold" }, Modifier.weight(1f), enabled = !state.busy)
+                            isOwner && listing.status == "sold" -> {
+                                SecondaryButton("Extend visibility", { durationAction = "extend" }, Modifier.weight(1f), enabled = !state.busy)
+                                SecondaryButton("Relist", { vm.relist() }, Modifier.weight(1f), enabled = !state.busy)
+                            }
                             isOwner -> Text(
                                 "This is your listing (${listing.status}).",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -490,6 +522,29 @@ fun ListingDetailScreen(
                             TextButton(onClick = { confirmBuy = false; vm.buyNow(onNeedsLogin, onOpenOrder) }) { Text("Create order") }
                         },
                         dismissButton = { TextButton(onClick = { confirmBuy = false }) { Text("Cancel") } },
+                    )
+                }
+                durationAction?.let { action ->
+                    AlertDialog(
+                        onDismissRequest = { durationAction = null },
+                        title = { Text(if (action == "extend") "Extend market visibility" else "How long should this stay visible?") },
+                        text = {
+                            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    if (action == "extend") "Buyers will continue to see the sold listing but cannot purchase it."
+                                    else "Buyers can still see this listing and contact you, but cannot purchase it.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                                listOf(1, 3, 7, 14, 30).forEach { days ->
+                                    TextButton(onClick = {
+                                        durationAction = null
+                                        if (action == "extend") vm.extendMarketVisibility(days) else vm.markSold(days)
+                                    }) { Text("$days ${if (days == 1) "day" else "days"}") }
+                                }
+                            }
+                        },
+                        confirmButton = {},
+                        dismissButton = { TextButton(onClick = { durationAction = null }) { Text("Cancel") } },
                     )
                 }
                 if (reportOpen) {
@@ -579,18 +634,17 @@ private fun FloatingCircle(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun CommentRow(comment: Comment, sellerId: Int?, myId: Int?, depth: Int, onReply: () -> Unit) {
-    val label = when (comment.author_id) {
-        null -> "Member"
-        myId -> "You"
-        sellerId -> "Seller"
-        else -> "Member"
+private fun CommentRow(comment: Comment, myId: Int?, depth: Int, onReply: () -> Unit) {
+    val label = if (myId != null && comment.author_id == myId) {
+        "You"
+    } else {
+        comment.author?.display_name ?: "Deleted user"
     }
     Row(
         Modifier.padding(start = 16.dp + (depth * 36).dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Avatar(label, null, size = if (depth == 0) 32.dp else 26.dp)
+        Avatar(label, comment.author?.avatar_url, size = if (depth == 0) 32.dp else 26.dp)
         Column {
             Column(
                 Modifier

@@ -7,12 +7,18 @@ from rest_framework.response import Response
 from listings.models import Listing
 from orders.models import Order
 
+from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.utils import timezone
+from accounts.demo import is_demo_user
 
 from .models import Conversation, Message
+from .listing_references import append_listing_reference
 from .serializers import ConversationSerializer, MessageSerializer
 from common.throttling import ScopedWritesMixin
+
+User = get_user_model()
 
 
 class ConversationViewSet(
@@ -23,38 +29,85 @@ class ConversationViewSet(
 
     def get_queryset(self):
         user = self.request.user
-        return Conversation.objects.filter(Q(buyer=user) | Q(seller=user)).select_related(
-            "listing", "buyer", "buyer__profile", "seller", "seller__profile"
+        return Conversation.objects.filter(Q(user_low=user) | Q(user_high=user)).select_related(
+            "listing", "buyer", "buyer__profile", "seller", "seller__profile",
+            "user_low", "user_low__profile", "user_high", "user_high__profile",
         )
 
     def get_object(self):
         obj = super().get_object()
-        if self.request.user.id not in (obj.buyer_id, obj.seller_id):
+        if self.request.user.id not in (obj.user_low_id, obj.user_high_id):
             raise PermissionDenied()
         return obj
+
+    @action(detail=False, methods=["post"], url_path="open")
+    def open(self, request):
+        other_user_id = request.data.get("other_user_id")
+        listing_id = request.data.get("listing_id")
+        if not other_user_id:
+            raise ValidationError({"other_user_id": "This field is required."})
+
+        try:
+            other_user = User.objects.get(pk=other_user_id, is_active=True)
+        except (User.DoesNotExist, TypeError, ValueError):
+            raise ValidationError({"other_user_id": "User not found."})
+
+        if other_user.pk == request.user.pk:
+            raise ValidationError("You cannot start a conversation with yourself.")
+        if is_demo_user(other_user):
+            raise ValidationError("This seller is not available for messages.")
+
+        listing = None
+        if listing_id is not None:
+            listing = Listing.objects.filter(pk=listing_id).first()
+            if listing is None:
+                raise ValidationError({"listing_id": "Listing not found."})
+            if listing.owner_id != other_user.pk:
+                raise ValidationError({"listing_id": "The listing must belong to the other participant."})
+            if is_demo_user(listing.owner):
+                raise ValidationError("This seller is not available for messages.")
+
+        conversation, created = Conversation.get_or_create_direct_thread(request.user, other_user, listing=listing)
+        if listing is not None:
+            message, ref_created = append_listing_reference(conversation.pk, listing, request.user, request)
+            if ref_created:
+                from .realtime import broadcast_message
+
+                broadcast_message(message)
+        serializer = self.get_serializer(conversation)
+        return Response(serializer.data, status=201 if created else 200)
 
     @action(detail=True, methods=["post"], url_path="create-order")
     def create_order(self, request, pk=None):
         conversation = self.get_object()
-
-        if conversation.order_id:
-            raise ValidationError("This conversation already has an order.")
-        if request.user.id != conversation.buyer_id:
-            raise PermissionDenied("Only the buyer can turn this conversation into an order.")
-
-        listing = conversation.listing
-        if listing.status != Listing.Status.ACTIVE:
+        listing_id = request.data.get("listing_id") or conversation.listing_id
+        if listing_id is None:
+            raise ValidationError({"listing_id": "Choose a listing from this conversation."})
+        listing = Listing.objects.filter(pk=listing_id, owner_id=conversation.other_participant(request.user).pk).first()
+        if listing is None:
+            raise ValidationError({"listing_id": "This listing is not available in this conversation."})
+        if listing.status != Listing.Status.ACTIVE or listing.quantity < 1:
             raise ValidationError("This listing is no longer active.")
 
-        order = Order.objects.create(
-            listing=listing, buyer=conversation.buyer, seller=conversation.seller, price=listing.price
-        )
-        conversation.order = order
-        conversation.save(update_fields=["order"])
+        with transaction.atomic():
+            order = Order.objects.select_for_update().filter(
+                listing=listing,
+                buyer=request.user,
+                status=Order.Status.PENDING_PAYMENT,
+            ).first()
+            created = order is None
+            if created:
+                order = Order.objects.create(
+                    listing=listing, buyer=request.user, seller=listing.owner, price=listing.price
+                )
+            conversation.orders.add(order)
+            if conversation.order_id is None:
+                conversation.order = order
+                conversation.save(update_fields=["order"])
 
         from orders.serializers import OrderSerializer
 
-        return Response(OrderSerializer(order).data, status=201)
+        return Response(OrderSerializer(order).data, status=201 if created else 200)
 
 
 class MessageViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -65,8 +118,10 @@ class MessageViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListMode
     def get_queryset(self):
         user = self.request.user
         qs = Message.objects.filter(
-            Q(conversation__buyer=user) | Q(conversation__seller=user)
-        ).select_related("sender")
+            Q(conversation__user_low=user) | Q(conversation__user_high=user)
+        ).select_related("sender", "offer__listing", "referenced_listing").prefetch_related(
+            "offer__listing__photos", "referenced_listing__photos"
+        )
         conversation_id = self.request.query_params.get("conversation")
         if conversation_id:
             qs = qs.filter(conversation_id=conversation_id)
@@ -83,7 +138,7 @@ class MessageViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListMode
 
     def perform_create(self, serializer):
         conversation = serializer.validated_data["conversation"]
-        if self.request.user.id not in (conversation.buyer_id, conversation.seller_id):
+        if self.request.user.id not in (conversation.user_low_id, conversation.user_high_id):
             raise PermissionDenied()
         message = serializer.save()
 
@@ -97,7 +152,9 @@ def mark_conversation_seen(user, conversation_id: int) -> None:
     Does nothing for a conversation `user` is not part of."""
     from notifications.models import Notification
 
-    conversation = Conversation.objects.filter(pk=conversation_id).filter(Q(buyer=user) | Q(seller=user)).first()
+    conversation = Conversation.objects.filter(pk=conversation_id).filter(
+        Q(user_low=user) | Q(user_high=user)
+    ).first()
     if conversation is None:
         return
     Message.objects.filter(conversation=conversation, read_at__isnull=True).exclude(sender=user).update(read_at=timezone.now())
