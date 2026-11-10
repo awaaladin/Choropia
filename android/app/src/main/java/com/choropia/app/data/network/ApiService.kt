@@ -68,6 +68,8 @@ data class RegisterRequest(
 
 @Serializable data class RefreshRequest(val refresh: String)
 @Serializable data class LogoutRequest(val refresh: String)
+@Serializable data class GoogleLoginRequest(val id_token: String)
+@Serializable data class GoogleConfig(val client_id: String = "")
 @Serializable data class TwoFactorVerifyRequest(val challenge: String, val code: String)
 @Serializable data class TwoFactorCodeRequest(val code: String)
 @Serializable data class TwoFactorDisableRequest(val password: String, val code: String)
@@ -270,6 +272,12 @@ interface ChoropiaApi {
     // --- auth ---------------------------------------------------------------------------------
     @POST("auth/login/")
     suspend fun login(@Body body: LoginRequest): LoginResponse
+
+    @POST("auth/google/")
+    suspend fun googleLogin(@Body body: GoogleLoginRequest): LoginResponse
+
+    @GET("auth/google/config/")
+    suspend fun googleConfig(): GoogleConfig
 
     @POST("auth/2fa/verify/")
     suspend fun verifyTwoFactor(@Body body: TwoFactorVerifyRequest): AuthResponse

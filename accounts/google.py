@@ -93,3 +93,14 @@ class GoogleLoginView(APIView):
         if not user.is_active:
             return Response({"detail": "This account is inactive."}, status=403)
         return Response(login_response(user))
+
+
+class GoogleConfigView(APIView):
+    """Tells the website and the app which Google client ID to sign in with (empty until it is configured), so turning
+    Google sign-in on needs no new app build."""
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        return Response({"client_id": getattr(settings, "GOOGLE_OAUTH_CLIENT_ID", "")})

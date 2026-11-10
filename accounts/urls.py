@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .google import GoogleLoginView
+from .google import GoogleConfigView, GoogleLoginView
 from .pin_views import PinResetCodeView, TransactionPinView
 from .two_factor import (
     TwoFactorConfirmView,
@@ -37,6 +37,7 @@ urlpatterns = [
     path("auth/password-reset/", PasswordResetRequestView.as_view(), name="password_reset"),
     path("auth/password-reset/confirm/", PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("auth/google/", GoogleLoginView.as_view(), name="google_login"),
+    path("auth/google/config/", GoogleConfigView.as_view(), name="google_config"),
     path("auth/2fa/status/", TwoFactorStatusView.as_view(), name="2fa_status"),
     path("auth/2fa/setup/", TwoFactorSetupView.as_view(), name="2fa_setup"),
     path("auth/2fa/confirm/", TwoFactorConfirmView.as_view(), name="2fa_confirm"),
