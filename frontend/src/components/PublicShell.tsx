@@ -97,7 +97,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
               Choropia<span className="text-success">.</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">Good things. Real people. Closer to home.</p>
-            <p className="mt-5 text-xs text-muted-foreground">Uyo, Akwa Ibom · Nigeria</p>
+            <p className="mt-5 text-xs text-muted-foreground">Nigeria · Starting in Uyo, Akwa Ibom</p>
           </div>
           <nav aria-label="Footer" className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
             {FOOTER_LINKS.map((item) => (

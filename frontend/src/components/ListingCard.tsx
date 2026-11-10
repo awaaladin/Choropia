@@ -68,7 +68,7 @@ export function ListingCard({ item, view, density, style }: { item: Listing; vie
           {item.status === "sold" && <Badge tone="muted">Sold</Badge>}
         </div>
         <p className={cn("mt-1 text-xs leading-relaxed text-muted-foreground", compact ? "line-clamp-1" : "line-clamp-2")}>
-          {item.description || `${item.condition} · ${item.location || "Uyo"}`}
+          {item.description || `${item.condition} · ${item.location || "Nigeria"}`}
         </p>
         {item.status === "sold" && item.market_visible_until && (
           <p className="mt-1 text-xs text-muted-foreground">
@@ -85,7 +85,7 @@ export function ListingCard({ item, view, density, style }: { item: Listing; vie
             <Avatar src={item.seller_avatar} name={item.seller_name} size={24} />
             <span>{item.seller_name}</span>
           </Link>
-          <span>· {item.location || "Uyo"}</span>
+          <span>· {item.location || "Nigeria"}</span>
           <span className="capitalize">· {item.condition}</span>
         </div>
 

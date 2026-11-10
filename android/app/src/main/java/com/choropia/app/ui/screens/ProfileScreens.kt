@@ -208,7 +208,7 @@ fun ProfileScreen(
 
         SecondaryButton("Log out", { confirmLogout = true }, icon = Icons.AutoMirrored.Outlined.Logout, destructive = true)
         Text(
-            "Choropia ${BuildConfig.VERSION_NAME} · escrow-protected marketplace for Uyo",
+            "Choropia ${BuildConfig.VERSION_NAME} · escrow-protected marketplace for Nigeria",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.outline,
             modifier = Modifier.fillMaxWidth(),

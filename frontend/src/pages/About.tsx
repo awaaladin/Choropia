@@ -23,7 +23,7 @@ export function AboutPage() {
           Local at heart.
         </h1>
         <p className="page-enter mt-6 max-w-xl text-base leading-7 text-muted-foreground">
-          Good trade starts with people. We're building a place where the everyday talent, enterprise, and generosity of Uyo can be
+          Good trade starts with people. We're building a place where the everyday talent, enterprise, and generosity of Nigerians, starting in Uyo, can be
           seen — with every purchase held in escrow until the buyer confirms delivery.
         </p>
       </section>

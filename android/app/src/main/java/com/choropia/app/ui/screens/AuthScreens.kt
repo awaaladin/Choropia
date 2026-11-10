@@ -272,7 +272,7 @@ fun RegisterScreen(onRegistered: (wantsStorefront: Boolean) -> Unit, onLogin: ()
     val legalContext = androidx.compose.ui.platform.LocalContext.current
     val focus = LocalFocusManager.current
 
-    AuthFrame("Create your account", "Join Uyo's trusted, escrow-protected marketplace.", vm.busy, onBack) {
+    AuthFrame("Create your account", "Join Nigeria's escrow-protected marketplace, starting in Uyo.", vm.busy, onBack) {
         Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
             vm.error?.let { ErrorBanner(it) }
             Text("I want to", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)

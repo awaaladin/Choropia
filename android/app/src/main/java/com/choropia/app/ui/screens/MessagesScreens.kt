@@ -817,8 +817,11 @@ private fun Bubble(
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             )
         }
-        if (mine && message.type == "text" && !message.is_deleted && !pendingSend) {
+        // WhatsApp-style options on any message: Copy text for everyone, Delete for everyone on your own.
+        if (message.type == "text" && !message.is_deleted && !pendingSend && (message.body.isNotBlank() || mine)) {
             var menuExpanded by remember(message.id) { mutableStateOf(false) }
+            val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+            val menuContext = LocalContext.current
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
                     Icon(
@@ -828,10 +831,22 @@ private fun Bubble(
                     )
                 }
                 DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Delete for everyone") },
-                        onClick = { menuExpanded = false; onDelete() },
-                    )
+                    if (message.body.isNotBlank()) {
+                        DropdownMenuItem(
+                            text = { Text("Copy text") },
+                            onClick = {
+                                menuExpanded = false
+                                clipboard.setText(androidx.compose.ui.text.AnnotatedString(message.body))
+                                android.widget.Toast.makeText(menuContext, "Copied", android.widget.Toast.LENGTH_SHORT).show()
+                            },
+                        )
+                    }
+                    if (mine) {
+                        DropdownMenuItem(
+                            text = { Text("Delete for everyone", color = MaterialTheme.colorScheme.error) },
+                            onClick = { menuExpanded = false; onDelete() },
+                        )
+                    }
                 }
             }
         }

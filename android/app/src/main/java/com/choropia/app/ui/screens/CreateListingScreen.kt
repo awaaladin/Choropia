@@ -286,7 +286,7 @@ fun CreateListingScreen(onBack: () -> Unit, onCreated: (Int) -> Unit) {
                 }
 
                 ChoropiaField(
-                    location, { location = it }, "Location (e.g. Uyo)",
+                    location, { location = it }, "Location (e.g. Uyo, Aba, Lagos)",
                     leadingIcon = Icons.Outlined.LocationOn, imeAction = ImeAction.Done,
                 )
                 Spacer(Modifier.height(4.dp))

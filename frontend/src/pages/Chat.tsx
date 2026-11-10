@@ -1,10 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, Mic, Send, Square, Tag, Trash2 } from "lucide-react";
+import { ArrowLeft, ImagePlus, Mic, Send, Square, Tag } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
+import { MessageMenu } from "@/components/MessageMenu";
 import { ErrorState, Input, Skeleton } from "@/components/ui";
 import { OfferCard, OfferComposerSheet, PaySheet, type OfferCardActions } from "@/features/offers";
 import { errorMessage } from "@/lib/actions";
@@ -301,7 +302,6 @@ export function ChatPage() {
   };
 
   const deleteMessage = async (message: Message) => {
-    if (!window.confirm("Delete this message for everyone?")) return;
     setDeletingMessageId(message.id);
     try {
       await api.deleteMessage(message.id);
@@ -349,7 +349,7 @@ export function ChatPage() {
           const mine = m.sender_id === user?.id;
           return (
             <div key={m.id} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-              <div className={cn("flex max-w-[90%] items-end gap-1", mine ? "flex-row-reverse" : "flex-row")}>
+              <div className={cn("group flex max-w-[90%] items-end gap-1", mine ? "flex-row-reverse" : "flex-row")}>
                 <div className={cn("animate-pop-in max-w-[calc(100%-2.5rem)] rounded-xl text-sm", m.type === "listing_ref" || m.type === "offer" ? "bg-transparent" : `px-3 py-2 ${mine ? "bg-primary text-primary-foreground" : "bg-accent text-foreground"}`)}>
                   {m.type === "offer" && m.offer ? (
                     <OfferCard offer={m.offer} actions={offerActions} />
@@ -374,17 +374,14 @@ export function ChatPage() {
                     </>
                   )}
                 </div>
-                {mine && m.type === "text" && !m.is_deleted && (
-                  <button
-                    type="button"
-                    aria-label="Delete message for everyone"
-                    title="Delete for everyone"
-                    disabled={deletingMessageId === m.id}
-                    onClick={() => void deleteMessage(m)}
-                    className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-accent disabled:opacity-50"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                {m.type === "text" && !m.is_deleted && (
+                  <MessageMenu
+                    mine={mine}
+                    text={m.body}
+                    canDelete={mine}
+                    deleting={deletingMessageId === m.id}
+                    onDelete={() => void deleteMessage(m)}
+                  />
                 )}
               </div>
             </div>
