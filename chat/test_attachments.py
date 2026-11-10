@@ -79,3 +79,59 @@ class ChatAttachmentTests(APITestCase):
         self.client.force_authenticate(self.outsider)
         response = self._post(body="sneaky")
         self.assertEqual(response.status_code, 403)
+
+    def test_sender_can_delete_text_for_both_participants(self):
+        message = Message.objects.create(conversation=self.conversation, sender=self.buyer, body="private note")
+
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.delete(f"/api/v1/messages/{message.id}/")
+
+        self.assertEqual(response.status_code, 204)
+        message.refresh_from_db()
+        self.assertIsNotNone(message.deleted_at)
+        self.assertEqual(message.body, "")
+
+        for user in (self.buyer, self.seller):
+            client = APIClient()
+            client.force_authenticate(user)
+            messages = client.get(f"/api/v1/messages/?conversation={self.conversation.id}").json()["results"]
+            deleted = next(row for row in messages if row["id"] == message.id)
+            self.assertTrue(deleted["is_deleted"])
+            self.assertEqual(deleted["body"], "")
+
+    def test_sender_can_delete_attachment_and_storage_file(self):
+        response = self._post(attachment=SimpleUploadedFile("pic.png", PNG, content_type="image/png"))
+        message_id = response.json()["id"]
+        message = Message.objects.get(pk=message_id)
+        attachment_name = message.attachment.name
+        storage = message.attachment.storage
+        self.assertTrue(storage.exists(attachment_name))
+
+        with self.captureOnCommitCallbacks(execute=True):
+            delete_response = self.client.delete(f"/api/v1/messages/{message_id}/")
+
+        self.assertEqual(delete_response.status_code, 204)
+        message.refresh_from_db()
+        self.assertFalse(message.attachment)
+        self.assertFalse(storage.exists(attachment_name))
+
+    def test_only_sender_can_delete_message(self):
+        message = Message.objects.create(conversation=self.conversation, sender=self.buyer, body="private note")
+        self.client.force_authenticate(self.seller)
+
+        self.assertEqual(self.client.delete(f"/api/v1/messages/{message.id}/").status_code, 403)
+        message.refresh_from_db()
+        self.assertIsNone(message.deleted_at)
+
+        self.client.force_authenticate(self.outsider)
+        self.assertEqual(self.client.delete(f"/api/v1/messages/{message.id}/").status_code, 404)
+
+    def test_offer_and_listing_reference_messages_cannot_be_deleted(self):
+        for message_type in (Message.MessageType.OFFER, Message.MessageType.LISTING_REF):
+            message = Message.objects.create(
+                conversation=self.conversation, sender=self.buyer, message_type=message_type
+            )
+            response = self.client.delete(f"/api/v1/messages/{message.id}/")
+            self.assertEqual(response.status_code, 400)
+            message.refresh_from_db()
+            self.assertIsNone(message.deleted_at)

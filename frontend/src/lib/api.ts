@@ -383,6 +383,7 @@ export const api = {
   getMessages: (conversationId: number) => request<Paginated<Message> | Message[]>(`/messages/?conversation=${conversationId}`),
   sendMessage: (conversationId: number, body: string) =>
     request<Message>("/messages/", { method: "POST", body: { conversation: conversationId, body } }),
+  deleteMessage: (messageId: number) => request<void>(`/messages/${messageId}/`, { method: "DELETE" }),
   sendAttachment: (conversationId: number, file: File, durationSeconds?: number, body = "") => {
     const form = new FormData();
     form.append("conversation", String(conversationId));

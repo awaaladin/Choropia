@@ -84,6 +84,7 @@ class Message(TimeStampedModel):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_messages")
     body = EncryptedTextField(blank=True)  # may be empty when the message is only an attachment
     read_at = models.DateTimeField(null=True, blank=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     class AttachmentType(models.TextChoices):
         IMAGE = "image", "Image"

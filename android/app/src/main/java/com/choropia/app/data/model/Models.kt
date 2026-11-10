@@ -150,6 +150,7 @@ data class Message(
     val conversation: Int,
     val sender_id: Int? = null,
     val type: String = "text",
+    val is_deleted: Boolean = false,
     val offer: ChatOffer? = null,
     val body: String = "",
     val attachment: String? = null,

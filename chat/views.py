@@ -1,24 +1,26 @@
+import logging
+
+from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework import mixins, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
+from accounts.demo import is_demo_user
+from common.throttling import ScopedWritesMixin
 from listings.models import Listing
 from orders.models import Order
-
-from django.contrib.auth import get_user_model
-from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
-from django.utils import timezone
-from accounts.demo import is_demo_user
 
 from .models import Conversation, Message
 from .listing_references import append_listing_reference
 from .serializers import ConversationSerializer, MessageSerializer
-from common.throttling import ScopedWritesMixin
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 class ConversationViewSet(
@@ -110,7 +112,13 @@ class ConversationViewSet(
         return Response(OrderSerializer(order).data, status=201 if created else 200)
 
 
-class MessageViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+class MessageViewSet(
+    ScopedWritesMixin,
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     write_throttle_scope = "chat-send"
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -145,6 +153,45 @@ class MessageViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListMode
         from .realtime import broadcast_message
 
         broadcast_message(message)
+
+    def perform_destroy(self, message):
+        if message.sender_id != self.request.user.id:
+            raise PermissionDenied("You can only delete your own messages.")
+        if message.message_type != Message.MessageType.TEXT:
+            raise ValidationError("Offers and listing references cannot be deleted.")
+        if message.deleted_at is not None:
+            return
+
+        with transaction.atomic():
+            message = Message.objects.select_for_update().get(pk=message.pk)
+            if message.sender_id != self.request.user.id:
+                raise PermissionDenied("You can only delete your own messages.")
+            if message.deleted_at is None:
+                attachment_name = message.attachment.name if message.attachment else None
+                attachment_storage = message.attachment.storage if message.attachment else None
+                message.body = ""
+                message.attachment = None
+                message.attachment_type = ""
+                message.duration_seconds = None
+                message.deleted_at = timezone.now()
+                message.save(
+                    update_fields=("body", "attachment", "attachment_type", "duration_seconds", "deleted_at")
+                )
+                if attachment_name:
+                    transaction.on_commit(
+                        lambda: self._delete_attachment(attachment_storage, attachment_name)
+                    )
+
+        from .realtime import broadcast_message
+
+        broadcast_message(message)
+
+    @staticmethod
+    def _delete_attachment(storage, name):
+        try:
+            storage.delete(name)
+        except Exception:
+            logger.exception("Could not remove deleted chat attachment %s", name)
 
 
 def mark_conversation_seen(user, conversation_id: int) -> None:

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, Mic, Send, Square, Tag } from "lucide-react";
+import { ArrowLeft, ImagePlus, Mic, Send, Square, Tag, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -185,6 +185,7 @@ export function ChatPage() {
   const [offerPin, setOfferPin] = useState("");
   const [offerSending, setOfferSending] = useState(false);
   const [busyOfferId, setBusyOfferId] = useState<string | null>(null);
+  const [deletingMessageId, setDeletingMessageId] = useState<number | null>(null);
   const [recording, setRecording] = useState(false);
   const paneRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -448,6 +449,32 @@ export function ChatPage() {
     }
   };
 
+  const deleteMessage = async (message: Message) => {
+    if (!window.confirm("Delete this message for everyone?")) return;
+    setDeletingMessageId(message.id);
+    try {
+      await api.deleteMessage(message.id);
+      const deleted = (item: Message): Message => ({
+        ...item,
+        body: "",
+        attachment: null,
+        attachment_type: "",
+        duration_seconds: null,
+        is_deleted: true,
+      });
+      queryClient.setQueryData<Message[]>(["messages", conversationId], (current) =>
+        current?.map((item) => item.id === message.id ? deleted(item) : item),
+      );
+      setLive((current) => current.map((item) => item.id === message.id ? deleted(item) : item));
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      toast.success("Message deleted for everyone.");
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setDeletingMessageId(null);
+    }
+  };
+
   return (
     <div className="panel editorial-enter flex h-[75vh] flex-col overflow-hidden">
       <div className="flex items-center gap-2 border-b border-border p-3 md:hidden">
@@ -471,32 +498,48 @@ export function ChatPage() {
           const mine = m.sender_id === user?.id;
           return (
             <div key={m.id} className={cn("flex", mine ? "justify-end" : "justify-start")}>
-              <div className={cn("animate-pop-in max-w-[85%] rounded-xl text-sm", m.type === "listing_ref" || m.type === "offer" ? "bg-transparent" : `px-3 py-2 ${mine ? "bg-primary text-primary-foreground" : "bg-accent text-foreground"}`)}>
-                {m.type === "offer" && m.offer ? (
-                  <ChatOfferCard
-                    offer={m.offer}
-                    onCancel={(offer) => void updateOffer(offer, "cancel")}
-                    onDecline={(offer) => void updateOffer(offer, "decline")}
-                    onPay={(offer, method) => void payOffer(offer, method)}
-                    busy={busyOfferId === m.offer.id}
-                  />
-                ) : m.type === "listing_ref" ? (
-                  <ListingReferenceCard message={m} onQuickReply={setDraft} showQuickReplies={mine} />
-                ) : (
-                  <>
-                    {m.attachment_type === "image" && m.attachment && (
-                      <a href={m.attachment} target="_blank" rel="noreferrer">
-                        <img src={m.attachment} alt="Chat attachment" className="mb-2 max-h-80 max-w-full rounded-lg object-contain" />
-                      </a>
-                    )}
-                    {m.attachment_type === "audio" && m.attachment && (
-                      <audio controls preload="metadata" src={m.attachment} className="mb-2 max-w-full" />
-                    )}
-                    {m.attachment_type === "file" && m.attachment && (
-                      <a href={m.attachment} target="_blank" rel="noreferrer" className="mb-2 block underline">Open attachment</a>
-                    )}
-                    {m.body}
-                  </>
+              <div className={cn("flex max-w-[90%] items-end gap-1", mine ? "flex-row-reverse" : "flex-row")}>
+                <div className={cn("animate-pop-in max-w-[calc(100%-2.5rem)] rounded-xl text-sm", m.type === "listing_ref" || m.type === "offer" ? "bg-transparent" : `px-3 py-2 ${mine ? "bg-primary text-primary-foreground" : "bg-accent text-foreground"}`)}>
+                  {m.type === "offer" && m.offer ? (
+                    <ChatOfferCard
+                      offer={m.offer}
+                      onCancel={(offer) => void updateOffer(offer, "cancel")}
+                      onDecline={(offer) => void updateOffer(offer, "decline")}
+                      onPay={(offer, method) => void payOffer(offer, method)}
+                      busy={busyOfferId === m.offer.id}
+                    />
+                  ) : m.type === "listing_ref" ? (
+                    <ListingReferenceCard message={m} onQuickReply={setDraft} showQuickReplies={mine} />
+                  ) : m.is_deleted ? (
+                    <p className="italic opacity-75">Message deleted</p>
+                  ) : (
+                    <>
+                      {m.attachment_type === "image" && m.attachment && (
+                        <a href={m.attachment} target="_blank" rel="noreferrer">
+                          <img src={m.attachment} alt="Chat attachment" className="mb-2 max-h-80 max-w-full rounded-lg object-contain" />
+                        </a>
+                      )}
+                      {m.attachment_type === "audio" && m.attachment && (
+                        <audio controls preload="metadata" src={m.attachment} className="mb-2 max-w-full" />
+                      )}
+                      {m.attachment_type === "file" && m.attachment && (
+                        <a href={m.attachment} target="_blank" rel="noreferrer" className="mb-2 block underline">Open attachment</a>
+                      )}
+                      {m.body}
+                    </>
+                  )}
+                </div>
+                {mine && m.type === "text" && !m.is_deleted && (
+                  <button
+                    type="button"
+                    aria-label="Delete message for everyone"
+                    title="Delete for everyone"
+                    disabled={deletingMessageId === m.id}
+                    onClick={() => void deleteMessage(m)}
+                    className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-accent disabled:opacity-50"
+                  >
+                    <Trash2 size={15} />
+                  </button>
                 )}
               </div>
             </div>

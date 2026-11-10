@@ -26,6 +26,7 @@ class MessageSerializer(serializers.ModelSerializer):
     # "text" or "offer". An offer message carries the live offer (as the viewer may see it), not a copy.
     type = serializers.CharField(source="message_type", read_only=True)
     offer = serializers.SerializerMethodField()
+    is_deleted = serializers.SerializerMethodField()
     listing = serializers.IntegerField(source="referenced_listing_id", read_only=True, allow_null=True)
     listing_snapshot = serializers.JSONField(read_only=True)
     listing_status = serializers.SerializerMethodField()
@@ -39,6 +40,7 @@ class MessageSerializer(serializers.ModelSerializer):
             "sender_id",
             "type",
             "offer",
+            "is_deleted",
             "listing",
             "listing_snapshot",
             "listing_status",
@@ -56,6 +58,9 @@ class MessageSerializer(serializers.ModelSerializer):
         if not message.offer_id:
             return None
         return OfferSerializer(message.offer, context=self.context).data
+
+    def get_is_deleted(self, message):
+        return message.deleted_at is not None
 
     def get_listing_status(self, message):
         if message.referenced_listing_id:

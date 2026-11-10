@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Mic
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material3.AlertDialog
@@ -139,7 +140,7 @@ fun InboxScreen(onOpenChat: (Int) -> Unit) {
         val matchesQuery = q.isEmpty() ||
             (c.other_party_name ?: "").lowercase().contains(q) ||
             (c.listing_title ?: "").lowercase().contains(q) ||
-            (last?.body ?: "").lowercase().contains(q)
+            (if (last?.is_deleted == true) "message deleted" else last?.body.orEmpty()).lowercase().contains(q)
         matchesFilter && matchesQuery
     }
 
@@ -227,7 +228,11 @@ fun InboxScreen(onOpenChat: (Int) -> Unit) {
                                 )
                                 Text(
                                     if (last == null) "Say hello 👋"
-                                    else (if (mine) "You: " else "") + (last.body.ifBlank { last.listing_snapshot?.title.orEmpty() }),
+                                    else (if (mine) "You: " else "") + if (last.is_deleted) {
+                                        "Message deleted"
+                                    } else {
+                                        last.body.ifBlank { last.listing_snapshot?.title.orEmpty() }
+                                    },
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1,
@@ -325,6 +330,28 @@ class ChatViewModel(
                 _state.update { it.copy(sendError = e.message) }
             }
         }
+
+        fun deleteMessage(messageId: Int, onError: (String) -> Unit) {
+            viewModelScope.launch {
+                try {
+                    repo.deleteMessage(messageId)
+                    server = server.map { message ->
+                        if (message.id == messageId) {
+                            message.copy(
+                                body = "",
+                                attachment = null,
+                                attachment_type = "",
+                                duration_seconds = null,
+                                is_deleted = true,
+                            )
+                        } else message
+                    }
+                    publish()
+                } catch (e: ApiException) {
+                    onError(e.message ?: "Could not delete the message.")
+                }
+            }
+        }
     }
 
     fun sendImage(uri: android.net.Uri, myId: Int?) = sendAttachment(myId) { repo.sendImage(conversationId, uri) }
@@ -394,6 +421,7 @@ fun ChatScreen(
     var riderAvailable by remember { mutableStateOf(false) }
     var offerSending by remember { mutableStateOf(false) }
     var busyOfferId by remember { mutableStateOf<String?>(null) }
+    var deleteTarget by remember { mutableStateOf<Message?>(null) }
     val canMakeOffer = state.conversation?.let { it.listing != null && it.seller == me?.id } == true
     val selectedOfferListing = sellerListings.firstOrNull { it.id == selectedOfferListingId }
     androidx.compose.runtime.DisposableEffect(Unit) { onDispose { recorder.cancel() } }
@@ -563,7 +591,16 @@ fun ChatScreen(
                     }
                     items(reversed, key = { it.id ?: it.hashCode() }) { message ->
                         val mine = message.sender_id != null && message.sender_id == me?.id
-                        Bubble(message, mine, { draft = it }, onOpenListing, ::actOnOffer, ::payOffer, busyOfferId)
+                        Bubble(
+                            message,
+                            mine,
+                            { draft = it },
+                            onOpenListing,
+                            ::actOnOffer,
+                            ::payOffer,
+                            busyOfferId,
+                            onDelete = { deleteTarget = message },
+                        )
                     }
                 }
             }
@@ -599,6 +636,7 @@ fun ChatScreen(
                                             },
                                         )
                                     }
+
                                 }
                             }
                             OutlinedTextField(
@@ -693,6 +731,29 @@ fun ChatScreen(
                     },
                     dismissButton = {
                         TextButton(onClick = { offerDialogOpen = false }, enabled = !offerSending) { Text("Back") }
+                    },
+                )
+            }
+
+            deleteTarget?.let { message ->
+                AlertDialog(
+                    onDismissRequest = { deleteTarget = null },
+                    title = { Text("Delete message?") },
+                    text = { Text("This removes the message for everyone in the conversation.") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                deleteTarget = null
+                                message.id?.let { messageId ->
+                                    vm.deleteMessage(messageId) { error ->
+                                        android.widget.Toast.makeText(context, error, android.widget.Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            },
+                        ) { Text("Delete for everyone") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { deleteTarget = null }) { Text("Cancel") }
                     },
                 )
             }
@@ -829,6 +890,7 @@ private fun Bubble(
     onOfferAction: (ChatOffer, Boolean) -> Unit,
     onOfferCheckout: (ChatOffer, String) -> Unit,
     busyOfferId: String?,
+    onDelete: () -> Unit,
 ) {
     val pendingSend = (message.id ?: 0) < 0
     Row(Modifier.fillMaxWidth(), horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start) {
@@ -856,7 +918,9 @@ private fun Bubble(
                     .padding(horizontal = 14.dp, vertical = 9.dp),
             ) {
                 val textColor = if (mine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                if (message.type == "listing_ref") {
+                if (message.is_deleted) {
+                    Text("Message deleted", style = MaterialTheme.typography.bodyMedium, color = textColor)
+                } else if (message.type == "listing_ref") {
                     ListingReferenceBubble(message, mine, onQuickReply, onOpenListing)
                 } else if (message.type == "offer" && message.offer != null) {
                     ChatOfferBubble(message.offer, onOfferAction, onOfferCheckout, busyOfferId == message.offer.id)
@@ -890,6 +954,24 @@ private fun Bubble(
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
             )
+        }
+        if (mine && message.type == "text" && !message.is_deleted && !pendingSend) {
+            var menuExpanded by remember(message.id) { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(
+                        Icons.Outlined.MoreVert,
+                        contentDescription = "Message options",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                    DropdownMenuItem(
+                        text = { Text("Delete for everyone") },
+                        onClick = { menuExpanded = false; onDelete() },
+                    )
+                }
+            }
         }
     }
 }

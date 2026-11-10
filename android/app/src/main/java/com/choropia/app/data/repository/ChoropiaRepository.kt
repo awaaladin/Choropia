@@ -512,6 +512,8 @@ class ChoropiaRepository(
     suspend fun sendMessage(conversationId: Int, body: String): Message =
         apiCall { api.sendMessage(SendMessageRequest(conversationId, body.trim())) }
 
+    suspend fun deleteMessage(messageId: Int) = apiCall { api.deleteMessage(messageId) }
+
     /** Sends a photo (compressed on-device first) as a chat attachment. */
     suspend fun sendImage(conversationId: Int, uri: Uri, caption: String = ""): Message {
         val bytes = withContext(Dispatchers.IO) { compressImage(uri) }

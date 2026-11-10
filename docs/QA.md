@@ -13,6 +13,8 @@
 - [ ] App -> web voice note plays on web without a spinner loop.
 - [ ] Web -> app image displays correctly.
 - [ ] Web -> app voice note plays on Android.
+- [ ] Sender can delete their own text, image, or voice message for both participants; both see a deleted-message placeholder.
+- [ ] A participant cannot delete the other person's messages, and offer/listing-reference cards remain intact.
 - [ ] Web attachment uploads reject files over 3 MB and voice notes over 10 minutes.
 - [ ] Failed media states show a friendly message and a retry/download affordance when playback is unsupported.
 
@@ -25,6 +27,11 @@
 - [ ] Buyer can pay a chat offer into escrow; the resulting order uses the locked offer amount while the listing price remains unchanged.
 - [ ] Rider offers require a rider and delivery destination before payment; other offer types cannot add rider delivery.
 - [ ] Buyer can cancel a Paystack checkout and retry; an open Gaxtron checkout cannot be cancelled unsafely.
+
+## Android releases
+
+- [ ] The signed APK version and signing certificate match the installed release before replacing the public download.
+- [ ] `/api/v1/app/android/` reports the uploaded APK's exact version, size, and SHA-256.
 
 ## Comments and profiles
 

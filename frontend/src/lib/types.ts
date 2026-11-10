@@ -151,6 +151,7 @@ export interface Message {
   body: string;
   attachment: string | null;
   attachment_type: "image" | "audio" | "file" | "";
+  is_deleted?: boolean;
   duration_seconds: number | null;
   type?: "text" | "offer" | "listing_ref";
   event?: string;

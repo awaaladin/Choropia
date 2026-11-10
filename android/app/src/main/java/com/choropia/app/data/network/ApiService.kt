@@ -455,6 +455,9 @@ interface ChoropiaApi {
     @POST("messages/")
     suspend fun sendMessage(@Body body: SendMessageRequest): Message
 
+    @DELETE("messages/{id}/")
+    suspend fun deleteMessage(@Path("id") id: Int)
+
     @GET("conversations/{id}/offers/")
     suspend fun conversationOffers(@Path("id") id: Int): List<ChatOffer>
 

@@ -32,7 +32,13 @@ export function MessagesLayout() {
                 {c.last_message && <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(c.last_message.created_at)}</span>}
               </div>
               <p className="truncate text-xs font-medium text-primary">{c.listing_title || `Listing #${c.listing}`}</p>
-              <p className="truncate text-sm text-muted-foreground">{c.last_message ? c.last_message.body : "No messages yet"}</p>
+              <p className="truncate text-sm text-muted-foreground">
+                {c.last_message
+                  ? c.last_message.is_deleted
+                    ? "Message deleted"
+                    : c.last_message.body
+                  : "No messages yet"}
+              </p>
             </div>
           </Link>
         ))}
