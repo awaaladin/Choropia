@@ -330,26 +330,26 @@ class ChatViewModel(
                 _state.update { it.copy(sendError = e.message) }
             }
         }
+    }
 
-        fun deleteMessage(messageId: Int, onError: (String) -> Unit) {
-            viewModelScope.launch {
-                try {
-                    repo.deleteMessage(messageId)
-                    server = server.map { message ->
-                        if (message.id == messageId) {
-                            message.copy(
-                                body = "",
-                                attachment = null,
-                                attachment_type = "",
-                                duration_seconds = null,
-                                is_deleted = true,
-                            )
-                        } else message
-                    }
-                    publish()
-                } catch (e: ApiException) {
-                    onError(e.message ?: "Could not delete the message.")
+    fun deleteMessage(messageId: Int, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                repo.deleteMessage(messageId)
+                server = server.map { message ->
+                    if (message.id == messageId) {
+                        message.copy(
+                            body = "",
+                            attachment = null,
+                            attachment_type = "",
+                            duration_seconds = null,
+                            is_deleted = true,
+                        )
+                    } else message
                 }
+                publish()
+            } catch (e: ApiException) {
+                onError(e.message ?: "Could not delete the message.")
             }
         }
     }
