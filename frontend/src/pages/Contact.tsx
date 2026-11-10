@@ -37,8 +37,8 @@ export function ContactPage() {
           </div>
           <div data-reveal className="border-t border-border py-6">
             <MapPin className="text-primary" size={22} />
-            <h2 className="mt-4 font-semibold">Rooted in Uyo</h2>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">Akwa Ibom, Nigeria</p>
+            <h2 className="mt-4 font-semibold">Starting in Uyo</h2>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">Akwa Ibom, Nigeria. Open to buyers and sellers across Nigeria.</p>
             <Link to="/how-it-works" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary">
               Find an answer in our guide <ArrowRight size={15} />
             </Link>

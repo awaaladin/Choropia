@@ -14,6 +14,10 @@ class ApiException(
     message: String,
     val httpCode: Int? = null,
     val fieldErrors: Map<String, String> = emptyMap(),
+    /** Machine-readable reason from the offer/PIN endpoints, e.g. "pin_invalid", "pin_locked", "expired". */
+    val code: String? = null,
+    /** Numbers that come with it, e.g. retry_after (seconds) and attempts_left. */
+    val numbers: Map<String, Long> = emptyMap(),
 ) : Exception(message)
 
 private val errorJson = Json { ignoreUnknownKeys = true; isLenient = true }
@@ -56,7 +60,15 @@ private fun HttpException.toApiException(): ApiException {
     val fields = mutableMapOf<String, String>()
     val message = parsed?.let { extractMessage(it, fields) }
 
+    val obj = parsed as? JsonObject
+    val reason = (obj?.get("code") as? JsonPrimitive)?.content
+    val numbers = buildMap {
+        for (key in listOf("retry_after", "attempts_left", "max_amount_kobo")) {
+            (obj?.get(key) as? JsonPrimitive)?.content?.toLongOrNull()?.let { put(key, it) }
+        }
+    }
     val friendly = when {
+        // The PIN lock answers 423 with its own message; don't replace it with the generic rate-limit text.
         code == 429 -> "Too many attempts. Please wait a moment and try again."
         code >= 500 -> "Choropia is having trouble right now. Please try again shortly."
         code == 401 && message == null -> "Please log in again."
@@ -64,7 +76,7 @@ private fun HttpException.toApiException(): ApiException {
         code == 404 && message == null -> "We couldn't find that."
         else -> message
     }
-    return ApiException(friendly ?: "Something went wrong (HTTP $code).", code, fields)
+    return ApiException(friendly ?: "Something went wrong (HTTP $code).", code, fields, reason, numbers)
 }
 
 private fun extractMessage(element: JsonElement, fields: MutableMap<String, String>): String? = when (element) {

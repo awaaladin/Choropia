@@ -166,7 +166,7 @@ export function AppShell() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-              placeholder="Search Uyo listings…"
+              placeholder="Search listings…"
               aria-label="Search listings"
             />
           </form>
@@ -211,7 +211,7 @@ export function AppShell() {
       </main>
 
       <footer className="hidden border-t border-border py-6 text-center text-xs text-muted-foreground md:block">
-        Choropia — social buy-and-sell marketplace (Uyo pilot)
+        Choropia: buy and sell safely in Nigeria, starting in Uyo
         <span className="mt-1 block">
           <Link to="/driver" className="hover:underline">Deliver with Choropia</Link> ·{" "}
           <a href="/legal/terms/" className="hover:underline">Terms</a> ·{" "}

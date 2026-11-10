@@ -56,7 +56,7 @@ export function LoginPage() {
 
         <div className="relative z-10 space-y-4 p-8 pt-16">
           <span className="page-enter inline-block rounded bg-background/10 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-hero-foreground/80 backdrop-blur-sm" style={delay(60)}>
-            Uyo pilot
+            Now live in Uyo
           </span>
           <h2 className="page-enter font-display text-2xl font-semibold leading-snug" style={delay(120)}>
             Buy and sell locally, with every purchase held in escrow.

@@ -5,7 +5,7 @@ import { useReveal } from "@/lib/useReveal";
 const SECTIONS = [
   [
     "About this notice",
-    "This is a plain-language summary of how Choropia handles your information during the Uyo pilot. It isn't a substitute for a full legal policy — that should be reviewed by counsel before a wider public launch.",
+    "This is a plain-language summary of how Choropia handles your information during our launch in Uyo. It isn't a substitute for a full legal policy — that should be reviewed by counsel before a wider public launch.",
   ],
   [
     "Account information",

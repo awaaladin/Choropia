@@ -37,9 +37,48 @@
   --animate-slide-in-right: slide-in-right 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
   --animate-fade-in: fade-in 200ms ease-out both;
   --animate-pop-in: pop-in 220ms cubic-bezier(0.32, 0.72, 0, 1) both;
+
+  /* Escrow offers (features/offers). Same names as the Compose tokens in ui/offers/OfferTokens.kt. */
+  --color-o-surface: var(--o-surface);
+  --color-o-raised: var(--o-raised);
+  --color-o-text: var(--o-text);
+  --color-o-muted: var(--o-muted);
+  --color-o-accent: var(--o-accent);
+  --color-o-accent-fg: var(--o-accent-fg);
+  --color-o-hairline: var(--o-hairline);
+  --color-o-tide: var(--o-tide);
+  --color-o-tide-fg: var(--o-tide-fg);
+  --color-o-ok: var(--o-ok);
+  --color-o-ok-bg: var(--o-ok-bg);
+  --color-o-caution: var(--o-caution);
+  --color-o-caution-bg: var(--o-caution-bg);
+  --color-o-danger: var(--o-danger);
+  --color-o-danger-bg: var(--o-danger-bg);
+  --radius-o-sm: 12px;
+  --radius-o-md: 16px;
+  --radius-o-lg: 24px;
+  --shadow-o-card: var(--o-shadow);
 }
 
 :root {
+  /* Offer tokens, light: warm paper on a navy ramp (ink #070F22 -> #0B1B3A -> #14306B -> pale tint). Status colours
+     are muted and only ever mean a state, never decoration. All text pairs meet WCAG AA on their surfaces. */
+  --o-surface: #f7f5f0;
+  --o-raised: #ffffff;
+  --o-text: #070f22;
+  --o-muted: #4a5670;
+  --o-accent: #14306b;
+  --o-accent-fg: #ffffff;
+  --o-hairline: rgb(11 27 58 / 0.12);
+  --o-tide: #e4ebf2;
+  --o-tide-fg: #233f5c;
+  --o-ok: #2f6b4f;
+  --o-ok-bg: #e5efe9;
+  --o-caution: #7d5310;
+  --o-caution-bg: #f5ecda;
+  --o-danger: #9b2c2c;
+  --o-danger-bg: #f6e3e1;
+  --o-shadow: 0 1px 2px rgb(7 15 34 / 0.06), 0 10px 28px -12px rgb(7 15 34 / 0.18);
   --radius: 0.5rem;
   --background: oklch(0.955 0.012 250);
   --foreground: oklch(0.205 0.035 257);
@@ -66,6 +105,23 @@
 }
 
 .dark {
+  /* Offer tokens, dark: hairline borders instead of shadows. */
+  --o-surface: #0b1630;
+  --o-raised: #101f3e;
+  --o-text: #eef2f8;
+  --o-muted: #a7b3c9;
+  --o-accent: #a9c1f3;
+  --o-accent-fg: #070f22;
+  --o-hairline: rgb(255 255 255 / 0.1);
+  --o-tide: #16304a;
+  --o-tide-fg: #c3d6e7;
+  --o-ok: #93cdb0;
+  --o-ok-bg: rgb(147 205 176 / 0.12);
+  --o-caution: #e6be78;
+  --o-caution-bg: rgb(230 190 120 / 0.12);
+  --o-danger: #eda29a;
+  --o-danger-bg: rgb(237 162 154 / 0.12);
+  --o-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
   --background: oklch(0.145 0.032 255);
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);

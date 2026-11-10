@@ -133,7 +133,7 @@ export function ListingDetailPage() {
             </span>
           </div>
           <p className="mt-1 text-sm capitalize text-muted-foreground">
-            {item.condition} · {item.location || "Uyo"}
+            {item.condition} · {item.location || "Nigeria"}
           </p>
           {item.status === "sold" && (
             <p className="mt-2 text-sm font-medium text-muted-foreground">

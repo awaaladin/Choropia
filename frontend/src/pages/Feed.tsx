@@ -61,7 +61,7 @@ export function FeedPage() {
                 <Avatar src={user.profile?.avatar} name={displayName(user)} size={40} />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold">{displayName(user)}</p>
-                  <p className="truncate text-xs text-muted-foreground">{user.profile?.location || "Uyo"} · Buyer</p>
+                  <p className="truncate text-xs text-muted-foreground">{user.profile?.location || "Nigeria"} · Buyer</p>
                 </div>
               </div>
               <Link to="/orders" className="mt-3 block rounded-md bg-accent px-3 py-2 text-xs text-primary transition-colors hover:bg-accent/70">
@@ -117,7 +117,7 @@ export function FeedPage() {
       <section className="min-w-0">
         <Link to="/listings/new" className="editorial-enter panel flex items-center gap-3 p-3 transition-shadow hover:shadow-md">
           <span className="grid size-9 place-items-center rounded-md bg-accent text-lg font-semibold text-primary">+</span>
-          <span className="text-sm text-muted-foreground">List a new item or service for Uyo buyers…</span>
+          <span className="text-sm text-muted-foreground">List a new item or service for buyers near you…</span>
           <span className="ml-auto hidden text-xs font-semibold text-primary sm:block">Post listing</span>
         </Link>
 
@@ -149,7 +149,7 @@ export function FeedPage() {
               <EmptyState
                 icon={<ShoppingBag size={20} />}
                 title={listings.length ? "Nothing matches those filters" : "No listings yet"}
-                hint={listings.length ? "Try a different category or show all listings." : "Be the first to post something for sale in Uyo."}
+                hint={listings.length ? "Try a different category or show all listings." : "Be the first to post something for sale."}
                 action={
                   listings.length ? (
                     <Pill onClick={() => (setScope("all"), setCategoryId(null))}>Clear filters</Pill>
@@ -172,7 +172,7 @@ export function FeedPage() {
       <aside className="hidden self-start xl:sticky xl:top-20 xl:flex xl:flex-col xl:gap-5">
         <section className="panel editorial-enter overflow-hidden" style={prefs.stagger(1)}>
           <div className="flex justify-between px-4 py-3">
-            <h2 className="text-sm font-semibold">Trending in Uyo</h2>
+            <h2 className="text-sm font-semibold">Trending on Choropia</h2>
             <span className="text-xs text-muted-foreground">Most liked</span>
           </div>
           {feed.isPending && (

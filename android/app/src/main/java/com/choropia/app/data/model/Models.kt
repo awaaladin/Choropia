@@ -13,6 +13,8 @@ data class Profile(
     val location: String = "",
     val theme_preference: String = "light",
     val email_verified: Boolean = false,
+    /** Set by Choropia staff; verified sellers pay a lower fee. */
+    val seller_verified: Boolean = false,
 )
 
 @Serializable
@@ -190,6 +192,36 @@ data class ChatOffer(
     val paid_at: String? = null,
     val closed_at: String? = null,
     val server_now: String = "",
+    /** Where the money is once an order exists: awaiting_payment, escrow_held, handed_over, released, disputed,
+     *  refund_pending, refunded or cancelled. */
+    val order_stage: String? = null,
+    /** The last checkout failed at Paystack; the offer is open again. */
+    val last_payment_failed: Boolean = false,
+)
+
+@Serializable
+data class FeePreview(
+    val amount_kobo: Long,
+    val fee_kobo: Long,
+    val seller_net_kobo: Long,
+    val verified: Boolean = false,
+    val min_fee_kobo: Long = 0,
+)
+
+@Serializable
+data class PinStatus(
+    val has_pin: Boolean = false,
+    val length: Int = 4,
+    val locked: Boolean = false,
+    val locked_until: String? = null,
+    val retry_after: Long? = null,
+)
+
+@Serializable
+data class HandoverCode(
+    val code: String? = null,
+    val entered_by: String = "seller",
+    val used: Boolean = false,
 )
 
 @Serializable

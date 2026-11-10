@@ -43,7 +43,7 @@ export function LandingPage() {
         <div className="mx-auto flex h-full max-w-[1400px] flex-col justify-end px-5 pb-12 pt-20 lg:px-8 lg:pb-16">
           <p className="page-enter mb-5 flex items-center gap-2 text-xs font-semibold uppercase text-hero-foreground/80">
             <span className="size-1.5 rounded-full bg-success" />
-            Rooted in Uyo. Open to you.
+            Starting in Uyo. Open to all of Nigeria.
           </p>
           <h1 className="page-enter max-w-2xl text-5xl font-semibold leading-[1.08] text-hero-foreground sm:text-7xl">
             Choropia<span className="text-hero-accent">.</span>
@@ -77,7 +77,7 @@ export function LandingPage() {
             )}
           </div>
           <div className="mt-10 flex items-center gap-2 text-xs text-hero-foreground/75">
-            <MapPin size={14} /> Uyo, Akwa Ibom
+            <MapPin size={14} /> Nigeria · Starting in Uyo
           </div>
         </div>
       </section>
@@ -131,7 +131,7 @@ export function LandingPage() {
                 <Link to={item.merchant ? `/merchants/${item.merchant}` : `/users/${item.seller_id}`} className="hover:text-foreground">
                   {item.seller_name}
                 </Link>
-                {" · "}{item.location || "Uyo"}
+                {" · "}{item.location || "Nigeria"}
               </p>
             </article>
           ))}

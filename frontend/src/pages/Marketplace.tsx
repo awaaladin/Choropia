@@ -58,7 +58,7 @@ export function MarketplacePage() {
 
       <div className="editorial-enter mt-5 flex items-center gap-2" style={prefs.stagger(0)}>
         <Pill active={!active.campus} onClick={() => commit({ campus: "" })}>
-          All of Uyo
+          All listings
         </Pill>
         <Pill active={active.campus === "uniuyo"} onClick={() => commit({ campus: "uniuyo" })}>
           UniUyo campus market
