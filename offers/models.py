@@ -149,3 +149,20 @@ class OfferEvent(models.Model):
         if self.pk is not None:
             raise ValueError("Offer events are append-only.")
         super().save(*args, **kwargs)
+
+
+class HandoverCode(models.Model):
+    """The buyer's 6-digit code for an offer order handed over without a rider (meet-up, or the seller delivers).
+    The buyer tells the seller the code once they hold the item; the seller enters it and escrow is released.
+    Stored hashed for checking, plus an encrypted copy (dispatch/crypto.py key) so the buyer can see it again.
+    Rider orders use the dispatch app's code instead, which the rider enters."""
+
+    order = models.OneToOneField("orders.Order", on_delete=models.CASCADE, related_name="offer_handover")
+    code_hash = models.CharField(max_length=128)
+    code_encrypted = models.BinaryField(null=True, blank=True, editable=False)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"HandoverCode<order {self.order_id}>"

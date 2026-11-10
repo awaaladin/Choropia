@@ -316,7 +316,9 @@ def expire_due_offers(now=None, limit=500):
             offer = Offer.objects.select_for_update().filter(pk=pk).first()
             if offer is not None and expire_if_due(offer, now):
                 expired += 1
-    return {"expired": expired}
+    from .settlement import release_stale_checkouts
+
+    return {"expired": expired, **release_stale_checkouts(now)}
 
 
 # --- realtime ---------------------------------------------------------------------------------------------------------

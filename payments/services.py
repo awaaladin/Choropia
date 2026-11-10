@@ -11,7 +11,7 @@ from orders.state_machine import OrderStatus
 from .gaxtron import GaxtronClient
 from .models import Payment
 from .naming import make_reference, paystack_metadata
-from .paystack import PaystackClient, PaystackError, from_kobo
+from .paystack import PaystackClient, PaystackError, from_kobo, to_kobo
 
 logger = logging.getLogger(__name__)
 
@@ -239,6 +239,10 @@ def _mark_held(payment, note):
     offer = Offer.objects.select_for_update().filter(order_id=payment.order_id).first()
     if offer is not None and offer.status == Offer.Status.PAYMENT_PROCESSING:
         transition_offer(offer, Offer.Status.PAID, note="Payment confirmed into escrow")
+        if offer.delivery_method != Offer.Delivery.RIDER:
+            from offers.settlement import issue_handover_code
+
+            issue_handover_code(payment.order)  # the buyer's code for a meet-up or seller delivery
     ledger.held(payment)
     try:
         from dispatch import services as dispatch_services
@@ -281,23 +285,38 @@ def confirm_paystack_payment(reference, data, raw_payload=None):
 
     The row lock plus the INITIALIZED check means the webhook, the buyer's verify call and the
     poller can all report the same charge and the order still moves to escrow exactly once.
-    Only a successful NGN charge of at least the order amount counts."""
+    Only a successful NGN charge for the order amount counts (exactly the amount for a chat offer). Money that did
+    arrive but can't be accepted (wrong amount or currency, a closed offer, an item that sold out) is never dropped:
+    it is refunded automatically and shows to staff as a refund pending."""
     payment = Payment.objects.select_for_update().select_related("order").filter(reference=reference).first()
     if payment is None or payment.status != Payment.Status.INITIALIZED:
         return payment
     if data.get("status") != "success":
         return payment  # abandoned/failed attempts can still be retried on the same checkout
 
-    paid = from_kobo(data.get("amount") or 0)
-    if data.get("currency", "NGN") != "NGN" or paid < payment.amount:
-        logger.error("Paystack %s: expected NGN %s, got %s %s", reference, payment.amount, data.get("currency"), paid)
-        payment.status = Payment.Status.FAILED
-        payment.raw_webhook_payload = raw_payload or data
-        payment.save(update_fields=["status", "raw_webhook_payload"])
-        return payment
+    paid_kobo = int(data.get("amount") or 0)
+    expected_kobo = to_kobo(payment.amount)
+    offer = _offer_for(payment.order)
+    if offer is not None:
+        amount_ok = paid_kobo == expected_kobo == offer.amount_kobo + (offer.delivery_fee_kobo or 0)
+    else:
+        amount_ok = paid_kobo >= expected_kobo
+    if data.get("currency", "NGN") != "NGN" or not amount_ok:
+        logger.error("Paystack %s: expected NGN %s kobo, got %s %s kobo", reference, expected_kobo, data.get("currency"), paid_kobo)
+        _alert_refund(payment, "The amount or currency did not match what was owed")
+        return _hold_for_refund(payment, data, raw_payload, note="The amount or currency did not match")
+
+    if offer is not None and offer.status != offer.Status.PAYMENT_PROCESSING:
+        _alert_refund(payment, f"The chat offer was {offer.status.replace('_', ' ')} before the money arrived")
+        return _hold_for_refund(payment, data, raw_payload, note=f"The chat offer was {offer.status.replace('_', ' ')}")
 
     # Paid on a checkout that was left open after the order was cancelled: give the money straight back.
     if payment.order.status == OrderStatus.CANCELLED or not reserve_listing(payment.order):
+        if offer is not None and offer.status == offer.Status.PAYMENT_PROCESSING:
+            from offers.models import Offer
+            from offers.services import transition as transition_offer
+
+            transition_offer(offer, Offer.Status.CANCELLED, note="Item no longer available; payment refunded")
         return _hold_for_refund(payment, data, raw_payload)
 
     _mark_held(payment, "Payment confirmed via Paystack")
@@ -305,6 +324,26 @@ def confirm_paystack_payment(reference, data, raw_payload=None):
     payment.raw_webhook_payload = raw_payload or data
     payment.save(update_fields=["status", "paid_at", "paystack_transaction_id", "raw_webhook_payload"])
     return payment
+
+
+def _offer_for(order):
+    """The chat offer an order came from, locked, or None."""
+    from offers.models import Offer
+
+    return Offer.objects.select_for_update().filter(order_id=order.pk).first()
+
+
+def _alert_refund(payment, reason):
+    try:
+        from notifications import staff_alerts
+
+        staff_alerts.alert(
+            f"Refund started for order #{payment.order_id}", "A payment is being refunded",
+            [f"{payment.reference}: {reason}. Paystack is refunding it automatically; check it completes."],
+            f"/staff/orders/{payment.order_id}/",
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception("Could not alert staff about refund for %s", payment.reference)
 
 
 def verify_paystack_payment(payment):

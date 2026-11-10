@@ -375,7 +375,7 @@ class ExpiryTests(OfferFixture):
         Offer.objects.filter(pk=due.pk).update(expires_at=timezone.now() - timedelta(seconds=1))
         call_command("expire_offers", stdout=mock.MagicMock())
         self.assertEqual(Offer.objects.get(pk=due.pk).status, "expired")
-        self.assertEqual(services.expire_due_offers(), {"expired": 0})  # idempotent
+        self.assertEqual(services.expire_due_offers(), {"expired": 0, "released_checkouts": []})  # idempotent
 
     def test_an_overdue_offer_reads_as_expired_before_the_job_runs_and_cannot_be_acted_on(self):
         offer_id = self.make().json()["id"]

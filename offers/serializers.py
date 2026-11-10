@@ -83,10 +83,38 @@ class OfferSerializer(serializers.ModelSerializer):
         # Show the truth even if the expiry job hasn't run yet; every action expires it for real under a lock.
         if offer.status == Offer.Status.PENDING and offer.expires_at <= timezone.now():
             data["status"] = Offer.Status.EXPIRED
+        from .settlement import last_payment_failed
+
+        data["last_payment_failed"] = last_payment_failed(offer)
+        data["order_stage"] = order_stage(offer)
         if role_of(offer, self._viewer()) != "seller":
             for field in SELLER_ONLY_FIELDS:
                 data.pop(field, None)
         return data
+
+
+def order_stage(offer):
+    """Where the money is, for the offer card's timeline: None (no order yet), awaiting_payment, escrow_held,
+    handed_over, released, disputed, refund_pending, refunded or cancelled."""
+    order = offer.order
+    if order is None:
+        return None
+    payment = getattr(order, "payment", None) if hasattr(order, "payment") else None
+    payment_status = getattr(payment, "status", None)
+    if payment_status == "refund_pending":
+        return "refund_pending"
+    return {
+        "pending_payment": "awaiting_payment",
+        "paid_escrow": "escrow_held",
+        "courier_assigned": "escrow_held",
+        "in_transit": "escrow_held",
+        "delivered": "handed_over",
+        "confirmed": "handed_over",
+        "completed": "released",
+        "disputed": "disputed",
+        "refunded": "refunded",
+        "cancelled": "cancelled",
+    }.get(order.status, order.status)
 
 
 class CreateOfferSerializer(serializers.Serializer):

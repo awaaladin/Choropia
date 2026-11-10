@@ -556,6 +556,13 @@ def handle_choropia_event(payload):
     if not is_ours(reference):
         return
     if event == "charge.success":
+        from offers.models import Offer
+
+        if Offer.objects.filter(order__payment__reference=reference).exists():
+            # Chat offers: the signed webhook only tells us to look. Paystack's own verify endpoint is the source of
+            # truth for status, currency and amount. If Paystack can't be reached this raises, the webhook answers
+            # 500 and Paystack retries (the poller is a second safety net).
+            data = _paystack().verify_transaction(reference)
         confirm_paystack_payment(reference, data, raw_payload=payload)
     elif event in ("transfer.success", "transfer.failed", "transfer.reversed"):
         apply_transfer_event(event, data)

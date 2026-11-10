@@ -106,12 +106,12 @@ class PaystackWebhookTests(TestCase):
         self.payment.refresh_from_db()
         self.assertEqual(self.payment.status, Payment.Status.INITIALIZED)
 
-    def test_short_payment_is_not_accepted(self):
+    def test_short_payment_is_not_accepted_and_is_refunded_not_lost(self):
         self.post({"event": "charge.success", "data": charge(self.payment.reference, amount_kobo=100)})
         self.payment.refresh_from_db()
         self.order.refresh_from_db()
-        self.assertEqual(self.payment.status, Payment.Status.FAILED)
-        self.assertEqual(self.order.status, OrderStatus.PENDING_PAYMENT)
+        self.assertEqual(self.payment.status, Payment.Status.REFUND_PENDING)
+        self.assertEqual(self.order.status, OrderStatus.CANCELLED)
 
     def test_other_apps_references_are_acknowledged_and_ignored(self):
         response = self.post({"event": "charge.success", "data": charge("NUTRISCAN-PROMONTH-20261023-ABC")})

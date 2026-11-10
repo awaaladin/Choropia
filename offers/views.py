@@ -142,3 +142,53 @@ class OfferCheckoutView(APIView):
         if not payment.authorization_url:
             return Response({"detail": "The payment provider did not return a checkout URL."}, status=502)
         return Response({"order_id": order.pk, "authorization_url": payment.authorization_url})
+
+
+class VerifyOfferPaymentView(APIView):
+    """Buyer, back from Paystack: settles the payment now (escrow, or the offer opens again if it failed)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_scope = "offers"
+
+    @extend_schema(request=None, responses=OfferSerializer)
+    def post(self, request, offer_id):
+        from .settlement import verify_offer_payment
+
+        try:
+            offer = verify_offer_payment(user=request.user, offer_id=offer_id)
+        except services.OfferError as exc:
+            return error_response(exc)
+        return Response(OfferSerializer(offer, context={"request": request}).data)
+
+
+class HandoverCodeView(APIView):
+    """Buyer only: your 6-digit handover code. Tell it to the seller (or the rider) once you hold the item."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_scope = "handover-code"
+
+    def get(self, request, order_id):
+        from .settlement import handover_code_for_buyer
+
+        try:
+            return Response(handover_code_for_buyer(user=request.user, order_id=order_id))
+        except services.OfferError as exc:
+            return error_response(exc)
+
+
+class ConfirmHandoverView(APIView):
+    """Seller: enter the buyer's code after handing the item over (meet-up / seller delivers). Releases escrow."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_scope = "handover-code"
+
+    def post(self, request, order_id):
+        from orders.serializers import OrderSerializer
+
+        from .settlement import confirm_handover
+
+        try:
+            order = confirm_handover(user=request.user, order_id=order_id, code=request.data.get("code"))
+        except services.OfferError as exc:
+            return error_response(exc)
+        return Response(OrderSerializer(order, context={"request": request}).data)
