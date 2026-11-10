@@ -412,30 +412,10 @@ fun ChatScreen(
     var recordedSeconds by remember { mutableStateOf(0) }
     var offerDialogOpen by remember { mutableStateOf(false) }
     var sellerListings by remember { mutableStateOf<List<Listing>>(emptyList()) }
-    var selectedOfferListingId by remember { mutableStateOf<Int?>(null) }
-    var listingMenuExpanded by remember { mutableStateOf(false) }
-    var offerAmount by remember { mutableStateOf("") }
-    var offerNote by remember { mutableStateOf("") }
-    var offerPin by remember { mutableStateOf("") }
-    var deliveryMethods by remember { mutableStateOf(setOf("meetup")) }
-    var riderAvailable by remember { mutableStateOf(false) }
-    var offerSending by remember { mutableStateOf(false) }
-    var busyOfferId by remember { mutableStateOf<String?>(null) }
+    var payingOffer by remember { mutableStateOf<ChatOffer?>(null) }
     var deleteTarget by remember { mutableStateOf<Message?>(null) }
     val canMakeOffer = state.conversation?.let { it.listing != null && it.seller == me?.id } == true
-    val selectedOfferListing = sellerListings.firstOrNull { it.id == selectedOfferListingId }
     androidx.compose.runtime.DisposableEffect(Unit) { onDispose { recorder.cancel() } }
-
-    LaunchedEffect(selectedOfferListing?.id) {
-        selectedOfferListing?.let { listing ->
-            offerAmount = listing.price
-            riderAvailable = false
-            deliveryMethods = deliveryMethods - "rider"
-            val enabled = runCatching { repo.listingDelivery(listing.id).enabled }.getOrDefault(false)
-            riderAvailable = enabled
-            if (!enabled) deliveryMethods = deliveryMethods - "rider"
-        } ?: run { riderAvailable = false }
-    }
 
     fun openOfferComposer() {
         scope.launch {
@@ -445,10 +425,6 @@ fun ChatScreen(
                     if (listings.isEmpty()) {
                         android.widget.Toast.makeText(context, "Create an active listing before making an offer.", android.widget.Toast.LENGTH_LONG).show()
                     } else {
-                        selectedOfferListingId = listings.firstOrNull { it.id == state.conversation?.listing }?.id ?: listings.first().id
-                        offerNote = ""
-                        offerPin = ""
-                        deliveryMethods = setOf("meetup")
                         offerDialogOpen = true
                     }
                 }
@@ -458,45 +434,40 @@ fun ChatScreen(
         }
     }
 
-    fun actOnOffer(offer: ChatOffer, cancel: Boolean) {
-        scope.launch {
-            busyOfferId = offer.id
-            try {
-                if (cancel) repo.cancelOffer(offer.id) else repo.declineOffer(offer.id)
-                vm.poll()
-                android.widget.Toast.makeText(context, if (cancel) "Offer cancelled." else "Offer declined.", android.widget.Toast.LENGTH_SHORT).show()
-            } catch (e: ApiException) {
-                android.widget.Toast.makeText(context, e.message ?: "Could not update the offer.", android.widget.Toast.LENGTH_LONG).show()
-                vm.poll()
-            } finally {
-                busyOfferId = null
-            }
-        }
-    }
+    fun toast(text: String) = android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_SHORT).show()
 
-    fun payOffer(offer: ChatOffer, deliveryMethod: String) {
-        scope.launch {
-            busyOfferId = offer.id
-            try {
-                val checkout = repo.checkoutOffer(offer.id, deliveryMethod)
+    val offerActions = remember(conversationId) {
+        com.choropia.app.ui.offers.OfferCardActions(
+            onPay = { payingOffer = it },
+            onDecline = { offer ->
+                try { repo.declineOffer(offer.id); toast("Offer declined.") } catch (e: ApiException) { toast(e.message ?: "Could not decline the offer.") }
                 vm.poll()
-                if (checkout.authorization_url != null) {
-                    context.startActivity(
-                        android.content.Intent(
-                            android.content.Intent.ACTION_VIEW,
-                            android.net.Uri.parse(checkout.authorization_url),
-                        ),
+            },
+            onCancel = { offer ->
+                try { repo.cancelOffer(offer.id); toast("Offer cancelled.") } catch (e: ApiException) { toast(e.message ?: "Could not cancel the offer.") }
+                vm.poll()
+            },
+            onCheckPayment = { offer ->
+                try {
+                    val updated = repo.verifyOfferPayment(offer.id)
+                    toast(
+                        when {
+                            updated.status == "paid" -> "Payment received. It's held safely in escrow."
+                            updated.last_payment_failed -> "The payment didn't go through. Nothing was taken."
+                            else -> "No payment yet. If you've just paid, give it a minute."
+                        },
                     )
-                } else {
-                    onOpenOrder(checkout.order_id)
+                } catch (e: ApiException) {
+                    toast(e.message ?: "Could not check the payment.")
                 }
-            } catch (e: ApiException) {
-                android.widget.Toast.makeText(context, e.message ?: "Could not open escrow checkout.", android.widget.Toast.LENGTH_LONG).show()
                 vm.poll()
-            } finally {
-                busyOfferId = null
-            }
-        }
+            },
+            onReleased = {
+                toast("Handover confirmed. Your payout is on its way.")
+                scope.launch { vm.poll() }
+            },
+            onOpenOrder = onOpenOrder,
+        )
     }
 
     val photoPicker = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -596,9 +567,7 @@ fun ChatScreen(
                             mine,
                             { draft = it },
                             onOpenListing,
-                            ::actOnOffer,
-                            ::payOffer,
-                            busyOfferId,
+                            offerActions,
                             onDelete = { deleteTarget = message },
                         )
                     }
@@ -606,131 +575,32 @@ fun ChatScreen(
             }
 
             if (offerDialogOpen) {
-                val amountKobo = parseOfferKobo(offerAmount)
-                AlertDialog(
-                    onDismissRequest = { if (!offerSending) offerDialogOpen = false },
-                    title = { Text("Offer a different price") },
-                    text = {
-                        Column(
-                            Modifier.verticalScroll(rememberScrollState()),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Box {
-                                OutlinedTextField(
-                                    value = selectedOfferListing?.title.orEmpty(),
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text("Your listing") },
-                                    modifier = Modifier.fillMaxWidth().clickable { listingMenuExpanded = true },
-                                )
-                                DropdownMenu(
-                                    expanded = listingMenuExpanded,
-                                    onDismissRequest = { listingMenuExpanded = false },
-                                ) {
-                                    sellerListings.forEach { listing ->
-                                        DropdownMenuItem(
-                                            text = { Text(listing.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                                            onClick = {
-                                                selectedOfferListingId = listing.id
-                                                listingMenuExpanded = false
-                                            },
-                                        )
-                                    }
-
-                                }
-                            }
-                            OutlinedTextField(
-                                value = offerAmount,
-                                onValueChange = { offerAmount = it },
-                                label = { Text("Offer amount (₦)") },
-                                singleLine = true,
-                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
-                                ),
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            Text("Handover methods", style = MaterialTheme.typography.labelLarge)
-                            val handoverMethods = buildList {
-                                if (riderAvailable) add("rider" to "Choropia rider")
-                                add("seller_delivers" to "Seller delivers")
-                                add("meetup" to "Meet up")
-                            }
-                            handoverMethods.forEach { (method, label) ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Checkbox(
-                                        checked = method in deliveryMethods,
-                                        onCheckedChange = { checked ->
-                                            deliveryMethods = if (checked) deliveryMethods + method else deliveryMethods - method
-                                        },
-                                    )
-                                    Text(label, style = MaterialTheme.typography.bodyMedium)
-                                }
-                            }
-                            if (!riderAvailable) {
-                                Text(
-                                    "Set up rider delivery in listing settings to offer that option.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                            OutlinedTextField(
-                                value = offerNote,
-                                onValueChange = { if (it.length <= 300) offerNote = it },
-                                label = { Text("Note (optional)") },
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            OutlinedTextField(
-                                value = offerPin,
-                                onValueChange = { if (it.length <= 12) offerPin = it },
-                                label = { Text("Transaction PIN") },
-                                singleLine = true,
-                                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
-                                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                                    keyboardType = androidx.compose.ui.text.input.KeyboardType.NumberPassword,
-                                ),
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            Text(
-                                "Your PIN approves this offer. Chat offers cannot currently be paid through escrow.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                com.choropia.app.ui.offers.OfferComposerSheet(
+                    conversationId = conversationId,
+                    listings = sellerListings,
+                    defaultListingId = state.conversation?.listing,
+                    sellerVerified = me?.profile?.seller_verified == true,
+                    onDismiss = { offerDialogOpen = false },
+                    onSent = {
+                        offerDialogOpen = false
+                        toast("Offer sent. The buyer can pay from the chat.")
+                        scope.launch { vm.poll() }
                     },
-                    confirmButton = {
-                        TextButton(
-                            enabled = !offerSending && amountKobo != null && deliveryMethods.isNotEmpty() && offerPin.isNotBlank() && selectedOfferListing != null,
-                            onClick = {
-                                val listingId = selectedOfferListing?.id ?: return@TextButton
-                                val amount = amountKobo ?: return@TextButton
-                                scope.launch {
-                                    offerSending = true
-                                    try {
-                                        repo.createOffer(
-                                            conversationId,
-                                            listingId,
-                                            amount,
-                                            deliveryMethods.toList(),
-                                            offerNote,
-                                            offerPin,
-                                        )
-                                        offerDialogOpen = false
-                                        offerPin = ""
-                                        vm.poll()
-                                        android.widget.Toast.makeText(context, "Offer sent.", android.widget.Toast.LENGTH_SHORT).show()
-                                    } catch (e: ApiException) {
-                                        android.widget.Toast.makeText(context, e.message ?: "Could not send this offer.", android.widget.Toast.LENGTH_LONG).show()
-                                    } finally {
-                                        offerSending = false
-                                    }
-                                }
-                            },
-                        ) {
-                            Text(if (offerSending) "Sending…" else "Send offer")
+                )
+            }
+            payingOffer?.let { offer ->
+                com.choropia.app.ui.offers.PaySheet(
+                    offer = offer,
+                    onDismiss = { payingOffer = null },
+                    onCheckout = { checkout ->
+                        payingOffer = null
+                        scope.launch { vm.poll() }
+                        val url = checkout.authorization_url
+                        if (url != null) {
+                            context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url)))
+                        } else {
+                            onOpenOrder(checkout.order_id)
                         }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { offerDialogOpen = false }, enabled = !offerSending) { Text("Back") }
                     },
                 )
             }
@@ -831,16 +701,6 @@ fun ChatScreen(
     }
 }
 
-private fun parseOfferKobo(value: String): Long? {
-    val normalized = value.trim().replace(",", "")
-    if (!normalized.matches(Regex("""\d+(?:\.\d{1,2})?"""))) return null
-    val parts = normalized.split(".")
-    val naira = parts[0].toLongOrNull() ?: return null
-    if (naira > 1_000_000_000L) return null
-    val kobo = parts.getOrNull(1)?.padEnd(2, '0')?.toLongOrNull() ?: 0L
-    return (naira * 100 + kobo).takeIf { it > 0 }
-}
-
 /** Play/pause for a voice note streamed from its URL. */
 @Composable
 private fun VoiceNote(url: String?, durationSeconds: Int?, tint: androidx.compose.ui.graphics.Color) {
@@ -887,9 +747,7 @@ private fun Bubble(
     mine: Boolean,
     onQuickReply: (String) -> Unit,
     onOpenListing: (Int) -> Unit,
-    onOfferAction: (ChatOffer, Boolean) -> Unit,
-    onOfferCheckout: (ChatOffer, String) -> Unit,
-    busyOfferId: String?,
+    offerActions: com.choropia.app.ui.offers.OfferCardActions,
     onDelete: () -> Unit,
 ) {
     val pendingSend = (message.id ?: 0) < 0
@@ -909,13 +767,17 @@ private fun Bubble(
                         )
                     )
                     .background(
-                        if (mine && message.type != "offer" && message.type != "listing_ref") {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainer
+                        when {
+                            // The offer card draws its own surface, border and corners.
+                            message.type == "offer" && message.offer != null && !message.is_deleted -> androidx.compose.ui.graphics.Color.Transparent
+                            mine && message.type != "listing_ref" -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.surfaceContainer
                         }
                     )
-                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                    .padding(
+                        if (message.type == "offer" && message.offer != null && !message.is_deleted) PaddingValues(0.dp)
+                        else PaddingValues(horizontal = 14.dp, vertical = 9.dp),
+                    ),
             ) {
                 val textColor = if (mine) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
                 if (message.is_deleted) {
@@ -923,7 +785,7 @@ private fun Bubble(
                 } else if (message.type == "listing_ref") {
                     ListingReferenceBubble(message, mine, onQuickReply, onOpenListing)
                 } else if (message.type == "offer" && message.offer != null) {
-                    ChatOfferBubble(message.offer, onOfferAction, onOfferCheckout, busyOfferId == message.offer.id)
+                    com.choropia.app.ui.offers.OfferCard(message.offer, offerActions)
                 } else when (message.attachment_type) {
                     "uploading" -> Text("Sending attachment...", style = MaterialTheme.typography.bodyMedium, color = textColor)
                     "image" -> coil.compose.AsyncImage(
@@ -971,108 +833,6 @@ private fun Bubble(
                         onClick = { menuExpanded = false; onDelete() },
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ChatOfferBubble(
-    offer: ChatOffer,
-    onAction: (ChatOffer, Boolean) -> Unit,
-    onCheckout: (ChatOffer, String) -> Unit,
-    busy: Boolean,
-) {
-    var methodMenuOpen by remember(offer.id) { mutableStateOf(false) }
-    var selectedMethod by remember(offer.id) {
-        mutableStateOf(offer.delivery_method.ifBlank { offer.allowed_delivery_methods.firstOrNull() ?: "meetup" })
-    }
-    val status = when (offer.status) {
-        "pending" -> "Waiting for buyer"
-        "payment_processing" -> "Payment in progress"
-        "paid" -> "Paid into escrow"
-        "declined" -> "Declined by buyer"
-        "cancelled" -> "Cancelled by seller"
-        "expired" -> "Expired"
-        "superseded" -> "Replaced by a newer offer"
-        else -> offer.status.replace("_", " ")
-    }
-    val methods = if (offer.delivery_method.isNotBlank()) {
-        listOf(offer.delivery_method)
-    } else offer.allowed_delivery_methods
-    val methodLabels = methods.map {
-        when (it) {
-            "rider" -> "Choropia rider"
-            "seller_delivers" -> "Seller delivers"
-            "meetup" -> "Meet up"
-            else -> it
-        }
-    }
-    Column(
-        Modifier.width(280.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp),
-    ) {
-        Text(offer.listing.title, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Text(
-            formatNaira((offer.amount_kobo / 100.0).toString()),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        Text(
-            "Listed at ${formatNaira((offer.listing_price_kobo / 100.0).toString())}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text("Handover: ${methodLabels.joinToString().ifBlank { "Not set" }}", style = MaterialTheme.typography.bodySmall)
-        if (offer.note.isNotBlank()) Text(offer.note, style = MaterialTheme.typography.bodyMedium)
-        Text(status, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        if (offer.status in setOf("pending", "payment_processing") && offer.viewer_role == "buyer") {
-            Text(
-                "This private chat price does not change the public listing. Payment is secured in escrow.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Box {
-                TextButton(onClick = { methodMenuOpen = true }, enabled = !busy && offer.status == "pending") {
-                    Text(
-                        when (selectedMethod) {
-                            "rider" -> "Choropia rider"
-                            "seller_delivers" -> "Seller delivers"
-                            else -> "Meet up"
-                        },
-                    )
-                }
-                DropdownMenu(expanded = methodMenuOpen, onDismissRequest = { methodMenuOpen = false }) {
-                    offer.allowed_delivery_methods.forEach { method ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    when (method) {
-                                        "rider" -> "Choropia rider"
-                                        "seller_delivers" -> "Seller delivers"
-                                        else -> "Meet up"
-                                    },
-                                )
-                            },
-                            onClick = { selectedMethod = method; methodMenuOpen = false },
-                        )
-                    }
-                }
-            }
-            Button(onClick = { onCheckout(offer, selectedMethod) }, enabled = !busy) {
-                Text(if (busy) "Opening checkout…" else if (offer.status == "payment_processing") "Resume escrow checkout" else "Pay into escrow")
-            }
-            if (offer.status == "pending") {
-                TextButton(onClick = { onAction(offer, false) }, enabled = !busy) {
-                    Text(if (busy) "Updating…" else "Decline offer")
-                }
-            }
-        } else if (offer.status == "pending" && offer.viewer_role == "seller") {
-            TextButton(onClick = { onAction(offer, true) }, enabled = !busy) {
-                Text(if (busy) "Updating…" else "Cancel offer")
             }
         }
     }

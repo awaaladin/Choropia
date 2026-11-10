@@ -14,6 +14,9 @@ import com.choropia.app.data.model.Bank
 import com.choropia.app.data.model.CommissionPreview
 import com.choropia.app.data.model.Category
 import com.choropia.app.data.model.ChatOffer
+import com.choropia.app.data.model.FeePreview
+import com.choropia.app.data.model.HandoverCode
+import com.choropia.app.data.model.PinStatus
 import com.choropia.app.data.model.PayoutAccount
 import com.choropia.app.data.model.Comment
 import com.choropia.app.data.model.Conversation
@@ -89,6 +92,14 @@ data class CreateOfferRequest(
 )
 @Serializable data class OfferCheckoutRequest(val delivery_method: String, val source: String = "app")
 @Serializable data class OfferCheckoutResponse(val order_id: Int, val authorization_url: String? = null)
+@Serializable data class SetPinRequest(
+    val pin: String,
+    val old_pin: String? = null,
+    val password: String? = null,
+    val email_code: String? = null,
+)
+@Serializable data class HandoverCodeRequest(val code: String)
+@Serializable data class DetailResponse(val detail: String = "")
 @Serializable data class CreateOrderRequest(val listing: Int)
 @Serializable data class DisputeRequest(val reason: String)
 @Serializable data class InitializePaymentRequest(val order_id: Int, val source: String = "app")  // "app": Paystack returns to the app
@@ -475,6 +486,27 @@ interface ChoropiaApi {
 
     @POST("offers/{id}/checkout/")
     suspend fun checkoutOffer(@Path("id") id: String, @Body body: OfferCheckoutRequest): OfferCheckoutResponse
+
+    @POST("offers/{id}/verify-payment/")
+    suspend fun verifyOfferPayment(@Path("id") id: String): ChatOffer
+
+    @GET("fees/preview/")
+    suspend fun feePreview(@Query("amount_kobo") amountKobo: Long, @Query("verified") verified: Boolean): FeePreview
+
+    @GET("account/pin/")
+    suspend fun pinStatus(): PinStatus
+
+    @POST("account/pin/")
+    suspend fun setPin(@Body body: SetPinRequest): PinStatus
+
+    @POST("account/pin/reset-code/")
+    suspend fun pinResetCode(): DetailResponse
+
+    @GET("orders/{id}/handover-code/")
+    suspend fun handoverCode(@Path("id") orderId: Int): HandoverCode
+
+    @POST("orders/{id}/confirm-handover/")
+    suspend fun confirmHandover(@Path("id") orderId: Int, @Body body: HandoverCodeRequest): kotlinx.serialization.json.JsonObject
 
     @Multipart
     @POST("messages/")

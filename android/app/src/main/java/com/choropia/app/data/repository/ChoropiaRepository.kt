@@ -34,6 +34,11 @@ import com.choropia.app.data.network.CreateConversationRequest
 import com.choropia.app.data.network.OpenUserConversationRequest
 import com.choropia.app.data.network.OfferCheckoutRequest
 import com.choropia.app.data.network.OfferCheckoutResponse
+import com.choropia.app.data.network.SetPinRequest
+import com.choropia.app.data.network.HandoverCodeRequest
+import com.choropia.app.data.model.FeePreview
+import com.choropia.app.data.model.HandoverCode
+import com.choropia.app.data.model.PinStatus
 import com.choropia.app.data.network.CreateFollowRequest
 import com.choropia.app.data.network.CreateLikeRequest
 import com.choropia.app.data.network.CreateMerchantApplicationRequest
@@ -505,6 +510,21 @@ class ChoropiaRepository(
 
     suspend fun checkoutOffer(offerId: String, deliveryMethod: String): OfferCheckoutResponse =
         apiCall { api.checkoutOffer(offerId, OfferCheckoutRequest(deliveryMethod)) }
+
+    suspend fun verifyOfferPayment(offerId: String): ChatOffer = apiCall { api.verifyOfferPayment(offerId) }
+
+    suspend fun feePreview(amountKobo: Long, verified: Boolean): FeePreview = apiCall { api.feePreview(amountKobo, verified) }
+
+    suspend fun pinStatus(): PinStatus = apiCall { api.pinStatus() }
+
+    suspend fun setPin(pin: String, oldPin: String? = null, password: String? = null, emailCode: String? = null): PinStatus =
+        apiCall { api.setPin(SetPinRequest(pin, oldPin, password, emailCode)) }
+
+    suspend fun pinResetCode(): String = apiCall { api.pinResetCode().detail }
+
+    suspend fun handoverCode(orderId: Int): HandoverCode = apiCall { api.handoverCode(orderId) }
+
+    suspend fun confirmHandover(orderId: Int, code: String) { apiCall { api.confirmHandover(orderId, HandoverCodeRequest(code)) } }
 
     suspend fun myActiveListings(): List<Listing> = listings(ListingQuery(mine = true)).items
         .filter { it.status == "active" && it.quantity > 0 }
