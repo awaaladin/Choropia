@@ -226,12 +226,19 @@ def retry_pending_refunds():
     return {"pending": len(ids), "refunded": done}
 
 
+@transaction.atomic
 def _mark_held(payment, note):
     from . import ledger
 
     payment.status = Payment.Status.PAID_HELD
     payment.paid_at = timezone.now()
     payment.order.transition_to(OrderStatus.PAID_ESCROW, note=note)
+    from offers.models import Offer
+    from offers.services import transition as transition_offer
+
+    offer = Offer.objects.select_for_update().filter(order_id=payment.order_id).first()
+    if offer is not None and offer.status == Offer.Status.PAYMENT_PROCESSING:
+        transition_offer(offer, Offer.Status.PAID, note="Payment confirmed into escrow")
     ledger.held(payment)
     try:
         from dispatch import services as dispatch_services

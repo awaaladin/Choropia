@@ -13,6 +13,7 @@
 - [ ] App -> web voice note plays on web without a spinner loop.
 - [ ] Web -> app image displays correctly.
 - [ ] Web -> app voice note plays on Android.
+- [ ] Web attachment uploads reject files over 3 MB and voice notes over 10 minutes.
 - [ ] Failed media states show a friendly message and a retry/download affordance when playback is unsupported.
 
 ## Sold and offers
@@ -21,6 +22,9 @@
 - [ ] Sold listing stays visible until the cutoff and then disappears from public marketplace views.
 - [ ] Seller can relist or extend a sold listing without changing list price.
 - [ ] Offer creation leaves the catalog price untouched and only records the offer amount in the escrow flow.
+- [ ] Buyer can pay a chat offer into escrow; the resulting order uses the locked offer amount while the listing price remains unchanged.
+- [ ] Rider offers require a rider and delivery destination before payment; other offer types cannot add rider delivery.
+- [ ] Buyer can cancel a Paystack checkout and retry; an open Gaxtron checkout cannot be cancelled unsafely.
 
 ## Comments and profiles
 

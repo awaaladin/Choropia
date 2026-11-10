@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import Q
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions
@@ -8,7 +10,9 @@ from chat.models import Conversation
 
 from . import services
 from .models import Offer
-from .serializers import CreateOfferSerializer, OfferSerializer
+from .serializers import CreateOfferSerializer, OfferCheckoutSerializer, OfferSerializer
+
+logger = logging.getLogger(__name__)
 
 
 def error_response(exc: services.OfferError):
@@ -102,3 +106,39 @@ class DeclineOfferView(_OfferActionView):
     """Buyer: say no to a pending offer."""
 
     perform = staticmethod(services.decline_offer)
+
+
+class OfferCheckoutView(APIView):
+    """Buyer: open escrow checkout at the chat offer's locked price."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    throttle_scope = "orders"
+
+    def post(self, request, offer_id):
+        body = OfferCheckoutSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        data = body.validated_data
+        try:
+            order = services.create_offer_checkout(
+                user=request.user,
+                offer_id=offer_id,
+                delivery_method=data["delivery_method"],
+            )
+        except services.OfferError as exc:
+            return error_response(exc)
+
+        if data["delivery_method"] == Offer.Delivery.RIDER:
+            return Response({"order_id": order.pk, "authorization_url": None})
+
+        from payments.gaxtron import GaxtronError
+        from payments.paystack import PaystackError
+        from payments.services import initialize_payment
+
+        try:
+            payment = initialize_payment(order, return_to_app=data["source"] == "app")
+        except (PaystackError, GaxtronError):
+            logger.exception("Could not initialize payment for offer %s", offer_id)
+            return Response({"detail": "Payment checkout could not be opened. Please try again."}, status=502)
+        if not payment.authorization_url:
+            return Response({"detail": "The payment provider did not return a checkout URL."}, status=502)
+        return Response({"order_id": order.pk, "authorization_url": payment.authorization_url})

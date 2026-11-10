@@ -32,6 +32,8 @@ import com.choropia.app.data.network.CreateCommentRequest
 import com.choropia.app.data.network.CreateOfferRequest
 import com.choropia.app.data.network.CreateConversationRequest
 import com.choropia.app.data.network.OpenUserConversationRequest
+import com.choropia.app.data.network.OfferCheckoutRequest
+import com.choropia.app.data.network.OfferCheckoutResponse
 import com.choropia.app.data.network.CreateFollowRequest
 import com.choropia.app.data.network.CreateLikeRequest
 import com.choropia.app.data.network.CreateMerchantApplicationRequest
@@ -500,6 +502,9 @@ class ChoropiaRepository(
     suspend fun cancelOffer(offerId: String): ChatOffer = apiCall { api.cancelOffer(offerId) }
 
     suspend fun declineOffer(offerId: String): ChatOffer = apiCall { api.declineOffer(offerId) }
+
+    suspend fun checkoutOffer(offerId: String, deliveryMethod: String): OfferCheckoutResponse =
+        apiCall { api.checkoutOffer(offerId, OfferCheckoutRequest(deliveryMethod)) }
 
     suspend fun myActiveListings(): List<Listing> = listings(ListingQuery(mine = true)).items
         .filter { it.status == "active" && it.quantity > 0 }

@@ -135,12 +135,16 @@ def options_for_buyer(listing, dropoff_area=None):
 def choose_delivery(order, user, dropoff_area, driver, note=""):
     """The buyer picks where to and which driver's price. Must happen before they pay."""
     from payments.models import Payment
+    from offers.models import Offer
 
     order = Order.objects.select_for_update().get(pk=order.pk)
     if order.buyer_id != user.id:
         raise DispatchError("Only the buyer can choose delivery.", status=403)
     if order.status != OrderStatus.PENDING_PAYMENT:
         raise DispatchError("Delivery can only be chosen before you pay.")
+    offer = getattr(order, "source_offer", None)
+    if offer is not None and offer.delivery_method != Offer.Delivery.RIDER:
+        raise DispatchError("This chat offer does not include rider delivery.")
     options = ListingDelivery.objects.filter(listing_id=order.listing_id, enabled=True).first()
     if options is None:
         raise DispatchError("This item is not offered with delivery.")
@@ -172,6 +176,12 @@ def choose_delivery(order, user, dropoff_area, driver, note=""):
             "status": OrderDelivery.Status.AWAITING_PAYMENT,
         },
     )
+    if offer is not None:
+        offer.delivery_fee_kobo = int(buyer_share * 100)
+        offer.save(update_fields=["delivery_fee_kobo", "updated_at"])
+        from offers.services import broadcast_after_commit
+
+        broadcast_after_commit(offer)
     # A checkout already opened for a different total must be reissued: Paystack will not accept a
     # second initialize on the same reference, and the buyer must be charged exactly the new total.
     payment = Payment.objects.select_for_update().filter(order=order).first()
@@ -195,6 +205,9 @@ def clear_delivery(order, user):
             raise DispatchError("Only the buyer can change delivery.", status=403)
         if order.status != OrderStatus.PENDING_PAYMENT:
             raise DispatchError("Delivery can only be changed before you pay.")
+        offer = getattr(order, "source_offer", None)
+        if offer is not None and offer.delivery_method == "rider":
+            raise DispatchError("This chat offer requires rider delivery.")
         OrderDelivery.objects.filter(order=order).delete()
         payment = Payment.objects.select_for_update().filter(order=order).first()
         if payment is not None and payment.status == Payment.Status.INITIALIZED and payment.amount != Decimal(order.price):

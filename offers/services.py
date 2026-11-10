@@ -7,6 +7,7 @@ conversation so their cards update in place.
 """
 import logging
 from datetime import timedelta
+from decimal import Decimal
 
 from django.conf import settings
 from django.db import transaction
@@ -216,6 +217,61 @@ def create_offer(*, user, conversation, listing_id, amount_kobo, allowed_deliver
         conversation.save(update_fields=["updated_at"])
         broadcast_after_commit(offer)
     return offer
+
+
+def create_offer_checkout(*, user, offer_id, delivery_method):
+    """Create the escrow order at the offer's locked price, never the listing's public price."""
+    from chat.models import Conversation
+    from listings.models import Listing
+    from orders.models import Order
+
+    order = None
+    expired = False
+    with transaction.atomic():
+        offer = get_for_participant(offer_id, user, lock=True)
+        if user.pk != offer.buyer_id:
+            raise OfferError("Only the buyer can pay this offer.", status=403, code="forbidden")
+        if delivery_method not in offer.allowed_delivery_methods:
+            raise OfferError("Choose one of the handover methods in this offer.", code="delivery_method")
+        if delivery_method == Offer.Delivery.RIDER and not _rider_available(offer.listing):
+            raise OfferError("Rider delivery is no longer available for this listing.", code="delivery_method")
+        if expire_if_due(offer):
+            expired = True
+        elif offer.status == Offer.Status.PAYMENT_PROCESSING and offer.order_id:
+            order = Order.objects.select_for_update().get(pk=offer.order_id)
+            if order.status != Order.Status.PENDING_PAYMENT:
+                raise OfferError("The order for this offer is no longer payable.", status=409, code="invalid_state")
+            if offer.delivery_method != delivery_method:
+                raise OfferError("A checkout is already open for this offer.", status=409, code="payment_in_progress")
+        else:
+            if offer.status != Offer.Status.PENDING:
+                raise OfferError("This offer is no longer available for payment.", status=409, code="invalid_state")
+
+            listing = Listing.objects.select_for_update().get(pk=offer.listing_id)
+            if listing.status != Listing.Status.ACTIVE or listing.quantity < 1:
+                raise OfferError("That listing is no longer for sale.", status=409, code="listing_unavailable")
+
+            order = Order.objects.create(
+                listing=listing,
+                buyer=offer.buyer,
+                seller=offer.seller,
+                price=Decimal(offer.amount_kobo) / 100,
+            )
+            conversation = Conversation.objects.select_for_update().get(pk=offer.conversation_id)
+            conversation.orders.add(order)
+            if conversation.order_id is None or conversation.order.status == Order.Status.CANCELLED:
+                conversation.order = order
+                conversation.save(update_fields=["order", "updated_at"])
+            offer.order = order
+            offer.delivery_method = delivery_method
+            offer.delivery_fee_kobo = 0
+            offer.save(update_fields=["order", "delivery_method", "delivery_fee_kobo", "updated_at"])
+            transition(offer, Offer.Status.PAYMENT_PROCESSING, actor=user, note="Buyer started escrow checkout")
+    if expired:
+        raise OfferError("This offer has expired.", status=409, code="expired")
+    if order is None:
+        raise OfferError("The offer checkout could not be created.", status=500, code="checkout_error")
+    return order
 
 
 def format_naira(kobo):

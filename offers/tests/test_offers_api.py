@@ -13,6 +13,8 @@ from chat.models import Conversation, Message
 from listings.models import Category, Listing
 from offers import services
 from offers.models import Offer, OfferEvent
+from orders.models import Order
+from payments.models import Payment
 
 PIN = "2580"
 
@@ -223,6 +225,148 @@ class BuyerNeverSeesTheFeeTests(OfferFixture):
         )
         self.assertEqual(r.status_code, 201)
         self.assertEqual(r.json()["type"], "text")
+
+
+class OfferCheckoutTests(OfferFixture):
+    def setUp(self):
+        super().setUp()
+        self.offer_id = self.make().json()["id"]
+
+    def checkout(self, user=None, delivery_method="meetup", source="web"):
+        return self.client_for(user or self.buyer).post(
+            f"/api/v1/offers/{self.offer_id}/checkout/",
+            {"delivery_method": delivery_method, "source": source},
+            format="json",
+        )
+
+    @mock.patch("payments.services.initialize_payment")
+    def test_buyer_checkout_uses_locked_offer_amount_not_listing_price(self, initialize_payment):
+        initialize_payment.return_value.authorization_url = "https://checkout.example/pay"
+        response = self.checkout()
+        self.assertEqual(response.status_code, 200, response.content)
+        order = self.conversation.orders.get()
+        offer = Offer.objects.get(pk=self.offer_id)
+        self.listing.refresh_from_db()
+        self.assertEqual(order.price, 185_000)
+        self.assertEqual(self.listing.price, 200_000)
+        self.assertEqual((offer.status, offer.order_id, offer.delivery_method), ("payment_processing", order.pk, "meetup"))
+        self.assertEqual(response.json(), {"order_id": order.pk, "authorization_url": "https://checkout.example/pay"})
+        initialize_payment.assert_called_once_with(order, return_to_app=False)
+
+    @mock.patch("payments.services.initialize_payment")
+    def test_checkout_is_idempotent_and_can_be_reopened_from_the_app(self, initialize_payment):
+        initialize_payment.return_value.authorization_url = "https://checkout.example/pay"
+        first = self.checkout(source="app")
+        second = self.checkout(source="app")
+        self.assertEqual(first.json(), second.json())
+        self.assertEqual(self.conversation.orders.count(), 1)
+        self.assertEqual(Offer.objects.get(pk=self.offer_id).status, "payment_processing")
+        self.assertEqual(initialize_payment.call_count, 2)
+        self.assertTrue(all(call.kwargs["return_to_app"] for call in initialize_payment.call_args_list))
+
+    def test_only_the_buyer_can_start_checkout(self):
+        self.assertEqual(self.checkout(user=self.seller).status_code, 403)
+        self.assertEqual(self.checkout(user=self.outsider).status_code, 404)
+        self.assertFalse(self.conversation.orders.exists())
+
+    def test_checkout_rejects_an_unoffered_delivery_method(self):
+        response = self.checkout(delivery_method="rider")
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(self.conversation.orders.exists())
+
+    @mock.patch("payments.services.initialize_payment")
+    def test_rider_offer_requires_delivery_choice_before_payment(self, initialize_payment):
+        initialize_payment.return_value.authorization_url = "https://checkout.example/pay"
+        self.checkout()
+        initialize_payment.reset_mock()
+        offer = Offer.objects.get(pk=self.offer_id)
+        Offer.objects.filter(pk=offer.pk).update(
+            allowed_delivery_methods=["rider"],
+            delivery_method="rider",
+        )
+        order = self.conversation.orders.get()
+
+        response = self.client_for(self.buyer).post(
+            "/api/v1/payments/initialize/",
+            {"order_id": order.pk, "source": "app"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400, response.content)
+        initialize_payment.assert_not_called()
+        self.assertFalse(Payment.objects.filter(order=order).exists())
+
+    def test_expired_offer_cannot_be_checked_out(self):
+        Offer.objects.filter(pk=self.offer_id).update(expires_at=timezone.now() - timedelta(seconds=1))
+        response = self.checkout()
+        self.assertEqual((response.status_code, response.json()["code"]), (409, "expired"))
+        self.assertEqual(Offer.objects.get(pk=self.offer_id).status, "expired")
+        self.assertFalse(self.conversation.orders.exists())
+
+    @mock.patch("notifications.emails.send_payment_received")
+    @mock.patch("dispatch.services.on_order_paid")
+    @mock.patch("payments.ledger.held")
+    @mock.patch("payments.services.initialize_payment")
+    def test_confirmed_escrow_payment_marks_the_offer_paid(
+        self, initialize_payment, ledger_held, dispatch_paid, send_email
+    ):
+        initialize_payment.return_value.authorization_url = "https://checkout.example/pay"
+        self.checkout()
+        order = self.conversation.orders.get()
+        payment = Payment.objects.create(order=order, reference="offer-payment-ref", amount=order.price)
+
+        from payments.services import _mark_held
+
+        _mark_held(payment, "Payment confirmed in test")
+
+        offer = Offer.objects.get(pk=self.offer_id)
+        order.refresh_from_db()
+        self.assertEqual((offer.status, offer.paid_at is not None, order.status), ("paid", True, Order.Status.PAID_ESCROW))
+
+    @mock.patch("payments.services.initialize_payment")
+    def test_buyer_can_cancel_paystack_checkout_and_retry_the_offer(self, initialize_payment):
+        initialize_payment.return_value.authorization_url = "https://checkout.example/pay"
+        self.checkout()
+        order = self.conversation.orders.get()
+        Payment.objects.create(
+            order=order,
+            reference="offer-paystack-ref",
+            amount=order.price,
+            provider=Payment.Provider.PAYSTACK,
+        )
+
+        response = self.client_for(self.buyer).post(f"/api/v1/orders/{order.pk}/cancel/")
+
+        offer = Offer.objects.get(pk=self.offer_id)
+        order.refresh_from_db()
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual((order.status, offer.status, offer.order_id), (Order.Status.CANCELLED, "pending", None))
+        retry = self.checkout()
+        self.assertEqual(retry.status_code, 200, retry.content)
+        self.assertEqual(self.conversation.orders.count(), 2)
+        self.conversation.refresh_from_db()
+        self.assertEqual(self.conversation.order_id, retry.json()["order_id"])
+
+    @mock.patch("payments.services.initialize_payment")
+    def test_open_gaxtron_checkout_cannot_be_cancelled(self, initialize_payment):
+        from django.test import override_settings
+
+        initialize_payment.return_value.authorization_url = "https://checkout.example/pay"
+        with override_settings(PAYMENT_PROVIDER=Payment.Provider.GAXTRON):
+            self.checkout()
+        order = self.conversation.orders.get()
+        Payment.objects.create(
+            order=order,
+            reference="offer-gaxtron-ref",
+            amount=order.price,
+            provider=Payment.Provider.GAXTRON,
+        )
+
+        response = self.client_for(self.buyer).post(f"/api/v1/orders/{order.pk}/cancel/")
+
+        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(Offer.objects.get(pk=self.offer_id).status, "payment_processing")
+        self.assertEqual(Order.objects.get(pk=order.pk).status, Order.Status.PENDING_PAYMENT)
 
 
 class ExpiryTests(OfferFixture):

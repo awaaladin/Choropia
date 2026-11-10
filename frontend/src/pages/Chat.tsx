@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send, Tag } from "lucide-react";
+import { ArrowLeft, ImagePlus, Mic, Send, Square, Tag } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
@@ -27,6 +27,7 @@ const OFFER_STATUS_LABELS: Record<ChatOffer["status"], string> = {
   expired: "Expired",
   superseded: "Replaced by a newer offer",
 };
+const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024;
 
 function amountToKobo(value: string) {
   const cleaned = value.trim().replace(/,/g, "");
@@ -40,13 +41,18 @@ function ChatOfferCard({
   offer,
   onCancel,
   onDecline,
+  onPay,
   busy,
 }: {
   offer: ChatOffer;
   onCancel: (offer: ChatOffer) => void;
   onDecline: (offer: ChatOffer) => void;
+  onPay: (offer: ChatOffer, method: OfferDeliveryMethod) => void;
   busy: boolean;
 }) {
+  const [deliveryMethod, setDeliveryMethod] = useState<OfferDeliveryMethod>(
+    offer.delivery_method || offer.allowed_delivery_methods[0] || "meetup",
+  );
   const methods = offer.delivery_method
     ? [DELIVERY_LABELS[offer.delivery_method]]
     : offer.allowed_delivery_methods.map((method) => DELIVERY_LABELS[method]);
@@ -68,14 +74,34 @@ function ChatOfferCard({
         Handover: {methods.length ? methods.join(", ") : "No method selected"}
       </p>
       {offer.note && <p className="mt-2 whitespace-pre-wrap text-sm">{offer.note}</p>}
-      {offer.status === "pending" && offer.viewer_role === "buyer" && (
+      {(offer.status === "pending" || offer.status === "payment_processing") && offer.viewer_role === "buyer" && (
         <div className="mt-3 space-y-2 border-t border-border pt-3">
+          <label className="block text-xs font-medium">
+            Handover
+            <select
+              className="mt-1 min-h-10 w-full rounded-md border border-border bg-background px-2 text-sm"
+              value={deliveryMethod}
+              onChange={(event) => setDeliveryMethod(event.target.value as OfferDeliveryMethod)}
+              disabled={busy || offer.status === "payment_processing"}
+            >
+              {offer.allowed_delivery_methods.map((method) => (
+                <option key={method} value={method}>{DELIVERY_LABELS[method]}</option>
+              ))}
+            </select>
+          </label>
           <p className="text-xs text-muted-foreground">
-            This chat offer can’t be paid through escrow yet.
+            {offer.status === "payment_processing"
+              ? "Resume the existing checkout for this private price."
+              : "Private chat price; the public listing price will not change. Payment is held in escrow."}
           </p>
-          <Button variant="secondary" disabled={busy} onClick={() => onDecline(offer)}>
-            Decline offer
+          <Button disabled={busy} onClick={() => onPay(offer, deliveryMethod)}>
+            {busy ? "Opening checkout…" : offer.status === "payment_processing" ? "Resume checkout" : "Pay into escrow"}
           </Button>
+          {offer.status === "pending" && (
+            <Button variant="secondary" disabled={busy} onClick={() => onDecline(offer)}>
+              Decline offer
+            </Button>
+          )}
         </div>
       )}
       {offer.status === "pending" && offer.viewer_role === "seller" && (
@@ -145,6 +171,7 @@ function ListingReferenceCard({
 export function ChatPage() {
   const { id } = useParams();
   const conversationId = Number(id);
+  const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
@@ -158,8 +185,13 @@ export function ChatPage() {
   const [offerPin, setOfferPin] = useState("");
   const [offerSending, setOfferSending] = useState(false);
   const [busyOfferId, setBusyOfferId] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
   const paneRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const recordStartedAtRef = useRef(0);
   const conversations = useQuery({
     queryKey: ["conversations"],
     queryFn: async () => rows(await api.listConversations()),
@@ -172,6 +204,12 @@ export function ChatPage() {
     enabled: !!canOffer,
   });
   const selectedListing = myListings.data?.find((item) => item.id === selectedListingId);
+  useEffect(() => () => {
+    const recorder = recorderRef.current;
+    if (recorder) recorder.onstop = null;
+    if (recorder?.state !== "inactive") recorder?.stop();
+    mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+  }, []);
   const listingDelivery = useQuery({
     queryKey: ["listingDelivery", selectedListingId],
     queryFn: () => api.dispatch.listingDelivery(Number(selectedListingId)),
@@ -281,6 +319,70 @@ export function ChatPage() {
     }
   };
 
+  const sendAttachment = async (file: File, durationSeconds?: number) => {
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      toast.error("Attachments can be at most 3 MB.");
+      return;
+    }
+    const body = draft.trim();
+    setSending(true);
+    try {
+      const message = await api.sendAttachment(conversationId, file, durationSeconds, body);
+      setLive((current) => [...current, message]);
+      setDraft("");
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const startRecording = async () => {
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      toast.error("Voice recording is not supported in this browser.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      const mimeType = ["audio/webm;codecs=opus", "audio/mp4", "audio/ogg;codecs=opus"]
+        .find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      const chunks: BlobPart[] = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size) chunks.push(event.data);
+      };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+        recorderRef.current = null;
+        const duration = Math.max(1, Math.ceil((Date.now() - recordStartedAtRef.current) / 1000));
+        if (duration > 600) {
+          toast.error("Voice notes can be at most 10 minutes.");
+          return;
+        }
+        const type = recorder.mimeType || "audio/webm";
+        const extension = type.includes("mp4") ? "m4a" : type.includes("ogg") ? "ogg" : "webm";
+        void sendAttachment(new File([new Blob(chunks, { type })], `voice-note.${extension}`, { type }), duration);
+      };
+      recorderRef.current = recorder;
+      recordStartedAtRef.current = Date.now();
+      recorder.start();
+      setRecording(true);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not access the microphone.");
+    }
+  };
+
+  const stopRecording = () => {
+    const recorder = recorderRef.current;
+    if (recorder && recorder.state !== "inactive") {
+      setRecording(false);
+      recorder.stop();
+    }
+  };
+
   const submitOffer = async (e: FormEvent) => {
     e.preventDefault();
     const amountKobo = amountToKobo(offerAmount);
@@ -328,6 +430,24 @@ export function ChatPage() {
     }
   };
 
+  const payOffer = async (offer: ChatOffer, method: OfferDeliveryMethod) => {
+    setBusyOfferId(offer.id);
+    try {
+      const checkout = await api.checkoutOffer(offer.id, method);
+      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+      if (checkout.authorization_url) {
+        window.location.assign(checkout.authorization_url);
+      } else {
+        navigate(`/orders/${checkout.order_id}`);
+      }
+    } catch (error) {
+      toast.error(errorMessage(error));
+      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+    } finally {
+      setBusyOfferId(null);
+    }
+  };
+
   return (
     <div className="panel editorial-enter flex h-[75vh] flex-col overflow-hidden">
       <div className="flex items-center gap-2 border-b border-border p-3 md:hidden">
@@ -357,12 +477,26 @@ export function ChatPage() {
                     offer={m.offer}
                     onCancel={(offer) => void updateOffer(offer, "cancel")}
                     onDecline={(offer) => void updateOffer(offer, "decline")}
+                    onPay={(offer, method) => void payOffer(offer, method)}
                     busy={busyOfferId === m.offer.id}
                   />
                 ) : m.type === "listing_ref" ? (
                   <ListingReferenceCard message={m} onQuickReply={setDraft} showQuickReplies={mine} />
                 ) : (
-                  m.body
+                  <>
+                    {m.attachment_type === "image" && m.attachment && (
+                      <a href={m.attachment} target="_blank" rel="noreferrer">
+                        <img src={m.attachment} alt="Chat attachment" className="mb-2 max-h-80 max-w-full rounded-lg object-contain" />
+                      </a>
+                    )}
+                    {m.attachment_type === "audio" && m.attachment && (
+                      <audio controls preload="metadata" src={m.attachment} className="mb-2 max-w-full" />
+                    )}
+                    {m.attachment_type === "file" && m.attachment && (
+                      <a href={m.attachment} target="_blank" rel="noreferrer" className="mb-2 block underline">Open attachment</a>
+                    )}
+                    {m.body}
+                  </>
                 )}
               </div>
             </div>
@@ -382,10 +516,27 @@ export function ChatPage() {
           </Button>
         )}
         <form onSubmit={send} className="flex min-w-0 flex-1 gap-2">
-        <Input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type a message" required disabled={sending} />
-        <button type="submit" disabled={sending} className="grid size-10 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground shadow-button transition-transform active:translate-y-px disabled:opacity-50">
-          <Send size={16} />
-        </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = "";
+              if (file) void sendAttachment(file);
+            }}
+          />
+          <button type="button" aria-label="Attach image" title="Attach image" disabled={sending || recording} onClick={() => fileInputRef.current?.click()} className="grid size-10 shrink-0 place-items-center rounded-md border border-border disabled:opacity-50">
+            <ImagePlus size={16} />
+          </button>
+          <Input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type a message" disabled={sending || recording} />
+          <button type="button" aria-label={recording ? "Stop recording" : "Record voice note"} title={recording ? "Stop recording" : "Record voice note"} disabled={sending} onClick={() => recording ? stopRecording() : void startRecording()} className="grid size-10 shrink-0 place-items-center rounded-md border border-border disabled:opacity-50">
+            {recording ? <Square size={16} /> : <Mic size={16} />}
+          </button>
+          <button type="submit" disabled={sending || recording || !draft.trim()} aria-label="Send message" className="grid size-10 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground shadow-button transition-transform active:translate-y-px disabled:opacity-50">
+            <Send size={16} />
+          </button>
         </form>
       </div>
 
@@ -435,7 +586,7 @@ export function ChatPage() {
           <Field label="Transaction PIN">
             <Input type="password" inputMode="numeric" autoComplete="new-password" maxLength={12} value={offerPin} onChange={(e) => setOfferPin(e.target.value)} required />
           </Field>
-          <p className="text-xs text-muted-foreground">Your PIN approves this offer. The buyer can decline it; escrow checkout for chat offers is not available yet.</p>
+          <p className="text-xs text-muted-foreground">Your PIN approves this private offer. It does not change your public listing price; the buyer can pay through escrow.</p>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="secondary" onClick={() => setOfferDialogOpen(false)}>Back</Button>
             <Button type="submit" loading={offerSending} disabled={!offerMethods.length}>Send offer</Button>

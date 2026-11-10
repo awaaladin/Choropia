@@ -363,7 +363,12 @@ class ChatViewModel(
 }
 
 @Composable
-fun ChatScreen(conversationId: Int, onBack: () -> Unit, onOpenListing: (Int) -> Unit) {
+fun ChatScreen(
+    conversationId: Int,
+    onBack: () -> Unit,
+    onOpenListing: (Int) -> Unit,
+    onOpenOrder: (Int) -> Unit,
+) {
     val repo = LocalRepository.current
     val session = LocalSession.current
     val vm = rememberVm(key = "chat-$conversationId") { ChatViewModel(conversationId, repo) }
@@ -434,6 +439,31 @@ fun ChatScreen(conversationId: Int, onBack: () -> Unit, onOpenListing: (Int) -> 
                 android.widget.Toast.makeText(context, if (cancel) "Offer cancelled." else "Offer declined.", android.widget.Toast.LENGTH_SHORT).show()
             } catch (e: ApiException) {
                 android.widget.Toast.makeText(context, e.message ?: "Could not update the offer.", android.widget.Toast.LENGTH_LONG).show()
+                vm.poll()
+            } finally {
+                busyOfferId = null
+            }
+        }
+    }
+
+    fun payOffer(offer: ChatOffer, deliveryMethod: String) {
+        scope.launch {
+            busyOfferId = offer.id
+            try {
+                val checkout = repo.checkoutOffer(offer.id, deliveryMethod)
+                vm.poll()
+                if (checkout.authorization_url != null) {
+                    context.startActivity(
+                        android.content.Intent(
+                            android.content.Intent.ACTION_VIEW,
+                            android.net.Uri.parse(checkout.authorization_url),
+                        ),
+                    )
+                } else {
+                    onOpenOrder(checkout.order_id)
+                }
+            } catch (e: ApiException) {
+                android.widget.Toast.makeText(context, e.message ?: "Could not open escrow checkout.", android.widget.Toast.LENGTH_LONG).show()
                 vm.poll()
             } finally {
                 busyOfferId = null
@@ -533,7 +563,7 @@ fun ChatScreen(conversationId: Int, onBack: () -> Unit, onOpenListing: (Int) -> 
                     }
                     items(reversed, key = { it.id ?: it.hashCode() }) { message ->
                         val mine = message.sender_id != null && message.sender_id == me?.id
-                        Bubble(message, mine, { draft = it }, onOpenListing, ::actOnOffer, busyOfferId)
+                        Bubble(message, mine, { draft = it }, onOpenListing, ::actOnOffer, ::payOffer, busyOfferId)
                     }
                 }
             }
@@ -797,6 +827,7 @@ private fun Bubble(
     onQuickReply: (String) -> Unit,
     onOpenListing: (Int) -> Unit,
     onOfferAction: (ChatOffer, Boolean) -> Unit,
+    onOfferCheckout: (ChatOffer, String) -> Unit,
     busyOfferId: String?,
 ) {
     val pendingSend = (message.id ?: 0) < 0
@@ -828,7 +859,7 @@ private fun Bubble(
                 if (message.type == "listing_ref") {
                     ListingReferenceBubble(message, mine, onQuickReply, onOpenListing)
                 } else if (message.type == "offer" && message.offer != null) {
-                    ChatOfferBubble(message.offer, onOfferAction, busyOfferId == message.offer.id)
+                    ChatOfferBubble(message.offer, onOfferAction, onOfferCheckout, busyOfferId == message.offer.id)
                 } else when (message.attachment_type) {
                     "uploading" -> Text("Sending attachment...", style = MaterialTheme.typography.bodyMedium, color = textColor)
                     "image" -> coil.compose.AsyncImage(
@@ -867,8 +898,13 @@ private fun Bubble(
 private fun ChatOfferBubble(
     offer: ChatOffer,
     onAction: (ChatOffer, Boolean) -> Unit,
+    onCheckout: (ChatOffer, String) -> Unit,
     busy: Boolean,
 ) {
+    var methodMenuOpen by remember(offer.id) { mutableStateOf(false) }
+    var selectedMethod by remember(offer.id) {
+        mutableStateOf(offer.delivery_method.ifBlank { offer.allowed_delivery_methods.firstOrNull() ?: "meetup" })
+    }
     val status = when (offer.status) {
         "pending" -> "Waiting for buyer"
         "payment_processing" -> "Payment in progress"
@@ -911,14 +947,46 @@ private fun ChatOfferBubble(
         Text("Handover: ${methodLabels.joinToString().ifBlank { "Not set" }}", style = MaterialTheme.typography.bodySmall)
         if (offer.note.isNotBlank()) Text(offer.note, style = MaterialTheme.typography.bodyMedium)
         Text(status, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        if (offer.status == "pending" && offer.viewer_role == "buyer") {
+        if (offer.status in setOf("pending", "payment_processing") && offer.viewer_role == "buyer") {
             Text(
-                "Chat offers cannot currently be paid through escrow.",
+                "This private chat price does not change the public listing. Payment is secured in escrow.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            TextButton(onClick = { onAction(offer, false) }, enabled = !busy) {
-                Text(if (busy) "Updating…" else "Decline offer")
+            Box {
+                TextButton(onClick = { methodMenuOpen = true }, enabled = !busy && offer.status == "pending") {
+                    Text(
+                        when (selectedMethod) {
+                            "rider" -> "Choropia rider"
+                            "seller_delivers" -> "Seller delivers"
+                            else -> "Meet up"
+                        },
+                    )
+                }
+                DropdownMenu(expanded = methodMenuOpen, onDismissRequest = { methodMenuOpen = false }) {
+                    offer.allowed_delivery_methods.forEach { method ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    when (method) {
+                                        "rider" -> "Choropia rider"
+                                        "seller_delivers" -> "Seller delivers"
+                                        else -> "Meet up"
+                                    },
+                                )
+                            },
+                            onClick = { selectedMethod = method; methodMenuOpen = false },
+                        )
+                    }
+                }
+            }
+            Button(onClick = { onCheckout(offer, selectedMethod) }, enabled = !busy) {
+                Text(if (busy) "Opening checkout…" else if (offer.status == "payment_processing") "Resume escrow checkout" else "Pay into escrow")
+            }
+            if (offer.status == "pending") {
+                TextButton(onClick = { onAction(offer, false) }, enabled = !busy) {
+                    Text(if (busy) "Updating…" else "Decline offer")
+                }
             }
         } else if (offer.status == "pending" && offer.viewer_role == "seller") {
             TextButton(onClick = { onAction(offer, true) }, enabled = !busy) {

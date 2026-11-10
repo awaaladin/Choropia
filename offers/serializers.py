@@ -97,3 +97,8 @@ class CreateOfferSerializer(serializers.Serializer):
     )
     note = serializers.CharField(required=False, allow_blank=True, max_length=300)
     pin = serializers.CharField(write_only=True, max_length=12, trim_whitespace=True)
+
+
+class OfferCheckoutSerializer(serializers.Serializer):
+    delivery_method = serializers.ChoiceField(choices=Offer.Delivery.choices)
+    source = serializers.ChoiceField(choices=("web", "app"), default="web", required=False)

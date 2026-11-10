@@ -87,6 +87,8 @@ data class CreateOfferRequest(
     val note: String = "",
     val pin: String,
 )
+@Serializable data class OfferCheckoutRequest(val delivery_method: String, val source: String = "app")
+@Serializable data class OfferCheckoutResponse(val order_id: Int, val authorization_url: String? = null)
 @Serializable data class CreateOrderRequest(val listing: Int)
 @Serializable data class DisputeRequest(val reason: String)
 @Serializable data class InitializePaymentRequest(val order_id: Int, val source: String = "app")  // "app": Paystack returns to the app
@@ -467,6 +469,9 @@ interface ChoropiaApi {
 
     @POST("offers/{id}/decline/")
     suspend fun declineOffer(@Path("id") id: String): ChatOffer
+
+    @POST("offers/{id}/checkout/")
+    suspend fun checkoutOffer(@Path("id") id: String, @Body body: OfferCheckoutRequest): OfferCheckoutResponse
 
     @Multipart
     @POST("messages/")

@@ -149,6 +149,9 @@ export interface Message {
   conversation: number;
   sender_id: number;
   body: string;
+  attachment: string | null;
+  attachment_type: "image" | "audio" | "file" | "";
+  duration_seconds: number | null;
   type?: "text" | "offer" | "listing_ref";
   event?: string;
   offer?: ChatOffer | null;

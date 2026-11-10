@@ -383,6 +383,14 @@ export const api = {
   getMessages: (conversationId: number) => request<Paginated<Message> | Message[]>(`/messages/?conversation=${conversationId}`),
   sendMessage: (conversationId: number, body: string) =>
     request<Message>("/messages/", { method: "POST", body: { conversation: conversationId, body } }),
+  sendAttachment: (conversationId: number, file: File, durationSeconds?: number, body = "") => {
+    const form = new FormData();
+    form.append("conversation", String(conversationId));
+    form.append("body", body);
+    if (durationSeconds !== undefined) form.append("duration_seconds", String(durationSeconds));
+    form.append("attachment", file);
+    return request<Message>("/messages/", { method: "POST", body: form, formData: true });
+  },
   offers: (conversationId: number) => request<ChatOffer[]>(`/conversations/${conversationId}/offers/`),
   createOffer: (
     conversationId: number,
@@ -394,6 +402,11 @@ export const api = {
       pin: string;
     },
   ) => request<ChatOffer>(`/conversations/${conversationId}/offers/`, { method: "POST", body }),
+  checkoutOffer: (offerId: string, deliveryMethod: OfferDeliveryMethod, source: "web" | "app" = "web") =>
+    request<{ order_id: number; authorization_url: string | null }>(`/offers/${offerId}/checkout/`, {
+      method: "POST",
+      body: { delivery_method: deliveryMethod, source },
+    }),
   getOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/`),
   cancelOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/cancel/`, { method: "POST" }),
   declineOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/decline/`, { method: "POST" }),

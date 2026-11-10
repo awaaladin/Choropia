@@ -41,6 +41,14 @@ class InitializePaymentView(APIView):
             raise ValidationError("This order is not awaiting payment.")
         if order.listing.status != "active" or order.listing.quantity < 1:
             raise ValidationError("This item is no longer available.")
+        offer = getattr(order, "source_offer", None)
+        if offer is not None and offer.delivery_method == "rider":
+            from dispatch.models import OrderDelivery
+
+            if not OrderDelivery.objects.filter(
+                order=order, status=OrderDelivery.Status.AWAITING_PAYMENT
+            ).exists():
+                raise ValidationError("Choose a rider and delivery destination before paying this offer.")
 
         try:
             payment = initialize_payment(order, callback_url=request.data.get("callback_url"), return_to_app=request.data.get("source") == "app")

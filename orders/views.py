@@ -147,7 +147,35 @@ class OrderViewSet(
             with transaction.atomic():
                 order = Order.objects.select_for_update().get(pk=order.pk)
                 if order.status == OrderStatus.PENDING_PAYMENT:
+                    offer = getattr(order, "source_offer", None)
+                    if offer is not None:
+                        from payments.models import Payment
+
+                        payment = getattr(order, "payment", None)
+                        if (
+                            payment is not None
+                            and payment.status == Payment.Status.INITIALIZED
+                            and payment.provider == Payment.Provider.GAXTRON
+                        ):
+                            raise ValidationError(
+                                "This crypto checkout is already open and cannot be cancelled safely. "
+                                "Complete it or contact support."
+                            )
                     self._transition_or_400(order, OrderStatus.CANCELLED, actor=request.user, note=f"Cancelled by {who}")
+                    if offer is not None and offer.status == "payment_processing":
+                        from offers.models import Offer
+                        from offers.services import transition as transition_offer
+
+                        transition_offer(
+                            offer,
+                            Offer.Status.CANCELLED if request.user.id == order.seller_id else Offer.Status.PENDING,
+                            actor=request.user,
+                            note=f"Checkout cancelled by {who}",
+                        )
+                        offer.order = None
+                        offer.delivery_method = ""
+                        offer.delivery_fee_kobo = 0
+                        offer.save(update_fields=["order", "delivery_method", "delivery_fee_kobo", "updated_at"])
                 elif order.status == OrderStatus.PAID_ESCROW:
                     self._transition_or_400(order, OrderStatus.REFUNDED, actor=request.user, note=f"Cancelled by {who}; the buyer is refunded in full")
                     try:

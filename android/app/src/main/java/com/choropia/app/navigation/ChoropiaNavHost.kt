@@ -386,6 +386,7 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                     conversationId = id,
                     onBack = { navController.popBackStack() },
                     onOpenListing = { navController.navigate(Routes.listing(it)) },
+                    onOpenOrder = { navController.navigate(Routes.order(it)) },
                 )
             }
             composable(Routes.ORDERS) {
