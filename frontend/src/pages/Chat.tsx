@@ -5,115 +5,15 @@ import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
-import { ErrorState, Field, Input, Modal, Select, Skeleton, Textarea } from "@/components/ui";
+import { ErrorState, Input, Skeleton } from "@/components/ui";
+import { OfferCard, OfferComposerSheet, PaySheet, type OfferCardActions } from "@/features/offers";
 import { errorMessage } from "@/lib/actions";
 import { api, rows, wsUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import type { ChatOffer, Message, OfferDeliveryMethod } from "@/lib/types";
+import type { ChatOffer, Message } from "@/lib/types";
 import { cn, naira } from "@/lib/utils";
 
-const DELIVERY_LABELS: Record<OfferDeliveryMethod, string> = {
-  rider: "Choropia rider",
-  seller_delivers: "Seller delivers",
-  meetup: "Meet up",
-};
-
-const OFFER_STATUS_LABELS: Record<ChatOffer["status"], string> = {
-  pending: "Waiting for buyer",
-  payment_processing: "Payment in progress",
-  paid: "Paid into escrow",
-  declined: "Declined by buyer",
-  cancelled: "Cancelled by seller",
-  expired: "Expired",
-  superseded: "Replaced by a newer offer",
-};
 const MAX_ATTACHMENT_BYTES = 3 * 1024 * 1024;
-
-function amountToKobo(value: string) {
-  const cleaned = value.trim().replace(/,/g, "");
-  if (!/^\d+(?:\.\d{1,2})?$/.test(cleaned)) return null;
-  const [whole, fraction = ""] = cleaned.split(".");
-  const amount = Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
-  return Number.isSafeInteger(amount) && amount > 0 ? amount : null;
-}
-
-function ChatOfferCard({
-  offer,
-  onCancel,
-  onDecline,
-  onPay,
-  busy,
-}: {
-  offer: ChatOffer;
-  onCancel: (offer: ChatOffer) => void;
-  onDecline: (offer: ChatOffer) => void;
-  onPay: (offer: ChatOffer, method: OfferDeliveryMethod) => void;
-  busy: boolean;
-}) {
-  const [deliveryMethod, setDeliveryMethod] = useState<OfferDeliveryMethod>(
-    offer.delivery_method || offer.allowed_delivery_methods[0] || "meetup",
-  );
-  const methods = offer.delivery_method
-    ? [DELIVERY_LABELS[offer.delivery_method]]
-    : offer.allowed_delivery_methods.map((method) => DELIVERY_LABELS[method]);
-  return (
-    <div className="min-w-64 max-w-sm rounded-xl border border-border bg-panel p-4 text-foreground">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-xs text-muted-foreground">{offer.listing.title}</p>
-          <p className="mt-1 font-display text-xl font-bold">{naira(offer.amount_kobo / 100)}</p>
-          <p className="text-xs text-muted-foreground">
-            Listed at {naira(offer.listing_price_kobo / 100)}
-          </p>
-        </div>
-        <span className="shrink-0 rounded-full bg-accent px-2 py-1 text-[10px] font-semibold">
-          {OFFER_STATUS_LABELS[offer.status]}
-        </span>
-      </div>
-      <p className="mt-3 text-xs text-muted-foreground">
-        Handover: {methods.length ? methods.join(", ") : "No method selected"}
-      </p>
-      {offer.note && <p className="mt-2 whitespace-pre-wrap text-sm">{offer.note}</p>}
-      {(offer.status === "pending" || offer.status === "payment_processing") && offer.viewer_role === "buyer" && (
-        <div className="mt-3 space-y-2 border-t border-border pt-3">
-          <label className="block text-xs font-medium">
-            Handover
-            <select
-              className="mt-1 min-h-10 w-full rounded-md border border-border bg-background px-2 text-sm"
-              value={deliveryMethod}
-              onChange={(event) => setDeliveryMethod(event.target.value as OfferDeliveryMethod)}
-              disabled={busy || offer.status === "payment_processing"}
-            >
-              {offer.allowed_delivery_methods.map((method) => (
-                <option key={method} value={method}>{DELIVERY_LABELS[method]}</option>
-              ))}
-            </select>
-          </label>
-          <p className="text-xs text-muted-foreground">
-            {offer.status === "payment_processing"
-              ? "Resume the existing checkout for this private price."
-              : "Private chat price; the public listing price will not change. Payment is held in escrow."}
-          </p>
-          <Button disabled={busy} onClick={() => onPay(offer, deliveryMethod)}>
-            {busy ? "Opening checkout…" : offer.status === "payment_processing" ? "Resume checkout" : "Pay into escrow"}
-          </Button>
-          {offer.status === "pending" && (
-            <Button variant="secondary" disabled={busy} onClick={() => onDecline(offer)}>
-              Decline offer
-            </Button>
-          )}
-        </div>
-      )}
-      {offer.status === "pending" && offer.viewer_role === "seller" && (
-        <div className="mt-3 border-t border-border pt-3">
-          <Button variant="secondary" disabled={busy} onClick={() => onCancel(offer)}>
-            Cancel offer
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function ListingReferenceCard({
   message,
@@ -178,13 +78,7 @@ export function ChatPage() {
   const [sending, setSending] = useState(false);
   const [live, setLive] = useState<Message[]>([]);
   const [offerDialogOpen, setOfferDialogOpen] = useState(false);
-  const [selectedListingId, setSelectedListingId] = useState<number | "">("");
-  const [offerAmount, setOfferAmount] = useState("");
-  const [offerMethods, setOfferMethods] = useState<OfferDeliveryMethod[]>(["meetup"]);
-  const [offerNote, setOfferNote] = useState("");
-  const [offerPin, setOfferPin] = useState("");
-  const [offerSending, setOfferSending] = useState(false);
-  const [busyOfferId, setBusyOfferId] = useState<string | null>(null);
+  const [payingOffer, setPayingOffer] = useState<ChatOffer | null>(null);
   const [deletingMessageId, setDeletingMessageId] = useState<number | null>(null);
   const [recording, setRecording] = useState(false);
   const paneRef = useRef<HTMLDivElement>(null);
@@ -204,36 +98,12 @@ export function ChatPage() {
     queryFn: async () => rows(await api.listMyListings()).filter((item) => item.status === "active" && (item.quantity ?? 1) > 0),
     enabled: !!canOffer,
   });
-  const selectedListing = myListings.data?.find((item) => item.id === selectedListingId);
   useEffect(() => () => {
     const recorder = recorderRef.current;
     if (recorder) recorder.onstop = null;
     if (recorder?.state !== "inactive") recorder?.stop();
     mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
   }, []);
-  const listingDelivery = useQuery({
-    queryKey: ["listingDelivery", selectedListingId],
-    queryFn: () => api.dispatch.listingDelivery(Number(selectedListingId)),
-    enabled: offerDialogOpen && !!selectedListingId,
-  });
-
-  useEffect(() => {
-    if (!selectedListingId && myListings.data?.length) {
-      const currentThreadListing = myListings.data.find((item) => item.id === conversation?.listing);
-      setSelectedListingId(currentThreadListing?.id ?? myListings.data[0].id);
-    }
-  }, [conversation?.listing, myListings.data, selectedListingId]);
-
-  useEffect(() => {
-    if (selectedListing) setOfferAmount(selectedListing.price);
-  }, [selectedListing?.id]);
-
-  useEffect(() => {
-    if (!listingDelivery.data?.enabled) {
-      setOfferMethods((current) => current.filter((method) => method !== "rider"));
-    }
-  }, [listingDelivery.data?.enabled, selectedListingId]);
-
   const history = useQuery({
     queryKey: ["messages", conversationId],
     queryFn: async () => rows(await api.getMessages(conversationId)),
@@ -261,7 +131,11 @@ export function ChatPage() {
     const connect = () => {
       const socket = new WebSocket(url);
       socketRef.current = socket;
-      socket.onopen = () => (retry = 0);
+      socket.onopen = () => {
+        // Back after a drop: anything may have changed while we were away (an offer paid, expired, cancelled).
+        if (retry > 0) queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
+        retry = 0;
+      };
       socket.onmessage = (event) => {
         const message = JSON.parse(event.data) as Message;
         setLive((current) => {
@@ -384,69 +258,46 @@ export function ChatPage() {
     }
   };
 
-  const submitOffer = async (e: FormEvent) => {
-    e.preventDefault();
-    const amountKobo = amountToKobo(offerAmount);
-    const methods = offerMethods.filter((method) => method !== "rider" || listingDelivery.data?.enabled);
-    if (!selectedListingId || amountKobo === null || !methods.length || !offerPin.trim()) {
-      toast.error("Choose a listing, enter an amount, select a handover method and enter your PIN.");
-      return;
-    }
-    setOfferSending(true);
-    try {
-      await api.createOffer(conversationId, {
-        listing_id: selectedListingId,
-        amount_kobo: amountKobo,
-        allowed_delivery_methods: methods,
-        note: offerNote.trim(),
-        pin: offerPin,
-      });
-      setOfferDialogOpen(false);
-      setOfferPin("");
-      setOfferNote("");
-      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      toast.success("Offer sent.");
-    } catch (error) {
-      toast.error(errorMessage(error));
-    } finally {
-      setOfferSending(false);
-    }
-  };
+  const refreshOffers = () => queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
 
-  const updateOffer = async (offer: ChatOffer, action: "cancel" | "decline") => {
-    const verb = action === "cancel" ? "cancel" : "decline";
-    if (!window.confirm(`Are you sure you want to ${verb} this offer?`)) return;
-    setBusyOfferId(offer.id);
-    try {
-      if (action === "cancel") await api.cancelOffer(offer.id);
-      else await api.declineOffer(offer.id);
-      await queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-      toast.success(action === "cancel" ? "Offer cancelled." : "Offer declined.");
-    } catch (error) {
-      toast.error(errorMessage(error));
-      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-    } finally {
-      setBusyOfferId(null);
-    }
-  };
-
-  const payOffer = async (offer: ChatOffer, method: OfferDeliveryMethod) => {
-    setBusyOfferId(offer.id);
-    try {
-      const checkout = await api.checkoutOffer(offer.id, method);
-      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-      if (checkout.authorization_url) {
-        window.location.assign(checkout.authorization_url);
-      } else {
-        navigate(`/orders/${checkout.order_id}`);
+  const offerActions: OfferCardActions = {
+    onPay: (offer) => setPayingOffer(offer),
+    onDecline: async (offer) => {
+      try {
+        await api.declineOffer(offer.id);
+        toast("Offer declined.");
+      } catch (error) {
+        toast.error(errorMessage(error));
+      } finally {
+        await refreshOffers();
       }
-    } catch (error) {
-      toast.error(errorMessage(error));
-      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-    } finally {
-      setBusyOfferId(null);
-    }
+    },
+    onCancel: async (offer) => {
+      try {
+        await api.cancelOffer(offer.id);
+        toast("Offer cancelled.");
+      } catch (error) {
+        toast.error(errorMessage(error));
+      } finally {
+        await refreshOffers();
+      }
+    },
+    onCheckPayment: async (offer) => {
+      try {
+        const updated = await api.verifyOfferPayment(offer.id);
+        if (updated.status === "paid") toast.success("Payment received. It's held safely in escrow.");
+        else if (updated.last_payment_failed) toast.error("The payment didn't go through. Nothing was taken.");
+        else toast("No payment yet. If you've just paid, give it a minute.");
+      } catch (error) {
+        toast.error(errorMessage(error));
+      } finally {
+        await refreshOffers();
+      }
+    },
+    onReleased: () => {
+      toast.success("Handover confirmed. Your payout is on its way.");
+      void refreshOffers();
+    },
   };
 
   const deleteMessage = async (message: Message) => {
@@ -501,13 +352,7 @@ export function ChatPage() {
               <div className={cn("flex max-w-[90%] items-end gap-1", mine ? "flex-row-reverse" : "flex-row")}>
                 <div className={cn("animate-pop-in max-w-[calc(100%-2.5rem)] rounded-xl text-sm", m.type === "listing_ref" || m.type === "offer" ? "bg-transparent" : `px-3 py-2 ${mine ? "bg-primary text-primary-foreground" : "bg-accent text-foreground"}`)}>
                   {m.type === "offer" && m.offer ? (
-                    <ChatOfferCard
-                      offer={m.offer}
-                      onCancel={(offer) => void updateOffer(offer, "cancel")}
-                      onDecline={(offer) => void updateOffer(offer, "decline")}
-                      onPay={(offer, method) => void payOffer(offer, method)}
-                      busy={busyOfferId === m.offer.id}
-                    />
+                    <OfferCard offer={m.offer} actions={offerActions} />
                   ) : m.type === "listing_ref" ? (
                     <ListingReferenceCard message={m} onQuickReply={setDraft} showQuickReplies={mine} />
                   ) : m.is_deleted ? (
@@ -583,59 +428,33 @@ export function ChatPage() {
         </form>
       </div>
 
-      <Modal open={offerDialogOpen} onClose={() => setOfferDialogOpen(false)} title="Offer a different price">
-        <form onSubmit={submitOffer} className="space-y-3">
-          <Field label="Your listing">
-            <Select value={selectedListingId} onChange={(e) => setSelectedListingId(Number(e.target.value))} required>
-              {(myListings.data ?? []).map((listing) => (
-                <option key={listing.id} value={listing.id}>{listing.title}</option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="Offer amount (₦)">
-            <Input
-              inputMode="decimal"
-              value={offerAmount}
-              onChange={(e) => setOfferAmount(e.target.value)}
-              placeholder="e.g. 185000"
-              required
-            />
-          </Field>
-          <fieldset>
-            <legend className="mb-1.5 text-xs font-semibold text-muted-foreground">Handover methods</legend>
-            <div className="space-y-2">
-              {(Object.entries(DELIVERY_LABELS) as [OfferDeliveryMethod, string][])
-                .filter(([method]) => method !== "rider" || listingDelivery.data?.enabled)
-                .map(([method, label]) => (
-                <label key={method} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={offerMethods.includes(method)}
-                    onChange={(e) => setOfferMethods((current) =>
-                      e.target.checked ? [...current, method] : current.filter((value) => value !== method),
-                    )}
-                  />
-                  {label}
-                </label>
-              ))}
-            </div>
-            {!listingDelivery.data?.enabled && (
-              <p className="mt-1 text-xs text-muted-foreground">Set up rider delivery in the listing settings to offer that option.</p>
-            )}
-          </fieldset>
-          <Field label="Note (optional)">
-            <Textarea value={offerNote} onChange={(e) => setOfferNote(e.target.value)} maxLength={300} rows={2} />
-          </Field>
-          <Field label="Transaction PIN">
-            <Input type="password" inputMode="numeric" autoComplete="new-password" maxLength={12} value={offerPin} onChange={(e) => setOfferPin(e.target.value)} required />
-          </Field>
-          <p className="text-xs text-muted-foreground">Your PIN approves this private offer. It does not change your public listing price; the buyer can pay through escrow.</p>
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={() => setOfferDialogOpen(false)}>Back</Button>
-            <Button type="submit" loading={offerSending} disabled={!offerMethods.length}>Send offer</Button>
-          </div>
-        </form>
-      </Modal>
+      {canOffer && (
+        <OfferComposerSheet
+          open={offerDialogOpen}
+          onClose={() => setOfferDialogOpen(false)}
+          conversationId={conversationId}
+          listings={myListings.data ?? []}
+          defaultListingId={conversation?.listing}
+          onSent={() => {
+            setOfferDialogOpen(false);
+            toast.success("Offer sent. The buyer can pay from the chat.");
+            void refreshOffers();
+            queryClient.invalidateQueries({ queryKey: ["conversations"] });
+          }}
+        />
+      )}
+      {payingOffer && (
+        <PaySheet
+          open={payingOffer !== null}
+          onClose={() => setPayingOffer(null)}
+          offer={payingOffer}
+          onCheckout={(result) => {
+            void refreshOffers();
+            if (result.authorization_url) window.location.assign(result.authorization_url);
+            else navigate(`/orders/${result.order_id}`);
+          }}
+        />
+      )}
     </div>
   );
 }

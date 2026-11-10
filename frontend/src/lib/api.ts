@@ -9,6 +9,9 @@ import type {
   RoutePrice,
   Category,
   ChatOffer,
+  FeePreview,
+  HandoverCode,
+  PinStatus,
   Comment,
   Conversation,
   Follow,
@@ -74,9 +77,15 @@ export const isAuthenticated = () => tokens.hasSession;
 
 export class ApiError extends Error {
   status: number;
-  constructor(message: string, status: number) {
+  /** The raw error body, e.g. {code: "pin_locked", retry_after: 900} for the offer and PIN endpoints. */
+  data: Record<string, unknown>;
+  constructor(message: string, status: number, data: unknown = null) {
     super(message);
     this.status = status;
+    this.data = data && typeof data === "object" && !Array.isArray(data) ? (data as Record<string, unknown>) : {};
+  }
+  get code(): string | undefined {
+    return typeof this.data.code === "string" ? this.data.code : undefined;
   }
 }
 
@@ -160,6 +169,7 @@ async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
     throw new ApiError(
       extractErrorMessage(data) || `Request to ${path} failed (${response.status})`,
       response.status,
+      data,
     );
   }
   return data as T;
@@ -411,6 +421,16 @@ export const api = {
   getOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/`),
   cancelOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/cancel/`, { method: "POST" }),
   declineOffer: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/decline/`, { method: "POST" }),
+  verifyOfferPayment: (offerId: string) => request<ChatOffer>(`/offers/${offerId}/verify-payment/`, { method: "POST" }),
+  feePreview: (amountKobo: number, verified: boolean) =>
+    request<FeePreview>(`/fees/preview/${qs({ amount_kobo: amountKobo, verified: verified ? "true" : "false" })}`, { auth: false }),
+  pinStatus: () => request<PinStatus>("/account/pin/"),
+  setPin: (body: { pin: string; old_pin?: string; password?: string; email_code?: string }) =>
+    request<PinStatus>("/account/pin/", { method: "POST", body }),
+  pinResetCode: () => request<{ detail: string }>("/account/pin/reset-code/", { method: "POST" }),
+  handoverCode: (orderId: number) => request<HandoverCode>(`/orders/${orderId}/handover-code/`),
+  confirmHandover: (orderId: number, code: string) =>
+    request<unknown>(`/orders/${orderId}/confirm-handover/`, { method: "POST", body: { code } }),
 
   // --- orders & payments ---
   listOrders: () => request<Paginated<Order> | Order[]>("/orders/"),

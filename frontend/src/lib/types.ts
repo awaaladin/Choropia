@@ -10,6 +10,8 @@ export interface Profile {
   location: string;
   theme_preference: "light" | "dark";
   email_verified?: boolean;
+  /** Set by Choropia staff; verified sellers pay a lower fee (see the fee preview). */
+  seller_verified?: boolean;
 }
 
 export interface User {
@@ -203,6 +205,42 @@ export interface ChatOffer {
   paid_at: string | null;
   closed_at: string | null;
   server_now: string;
+  /** Where the money is once an order exists (see offers/serializers.py order_stage). */
+  order_stage?: OfferOrderStage | null;
+  /** The last checkout failed at Paystack; the offer is open again. */
+  last_payment_failed?: boolean;
+}
+
+export type OfferOrderStage =
+  | "awaiting_payment"
+  | "escrow_held"
+  | "handed_over"
+  | "released"
+  | "disputed"
+  | "refund_pending"
+  | "refunded"
+  | "cancelled";
+
+export interface FeePreview {
+  amount_kobo: number;
+  fee_kobo: number;
+  seller_net_kobo: number;
+  verified: boolean;
+  min_fee_kobo: number;
+}
+
+export interface PinStatus {
+  has_pin: boolean;
+  length: number;
+  locked: boolean;
+  locked_until: string | null;
+  retry_after: number | null;
+}
+
+export interface HandoverCode {
+  code: string | null;
+  entered_by: "seller" | "rider";
+  used: boolean;
 }
 
 export interface Conversation {
