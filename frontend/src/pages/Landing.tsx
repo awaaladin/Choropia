@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Navigate } from "react-router";
 import { ArrowRight, ArrowUpRight, MapPin, MessageCircle, ShieldCheck, Smartphone } from "lucide-react";
 import community from "@/assets/choropia-community.jpg";
 import exchange from "@/assets/choropia-exchange.jpg";
@@ -27,8 +28,15 @@ const STEPS = [
 export function LandingPage() {
   useReveal();
   const { loggedIn } = useAuth();
-  const listings = useQuery({ queryKey: ["listings", { landing: true }], queryFn: async () => rows(await api.listListings()) });
+  const listings = useQuery({
+    queryKey: ["listings", { landing: true }],
+    queryFn: async () => rows(await api.listListings()),
+    enabled: !loggedIn,
+  });
   const featured = (listings.data ?? []).slice(0, 3);
+
+  // Signed in already: the home page is your feed, not the sales pitch.
+  if (loggedIn) return <Navigate to="/feed" replace />;
 
   return (
     <PublicShell>
