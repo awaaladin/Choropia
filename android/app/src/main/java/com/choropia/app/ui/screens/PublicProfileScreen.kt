@@ -11,7 +11,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.StarBorder
+import com.choropia.app.ui.theme.WarnAmber
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.Icon
@@ -34,6 +38,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.choropia.app.data.model.Listing
 import com.choropia.app.data.model.PublicProfile
+import com.choropia.app.data.model.Review
+import com.choropia.app.data.model.ReviewSummary
 import com.choropia.app.data.repository.ChoropiaRepository
 import com.choropia.app.ui.LocalRepository
 import com.choropia.app.ui.LocalSession
@@ -64,6 +70,9 @@ data class PublicProfileState(
     val loadingMore: Boolean = false,
     val error: String? = null,
     val listingsError: String? = null,
+    val summary: ReviewSummary? = null,
+    val reviews: List<Review> = emptyList(),
+    val reviewsLoaded: Boolean = false,
 )
 
 class PublicProfileViewModel(
@@ -87,6 +96,7 @@ class PublicProfileViewModel(
                 return@launch
             }
             _state.update { it.copy(profile = profile, loading = false, error = null) }
+            runCatching { repo.reviewSummary(userId) }.onSuccess { s -> _state.update { it.copy(summary = s) } }
             try {
                 val page = repo.publicProfileListings(userId)
                 _state.update {
@@ -99,6 +109,13 @@ class PublicProfileViewModel(
             } catch (e: Exception) {
                 _state.update { it.copy(listingsError = e.message ?: "Could not load these listings.") }
             }
+        }
+    }
+
+    fun loadReviews() {
+        if (_state.value.reviewsLoaded) return
+        viewModelScope.launch {
+            runCatching { repo.reviewsFor(userId) }.onSuccess { list -> _state.update { it.copy(reviews = list, reviewsLoaded = true) } }
         }
     }
 
@@ -185,6 +202,17 @@ fun PublicProfileScreen(
                             profile?.username?.takeIf { it.isNotBlank() }?.let {
                                 Text("@$it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
+                            state.summary?.let { s ->
+                                if (s.eligible) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Icon(Icons.Filled.Star, null, tint = WarnAmber, modifier = Modifier.size(16.dp))
+                                        Text(
+                                            if (s.count > 0) "${"%.1f".format(s.average ?: 0.0)} (${s.count} review${if (s.count == 1) "" else "s"})" else "No reviews yet",
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                     Text(
@@ -237,10 +265,47 @@ fun PublicProfileScreen(
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Chip("Listings", selectedTab == 0, { selectedTab = 0 })
+                Chip("Reviews", selectedTab == 2, { selectedTab = 2; vm.loadReviews() })
                 Chip("About", selectedTab == 1, { selectedTab = 1 })
             }
         }
-        if (selectedTab == 1) {
+        if (selectedTab == 2) {
+            val s = state.summary
+            if (s != null && !s.eligible) {
+                item {
+                    Text(
+                        "Reviews appear once a seller has posted a few listings and completed a sale.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else if (state.reviewsLoaded && state.reviews.isEmpty()) {
+                item { Text("No reviews yet.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            } else {
+                items(state.reviews, key = { it.id }) { review ->
+                    SurfaceCard(Modifier.fillMaxWidth()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    (1..5).forEach { star ->
+                                        Icon(
+                                            if (star <= review.rating) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                            null,
+                                            tint = if (star <= review.rating) WarnAmber else MaterialTheme.colorScheme.outline,
+                                            modifier = Modifier.size(18.dp),
+                                        )
+                                    }
+                                }
+                                if (review.reviewer_name.isNotBlank()) {
+                                    Text(review.reviewer_name, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                            if (review.comment.isNotBlank()) Text(review.comment, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+            }
+        } else if (selectedTab == 1) {
             item {
                 SurfaceCard(Modifier.fillMaxWidth()) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

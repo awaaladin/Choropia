@@ -305,6 +305,8 @@ data class OrderDetailState(
     val busy: Boolean = false,
     val error: String? = null,
     val message: String? = null,
+    /** Can the buyer rate the seller, and the review they already left. Null when it does not apply to this person. */
+    val review: com.choropia.app.data.model.OrderReviewStatus? = null,
 )
 
 class OrderDetailViewModel(
@@ -325,10 +327,17 @@ class OrderDetailViewModel(
             try {
                 val order = repo.order(orderId)
                 _state.update { it.copy(order = order, loading = false) }
+                loadReview(order)
             } catch (e: ApiException) {
                 _state.update { it.copy(loading = false, error = e.message) }
             }
         }
+    }
+
+    private suspend fun loadReview(order: Order) {
+        val buyerId = session.user.value?.id
+        if (order.buyer != buyerId || order.status !in listOf("confirmed", "completed")) return
+        runCatching { repo.reviewForOrder(orderId) }.onSuccess { r -> _state.update { it.copy(review = r) } }
     }
 
     /** Silent refresh used while waiting for a payment to confirm. */
@@ -367,6 +376,7 @@ class OrderDetailViewModel(
 
     fun review(rating: Int, comment: String) = act("Thanks for your review!") {
         repo.createReview(orderId, rating, comment)
+        runCatching { repo.reviewForOrder(orderId) }.onSuccess { r -> _state.update { it.copy(review = r) } }
         null
     }
 
@@ -558,10 +568,33 @@ fun OrderDetailScreen(
                                     }
                                     "cancelled" -> InfoNote("This order was cancelled. If you paid, your money is being refunded in full.")
                                     "refunded" -> InfoNote("This order was refunded to the buyer.")
-                                    "completed" -> if (isBuyer || isSeller) {
-                                        SecondaryButton("Leave a review", { reviewOpen = true }, enabled = !state.busy, icon = Icons.Outlined.StarBorder)
-                                    }
                                     "disputed" -> InfoNote("A moderator is reviewing this dispute. Funds stay in escrow until it's resolved.")
+                                }
+                                val reviewState = state.review
+                                if (isBuyer && reviewState != null) {
+                                    val mine = reviewState.review
+                                    if (mine != null) {
+                                        SurfaceCard(Modifier.fillMaxWidth()) {
+                                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                Text("Your review of the seller", style = MaterialTheme.typography.titleSmall)
+                                                Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                                    (1..5).forEach { star ->
+                                                        Icon(
+                                                            if (star <= mine.rating) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                                                            contentDescription = null,
+                                                            tint = if (star <= mine.rating) WarnAmber else MaterialTheme.colorScheme.outline,
+                                                            modifier = Modifier.size(24.dp),
+                                                        )
+                                                    }
+                                                }
+                                                if (mine.comment.isNotBlank()) {
+                                                    Text(mine.comment, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                }
+                                            }
+                                        }
+                                    } else if (reviewState.can_review) {
+                                        SecondaryButton("Rate the seller", { reviewOpen = true }, enabled = !state.busy, icon = Icons.Outlined.StarBorder)
+                                    }
                                 }
                                 if ((order.status == "pending_payment" || order.status == "paid_escrow") && (isBuyer || isSeller)) {
                                     SecondaryButton("Cancel order", { cancelOpen = true }, enabled = !state.busy, destructive = true)
@@ -749,11 +782,11 @@ fun TextEntryDialog(
 
 @Composable
 private fun ReviewDialog(onDismiss: () -> Unit, onSubmit: (Int, String) -> Unit) {
-    var rating by remember { mutableIntStateOf(5) }
+    var rating by remember { mutableIntStateOf(0) }
     var comment by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Leave a review") },
+        title = { Text("How was the seller?") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -769,7 +802,7 @@ private fun ReviewDialog(onDismiss: () -> Unit, onSubmit: (Int, String) -> Unit)
                 OutlinedTextField(comment, { comment = it }, label = { Text("Comment (optional)") }, minLines = 3)
             }
         },
-        confirmButton = { TextButton(onClick = { onSubmit(rating, comment) }) { Text("Submit") } },
+        confirmButton = { TextButton(onClick = { onSubmit(rating, comment) }, enabled = rating > 0) { Text("Submit") } },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }

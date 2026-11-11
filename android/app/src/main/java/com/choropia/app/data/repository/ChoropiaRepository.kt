@@ -665,6 +665,10 @@ class ChoropiaRepository(
 
     suspend fun markAllNotificationsRead() = apiCall { api.markAllNotificationsRead() }
 
+    suspend fun reviewSummary(userId: Int): com.choropia.app.data.model.ReviewSummary = apiCall { api.reviewSummary(userId) }
+
+    suspend fun reviewForOrder(orderId: Int): com.choropia.app.data.model.OrderReviewStatus = apiCall { api.reviewForOrder(orderId) }
+
     suspend fun reviewsFor(userId: Int): List<Review> = apiCall { api.listReviewsFor(userId).results }
 
     suspend fun createReview(orderId: Int, rating: Int, comment: String): Review =

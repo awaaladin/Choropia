@@ -419,7 +419,24 @@ data class Review(
     val order: Int,
     val reviewer: Int? = null,
     val reviewee: Int? = null,
+    val reviewer_name: String = "",
     val rating: Int,
     val comment: String = "",
     val created_at: String? = null,
+)
+
+/** A seller's public rating. `eligible` is false until they have posted enough listings to be rated. */
+@Serializable
+data class ReviewSummary(
+    val eligible: Boolean = false,
+    val average: Double? = null,
+    val count: Int = 0,
+    val verified: Boolean = false,
+)
+
+@Serializable
+data class OrderReviewStatus(
+    val can_review: Boolean = false,
+    val reason: String = "",
+    val review: Review? = null,
 )

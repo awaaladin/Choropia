@@ -37,7 +37,9 @@ import com.choropia.app.data.model.PaymentVerifyResponse
 import com.choropia.app.data.model.PublicProfile
 import com.choropia.app.data.model.RefreshResponse
 import com.choropia.app.data.model.Report
+import com.choropia.app.data.model.OrderReviewStatus
 import com.choropia.app.data.model.Review
+import com.choropia.app.data.model.ReviewSummary
 import com.choropia.app.data.model.Reel
 import com.choropia.app.data.model.User
 import kotlinx.serialization.Serializable
@@ -594,6 +596,12 @@ interface ChoropiaApi {
 
     @GET("reviews/")
     suspend fun listReviewsFor(@Query("user") userId: Int): PaginatedResponse<Review>
+
+    @GET("reviews/summary/")
+    suspend fun reviewSummary(@Query("user") userId: Int): ReviewSummary
+
+    @GET("reviews/for-order/")
+    suspend fun reviewForOrder(@Query("order") orderId: Int): OrderReviewStatus
 
     @POST("reviews/")
     suspend fun createReview(@Body body: CreateReviewRequest): Review
