@@ -43,3 +43,6 @@ CHAT_MESSAGE_ENCRYPTION_KEYS = DOCUMENT_ENCRYPTION_KEYS
 
 # Staff alert emails are tested on purpose (staffpanel/tests_alerts.py); elsewhere they would only add noise to email counts.
 STAFF_ALERTS_ENABLED = False
+
+# Tests assume Paystack (as production does); never fall back to the crypto provider because a machine has no .env.
+PAYMENT_PROVIDER = "paystack"

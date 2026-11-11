@@ -131,6 +131,22 @@ class AuthViewModel(private val repo: ChoropiaRepository, private val session: S
         }
     }
 
+    fun googleLogin(idToken: String, onDone: () -> Unit) {
+        run {
+            when (val result = repo.loginWithGoogle(idToken)) {
+                is LoginResult.Success -> {
+                    session.setUser(result.user)
+                    onDone()
+                }
+                is LoginResult.NeedsCode -> challenge = result.challenge
+            }
+        }
+    }
+
+    fun showError(message: String) {
+        error = message
+    }
+
     fun register(
         firstName: String,
         lastName: String,
@@ -160,6 +176,30 @@ class AuthViewModel(private val repo: ChoropiaRepository, private val session: S
             resetSent = true
         }
     }
+}
+
+/** "Continue with Google": hidden until the server has a Google client ID configured. */
+@Composable
+private fun GoogleSignInButton(vm: AuthViewModel, enabled: Boolean = true, onDone: () -> Unit) {
+    val repo = LocalRepository.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var clientId by remember { mutableStateOf("") }
+    androidx.compose.runtime.LaunchedEffect(Unit) { clientId = repo.googleClientId() }
+    if (clientId.isBlank()) return
+    androidx.compose.material3.OutlinedButton(
+        onClick = {
+            scope.launch {
+                when (val result = com.choropia.app.ui.requestGoogleIdToken(context, clientId)) {
+                    is com.choropia.app.ui.GoogleResult.Token -> vm.googleLogin(result.idToken, onDone)
+                    is com.choropia.app.ui.GoogleResult.Failed -> vm.showError(result.message)
+                    com.choropia.app.ui.GoogleResult.Cancelled -> Unit
+                }
+            }
+        },
+        enabled = !vm.busy && enabled,
+        modifier = Modifier.fillMaxWidth().height(52.dp),
+    ) { Text("Continue with Google") }
 }
 
 @Composable
@@ -249,6 +289,7 @@ fun LoginScreen(onLoggedIn: () -> Unit, onRegister: () -> Unit, onForgot: () -> 
                 QuietButton("Forgot password?", onForgot)
             }
             PrimaryButton("Log in", { focus.clearFocus(); vm.login(identifier, password, onLoggedIn) }, enabled = !vm.busy)
+            GoogleSignInButton(vm, onLoggedIn)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Text("New to Choropia?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 QuietButton("Create an account", onRegister)
@@ -327,6 +368,7 @@ fun RegisterScreen(onRegistered: (wantsStorefront: Boolean) -> Unit, onLogin: ()
                 { focus.clearFocus(); vm.register(first, last, email, phone, password) { onRegistered(storefront) } },
                 enabled = !vm.busy && agreed,
             )
+            GoogleSignInButton(vm, enabled = agreed) { onRegistered(false) }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Text("Already have an account?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 QuietButton("Log in", onLogin)

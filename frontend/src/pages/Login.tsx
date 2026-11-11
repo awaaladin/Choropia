@@ -1,5 +1,5 @@
 import { AtSign, Lock, LogIn, MessageCircle, ShieldCheck, Store } from "lucide-react";
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useCallback, useState, type CSSProperties, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import exchange from "@/assets/choropia-exchange.jpg";
@@ -7,6 +7,7 @@ import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
 import { BrandLoader } from "@/components/BrandLoader";
 import { AppDownloadCard } from "@/components/AppDownloadCard";
+import { GoogleButton } from "@/components/GoogleButton";
 import { Input } from "@/components/ui";
 import { errorMessage } from "@/lib/actions";
 import { useAuth } from "@/lib/auth";
@@ -21,11 +22,23 @@ const FEATURES = [
 const delay = (ms: number): CSSProperties => ({ animationDelay: `${ms}ms` });
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const prefs = usePrefs();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const [loading, setLoading] = useState(false);
+
+  const onGoogle = useCallback(
+    async (idToken: string) => {
+      const result = await loginWithGoogle(idToken);
+      if (result.twoFactorRequired) {
+        toast.error("This account uses 2-step verification. Please log in with your email and password.");
+        return;
+      }
+      navigate(params.get("next") || "/feed", { viewTransition: true });
+    },
+    [loginWithGoogle, navigate],
+  );
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -111,6 +124,7 @@ export function LoginPage() {
             <LogIn size={15} /> Log in
           </Button>
         </form>
+        <GoogleButton onToken={onGoogle} />
         <p className="page-enter mt-4 text-sm text-muted-foreground" style={delay(220)}>
           No account?{" "}
           <Link to="/register" className="font-medium text-primary hover:underline">

@@ -33,7 +33,7 @@ android {
         applicationId = "com.choropia.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 15
+        versionCode = 17
         versionName = "1.10.0"
 
         buildConfigField("String", "API_ORIGIN", "\"$apiOrigin\"")
@@ -117,6 +117,10 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-messaging-ktx")

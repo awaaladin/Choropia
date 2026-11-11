@@ -13,6 +13,7 @@ interface AuthContext {
   loggedIn: boolean;
   loading: boolean;
   login: (identifier: string, password: string) => Promise<LoginResult>;
+  loginWithGoogle: (idToken: string) => Promise<LoginResult>;
   verifyTwoFactor: (challenge: string, code: string) => Promise<void>;
   register: (payload: Record<string, string>) => Promise<void>;
   logout: () => Promise<void>;
@@ -57,6 +58,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [queryClient],
   );
+  const loginWithGoogle = useCallback(
+    async (idToken: string): Promise<LoginResult> => {
+      const result = await api.googleLogin(idToken);
+      if ("access" in result) {
+        queryClient.setQueryData(["me"], result.user);
+        setLoggedIn(true);
+        return { twoFactorRequired: false };
+      }
+      return { twoFactorRequired: true, challenge: result.challenge };
+    },
+    [queryClient],
+  );
   const verifyTwoFactor = useCallback(
     async (challenge: string, code: string) => {
       const user = await api.verifyTwoFactor(challenge, code);
@@ -80,8 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const value = useMemo<AuthContext>(
-    () => ({ user: loggedIn ? (me.data ?? null) : null, loggedIn, loading: loggedIn && me.isPending, login, verifyTwoFactor, register, logout }),
-    [loggedIn, me.data, me.isPending, login, verifyTwoFactor, register, logout],
+    () => ({ user: loggedIn ? (me.data ?? null) : null, loggedIn, loading: loggedIn && me.isPending, login, loginWithGoogle, verifyTwoFactor, register, logout }),
+    [loggedIn, me.data, me.isPending, login, loginWithGoogle, verifyTwoFactor, register, logout],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

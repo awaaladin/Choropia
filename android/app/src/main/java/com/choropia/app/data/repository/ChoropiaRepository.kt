@@ -133,6 +133,25 @@ class ChoropiaRepository(
         }
     }
 
+    /** The Google client ID the server accepts, or empty while Google sign-in is not switched on. */
+    suspend fun googleClientId(): String = runCatching { apiCall { api.googleConfig() }.client_id }.getOrDefault("")
+
+    suspend fun loginWithGoogle(idToken: String): LoginResult = apiCall {
+        val response = api.googleLogin(com.choropia.app.data.network.GoogleLoginRequest(idToken))
+        val challenge = response.challenge
+        if (response.two_factor_required && challenge != null) {
+            LoginResult.NeedsCode(challenge)
+        } else {
+            val access = response.access
+            val refresh = response.refresh
+            val user = response.user
+            if (access == null || refresh == null || user == null) throw ApiException("Unexpected login response.")
+            tokenManager.saveTokens(access, refresh)
+            clearCaches()
+            LoginResult.Success(user)
+        }
+    }
+
     suspend fun verifyTwoFactor(challenge: String, code: String): User = apiCall {
         val response = api.verifyTwoFactor(TwoFactorVerifyRequest(challenge, code.trim()))
         tokenManager.saveTokens(response.access, response.refresh)

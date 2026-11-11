@@ -1,5 +1,5 @@
 import { AtSign, Heart, Lock, Phone, Tag, User, UserPlus, Verified } from "lucide-react";
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { useCallback, useState, type CSSProperties, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router"; // eslint-disable-line
 import { toast } from "sonner";
 import community from "@/assets/choropia-community.jpg";
@@ -7,6 +7,7 @@ import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
 import { BrandLoader } from "@/components/BrandLoader";
 import { AppDownloadCard } from "@/components/AppDownloadCard";
+import { GoogleButton } from "@/components/GoogleButton";
 import { Input } from "@/components/ui";
 import { errorMessage } from "@/lib/actions";
 import { useAuth } from "@/lib/auth";
@@ -21,12 +22,24 @@ const FEATURES = [
 const delay = (ms: number): CSSProperties => ({ animationDelay: `${ms}ms` });
 
 export function RegisterPage() {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const prefs = usePrefs();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const asDriver = searchParams.get("as") === "driver";
   const [loading, setLoading] = useState(false);
+
+  const onGoogle = useCallback(
+    async (idToken: string) => {
+      const result = await loginWithGoogle(idToken);
+      if (result.twoFactorRequired) {
+        toast.error("This account uses 2-step verification. Please log in with your email and password.");
+        return;
+      }
+      navigate(asDriver ? "/driver" : "/feed", { viewTransition: true });
+    },
+    [loginWithGoogle, navigate, asDriver],
+  );
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -124,6 +137,7 @@ export function RegisterPage() {
             <UserPlus size={15} /> Create account
           </Button>
         </form>
+        <GoogleButton onToken={onGoogle} />
                 {!asDriver && (
           <p className="page-enter mt-3 text-sm text-muted-foreground">
             Want to earn by delivering?{" "}

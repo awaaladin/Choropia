@@ -229,6 +229,12 @@ export const api = {
     if ("access" in data) tokens.set(data.access, data.refresh);
     return data;
   },
+  googleConfig: () => request<{ client_id: string }>("/auth/google/config/", { auth: false }),
+  async googleLogin(idToken: string): Promise<AuthResponse | TwoFactorChallenge> {
+    const data = await request<AuthResponse | TwoFactorChallenge>("/auth/google/", { method: "POST", body: { id_token: idToken }, auth: false });
+    if ("access" in data) tokens.set(data.access, data.refresh);
+    return data;
+  },
   async verifyTwoFactor(challenge: string, code: string) {
     const data = await request<AuthResponse>("/auth/2fa/verify/", { method: "POST", body: { challenge, code }, auth: false });
     tokens.set(data.access, data.refresh);
