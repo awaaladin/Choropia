@@ -1,4 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
+import { Navigate } from "react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
@@ -7,8 +9,11 @@ import { errorMessage } from "@/lib/actions";
 import { api } from "@/lib/api";
 
 export function ApplyMerchantPage() {
+  const me = useQuery({ queryKey: ["me"], queryFn: api.me });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  if (me.data?.profile?.seller_verified) return <Navigate to="/profile" replace />;
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Button } from "@/components/Button";
 import { Avatar, ErrorState, Field, Input, Segmented, Skeleton, Textarea } from "@/components/ui";
 import { errorMessage } from "@/lib/actions";
@@ -115,6 +116,7 @@ export function ProfilePage() {
         <div className="mb-5 flex items-center gap-3">
           <Avatar src={profile.avatar} name={displayName(u)} size={72} />
           <div className="min-w-0">
+            <p className="flex items-center gap-1.5 truncate font-semibold">{displayName(u)}{profile.seller_verified && <VerifiedBadge size={20} />}</p>
             <p className="truncate text-sm text-muted-foreground">{u.email}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               <Button type="button" variant="secondary" loading={uploadPhoto.isPending} onClick={() => photoInput.current?.click()}>
@@ -173,9 +175,15 @@ export function ProfilePage() {
           <Link to="/wallet" className="text-sm font-medium text-primary hover:underline md:hidden">
             View your wallet →
           </Link>
-          <Link to="/merchants/apply" className="text-sm font-medium text-primary hover:underline">
-            Become a merchant →
-          </Link>
+          {profile.seller_verified ? (
+            <Link to={`/users/${u.id}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+              <VerifiedBadge size={16} /> You are a verified seller
+            </Link>
+          ) : (
+            <Link to="/merchants/apply" className="text-sm font-medium text-primary hover:underline">
+              Become a merchant →
+            </Link>
+          )}
         </div>
       </Section>
 

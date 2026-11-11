@@ -1,3 +1,4 @@
+import os
 from .base import *  # noqa: F401,F403
 from .base import env, env_bool, env_int, env_list
 
@@ -55,3 +56,7 @@ EMAIL_PORT = env_int("EMAIL_PORT", 587)
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True) and not EMAIL_USE_SSL
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+
+# Emails link to the site and show images from it; without this they pointed at localhost.
+if "CHOROPIA_SITE_URL" not in os.environ:
+    CHOROPIA_SITE_URL = "https://choropia.vercel.app"
