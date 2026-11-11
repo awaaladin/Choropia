@@ -1,7 +1,7 @@
 import { listingPath, orderPath } from "@/lib/links";
 import { useRouteId } from "@/lib/routeRef";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ImagePlus, Mic, Send, Square, Tag } from "lucide-react";
+import { ArrowLeft, Check, CheckCheck, ImagePlus, Mic, Send, Square, Tag } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -92,8 +92,16 @@ export function ChatPage() {
   const conversations = useQuery({
     queryKey: ["conversations"],
     queryFn: async () => rows(await api.listConversations()),
+    refetchInterval: 15000, // keeps "online" and delivered ticks fresh
   });
   const conversation = conversations.data?.find((item) => item.id === conversationId);
+  const lastSeen = conversation?.other_party_last_seen ? new Date(conversation.other_party_last_seen) : null;
+  const statusText = conversation?.other_party_online
+    ? "online"
+    : lastSeen
+      ? `last seen ${lastSeen.toDateString() === new Date().toDateString() ? "today at " : lastSeen.toLocaleDateString([], { day: "numeric", month: "short" }) + " at "}${lastSeen.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
+      : "";
+  const receipt = (m: Message): "sent" | "delivered" | "seen" => (m.read_at ? "seen" : lastSeen && lastSeen >= new Date(m.created_at) ? "delivered" : "sent");
   const canOffer = conversation?.listing != null && conversation.seller === user?.id;
   const myListings = useQuery({
     queryKey: ["myListings"],
@@ -340,7 +348,14 @@ export function ChatPage() {
         ) : (
           <span className="text-sm font-semibold">{conversation?.other_party_name ?? "Conversation"}</span>
         )}
+        {statusText && <span className={cn("text-xs", conversation?.other_party_online ? "font-semibold text-success" : "text-muted-foreground")}>{statusText}</span>}
       </div>
+      {statusText && (
+        <div className="hidden items-center gap-2 border-b border-border px-4 py-2 text-sm md:flex">
+          <span className="font-semibold">{conversation?.other_party_name ?? "Conversation"}</span>
+          <span className={cn("text-xs", conversation?.other_party_online ? "font-semibold text-success" : "text-muted-foreground")}>{statusText}</span>
+        </div>
+      )}
 
       <div ref={paneRef} className="flex-1 space-y-2 overflow-y-auto bg-background p-4">
         {history.isPending && <Skeleton className="h-10 w-2/3" />}
@@ -383,6 +398,12 @@ export function ChatPage() {
                     deleting={deletingMessageId === m.id}
                     onDelete={() => void deleteMessage(m)}
                   />
+                )}
+                {mine && !m.is_deleted && m.type === "text" && (
+                  <span className="mb-1 flex items-center gap-1 self-end text-[10px] text-muted-foreground" title={receipt(m)}>
+                    {new Date(m.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                    {receipt(m) === "sent" ? <Check size={13} /> : <CheckCheck size={13} className={receipt(m) === "seen" ? "text-sky-500" : ""} />}
+                  </span>
                 )}
               </div>
             </div>

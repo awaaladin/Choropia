@@ -46,6 +46,7 @@ class Profile(TimeStampedModel):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     bio = models.CharField(max_length=300, blank=True)
+    last_seen_at = models.DateTimeField(null=True, blank=True, help_text="Last time this person used the app; drives online status in chat.")
     avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
     location = models.CharField(
         max_length=150,

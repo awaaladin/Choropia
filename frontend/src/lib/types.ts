@@ -157,6 +157,7 @@ export interface Message {
   conversation: number;
   sender_id: number;
   body: string;
+  read_at?: string | null;
   attachment: string | null;
   attachment_type: "image" | "audio" | "file" | "";
   is_deleted?: boolean;
@@ -261,6 +262,8 @@ export interface Conversation {
   other_party_name?: string | null;
   other_party_id?: number | null;
   other_party_avatar?: string | null;
+  other_party_last_seen?: string | null;
+  other_party_online?: boolean;
   last_message: Message | null;
 }
 

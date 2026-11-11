@@ -212,7 +212,7 @@ SOLD_LISTING_DEFAULT_DAYS = env_int("SOLD_LISTING_DEFAULT_DAYS", 3)
 # --- DRF ------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "common.presence.PresenceJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",

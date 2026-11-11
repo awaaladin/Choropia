@@ -102,6 +102,8 @@ class ConversationSerializer(serializers.ModelSerializer):
     other_party_name = serializers.SerializerMethodField()
     other_party_id = serializers.SerializerMethodField()
     other_party_avatar = serializers.SerializerMethodField()
+    other_party_last_seen = serializers.SerializerMethodField()
+    other_party_online = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
@@ -115,6 +117,8 @@ class ConversationSerializer(serializers.ModelSerializer):
             "other_party_name",
             "other_party_id",
             "other_party_avatar",
+            "other_party_last_seen",
+            "other_party_online",
             "order",
             "orders",
             "last_message",
@@ -147,6 +151,19 @@ class ConversationSerializer(serializers.ModelSerializer):
     def get_other_party_id(self, obj):
         other = self._other_party(obj)
         return other.pk if other else None
+
+    def _last_seen(self, obj):
+        other = self._other_party(obj)
+        profile = getattr(other, "profile", None) if other else None
+        return profile.last_seen_at if profile else None
+
+    def get_other_party_last_seen(self, obj):
+        return self._last_seen(obj)
+
+    def get_other_party_online(self, obj):
+        from common.presence import is_online
+
+        return is_online(self._last_seen(obj))
 
     def get_other_party_avatar(self, obj):
         other = self._other_party(obj)
