@@ -247,7 +247,7 @@ class OrderAndPaymentEmailTests(TestCase):
         self.assertIn("₦200,000.00", html_of(buyer_mail))
         self.assertIn(self.payment.reference, html_of(buyer_mail))
         self.assertIn("You have a paid order", html_of(seller_mail))
-        self.assertIn(f"https://choropia.test/orders/{self.order.id}", seller_mail.body)
+        self.assertIn(f"https://choropia.test/order/{self.order.public_id}", seller_mail.body)
 
     def test_a_duplicate_confirmation_sends_no_second_set_of_emails(self):
         self.pay()

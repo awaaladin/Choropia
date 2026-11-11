@@ -1,3 +1,4 @@
+from common.public_ids import PublicIdLookupMixin
 from datetime import timedelta
 
 from django.conf import settings
@@ -24,7 +25,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class ListingViewSet(viewsets.ModelViewSet):
+class ListingViewSet(PublicIdLookupMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     filterset_class = ListingFilter
     search_fields = ("title", "description", "location")

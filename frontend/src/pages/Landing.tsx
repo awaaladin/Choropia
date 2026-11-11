@@ -1,3 +1,4 @@
+import { listingPath } from "@/lib/links";
 import { useQuery } from "@tanstack/react-query";
 import { Navigate } from "react-router";
 import { ArrowRight, ArrowUpRight, MapPin, MessageCircle, ShieldCheck, Smartphone } from "lucide-react";
@@ -115,7 +116,7 @@ export function LandingPage() {
           {listings.isPending && Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className="aspect-[4/3] w-full" />)}
           {featured.map((item, index) => (
             <article key={item.id} className="group">
-              <Link to={`/listings/${item.id}`} className="block">
+              <Link to={listingPath(item)} className="block">
                 <div className="relative overflow-hidden rounded-md">
                   {item.cover_photo ? (
                     <img

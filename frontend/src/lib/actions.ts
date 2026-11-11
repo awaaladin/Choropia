@@ -1,3 +1,4 @@
+import { chatPath, orderPath } from "@/lib/links";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router";
@@ -29,7 +30,7 @@ export function useListingActions() {
       if (!ensureLogin()) return;
       try {
         const order = await api.createOrder(listingId);
-        navigate(`/orders/${order.id}`, { viewTransition: true });
+        navigate(orderPath(order), { viewTransition: true });
       } catch (err) {
         toast.error(errorMessage(err));
       }
@@ -42,7 +43,7 @@ export function useListingActions() {
       if (!ensureLogin()) return;
       try {
         const conversation = await api.startConversation(listingId);
-        navigate(`/messages/${conversation.id}`, { viewTransition: true });
+        navigate(chatPath(conversation), { viewTransition: true });
       } catch (err) {
         toast.error(errorMessage(err));
       }

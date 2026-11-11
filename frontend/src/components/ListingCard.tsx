@@ -1,3 +1,4 @@
+import { listingPath } from "@/lib/links";
 import { Heart, MessageCircle } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import { toast } from "sonner";
@@ -35,7 +36,7 @@ export function ListingCard({ item, view, density, style }: { item: Listing; vie
     }
   };
 
-  const href = `/listings/${item.id}`;
+  const href = listingPath(item);
   const editorial = view === "editorial";
 
   return (

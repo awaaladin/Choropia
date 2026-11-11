@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from common.models import TimeStampedModel
+from common.public_ids import listing_slug, new_public_id
 
 
 class Category(models.Model):
@@ -50,6 +51,8 @@ class Listing(TimeStampedModel):
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="listings")
 
     title = models.CharField(max_length=150)
+    # Random code used in links instead of the sequential id (see common/public_ids.py).
+    public_id = models.CharField(max_length=10, unique=True, default=new_public_id, editable=False)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     condition = models.CharField(max_length=10, choices=Condition.choices, default=Condition.USED)
@@ -88,6 +91,11 @@ class Listing(TimeStampedModel):
         return models.Q(status=cls.Status.ACTIVE) | models.Q(
             status=cls.Status.SOLD, market_visible_until__gt=now
         )
+
+    @property
+    def slug(self) -> str:
+        """"skirt-k7f3q9x2ab": what the website shows in the listing's address."""
+        return listing_slug(self.title, self.public_id)
 
     @property
     def seller(self):

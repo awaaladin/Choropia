@@ -1,3 +1,4 @@
+import { listingPath } from "@/lib/links";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Heart, MessageCircle, Share2, ShoppingBag, Trash2, Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -136,7 +137,7 @@ export function ReelCard({ reel }: { reel: Reel }) {
         </div>
         {reel.caption && <p className="line-clamp-2 text-sm text-background/90">{reel.caption}</p>}
         {reel.listing && (
-          <Link to={`/listings/${reel.listing}`} className="flex items-center gap-3 rounded-lg bg-background/15 p-2.5 backdrop-blur-sm transition-colors hover:bg-background/25">
+          <Link to={listingPath(reel.listing)} className="flex items-center gap-3 rounded-lg bg-background/15 p-2.5 backdrop-blur-sm transition-colors hover:bg-background/25">
             <span className="grid size-9 shrink-0 place-items-center rounded-md bg-background/20">
               <ShoppingBag size={16} />
             </span>
@@ -170,7 +171,7 @@ export function ListingReelCard({ listing }: { listing: Listing }) {
         <p className="line-clamp-2 text-lg font-semibold">{listing.title}</p>
         <p className="text-sm text-background/80">{listing.seller_name}</p>
         <Link
-          to={`/listings/${listing.id}`}
+          to={listingPath(listing)}
           className="flex w-fit items-center gap-2 rounded-full bg-background px-4 py-2 text-sm font-semibold text-foreground"
         >
           <ShoppingBag size={16} />

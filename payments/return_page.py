@@ -20,8 +20,13 @@ logger = logging.getLogger(__name__)
 
 @never_cache
 @require_GET
-def payment_return(request, order_id):
-    payment = Payment.objects.filter(order_id=order_id).first()
+def payment_return(request, order_ref):
+    from common.public_ids import lookup_kwargs
+    from orders.models import Order
+
+    order = Order.objects.filter(**lookup_kwargs(order_ref)).only("pk", "public_id").first()
+    order_id = order.pk if order else None
+    payment = Payment.objects.filter(order_id=order_id).first() if order else None
     reference = request.GET.get("reference") or request.GET.get("trxref") or ""
     # Ask Paystack right away, so the order is already "paid" when the app opens (the webhook can lag behind).
     if payment is not None and payment.status == Payment.Status.INITIALIZED and reference == payment.reference:
@@ -32,7 +37,7 @@ def payment_return(request, order_id):
 
     paid = payment is not None and payment.status in (Payment.Status.PAID_HELD, Payment.Status.RELEASED)
     site = settings.CHOROPIA_SITE_URL.rstrip("/")
-    web_url = f"{site}/orders/{order_id}"
+    web_url = f"{site}/order/{order.public_id}" if order else site
     app_url = f"choropia://order/{order_id}"
     intent_url = (
         f"intent://order/{order_id}#Intent;scheme=choropia;package=com.choropia.app;"

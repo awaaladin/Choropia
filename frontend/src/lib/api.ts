@@ -322,7 +322,7 @@ export const api = {
   listMyListings: () => request<Paginated<Listing> | Listing[]>("/listings/?mine=true"),
   listMerchantListings: (merchantId: number) =>
     request<Paginated<Listing> | Listing[]>(`/listings/?merchant=${merchantId}`, { auth: false }),
-  getListing: (id: number) => request<Listing>(`/listings/${id}/`),
+  getListing: (id: number | string) => request<Listing>(`/listings/${encodeURIComponent(String(id))}/`),
   deleteListing: (id: number) => request(`/listings/${id}/`, { method: "DELETE" }),
   removeListingPhoto: (id: number, photoId: number) => request<Listing>(`/listings/${id}/photos/${photoId}/`, { method: "DELETE" }),
   addListingPhotos: (id: number, files: File[]) => {
@@ -393,6 +393,7 @@ export const api = {
 
   // --- chat ---
   listConversations: () => request<Paginated<Conversation> | Conversation[]>("/conversations/"),
+  getConversation: (ref: number | string) => request<Conversation>(`/conversations/${encodeURIComponent(String(ref))}/`),
   startConversation: (listingId: number) => request<Conversation>("/conversations/", { method: "POST", body: { listing: listingId } }),
   openConversation: (otherUserId: number, listingId?: number) =>
     request<Conversation>("/conversations/open/", { method: "POST", body: { other_user_id: otherUserId, listing_id: listingId } }),
@@ -440,7 +441,7 @@ export const api = {
 
   // --- orders & payments ---
   listOrders: () => request<Paginated<Order> | Order[]>("/orders/"),
-  getOrder: (id: number) => request<Order>(`/orders/${id}/`),
+  getOrder: (id: number | string) => request<Order>(`/orders/${encodeURIComponent(String(id))}/`),
   createOrder: (listingId: number) => request<Order>("/orders/", { method: "POST", body: { listing: listingId } }),
   confirmReceipt: (id: number) => request(`/orders/${id}/confirm_receipt/`, { method: "POST" }),
   openDispute: (id: number, reason: string) => request(`/orders/${id}/open_dispute/`, { method: "POST", body: { reason } }),

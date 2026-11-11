@@ -1,3 +1,4 @@
+import { orderPath } from "@/lib/links";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, useAnimationControls } from "motion/react";
 import { useEffect, useRef, useState } from "react";
@@ -150,7 +151,7 @@ export function SellerHandoverEntry({ orderId, onReleased }: { orderId: number; 
         </p>
       )}
       {locked && (
-        <Button variant="secondary" className="mt-3 min-h-11 w-full" onClick={() => navigate(`/orders/${orderId}`)}>
+        <Button variant="secondary" className="mt-3 min-h-11 w-full" onClick={() => navigate(orderPath(orderId))}>
           Open the order
         </Button>
       )}

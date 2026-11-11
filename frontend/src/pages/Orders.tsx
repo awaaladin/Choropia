@@ -1,3 +1,4 @@
+import { orderPath } from "@/lib/links";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PackageSearch, Truck } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -82,7 +83,7 @@ export function OrdersPage() {
           const canDispatch = role === "selling" && order.status === "paid_escrow";
           return (
             <div key={order.id} className="flex items-center gap-3 p-4">
-              <Link to={`/orders/${order.id}`} className="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80">
+              <Link to={orderPath(order)} className="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80">
                 <div className="size-12 shrink-0 overflow-hidden rounded-md bg-accent">
                   {order.listing_cover_photo && <img src={order.listing_cover_photo} alt="" className="h-full w-full object-cover" />}
                 </div>

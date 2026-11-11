@@ -34,6 +34,7 @@ import { ReelsPage } from "@/pages/Reels";
 import { RegisterPage } from "@/pages/Register";
 import { ResetPasswordPage } from "@/pages/ResetPassword";
 import { WalletPage } from "@/pages/Wallet";
+import { RefRoute } from "@/lib/routeRef";
 
 export const router = createBrowserRouter([
   // Public marketing pages — their own PublicShell, not the logged-in app chrome.
@@ -50,7 +51,8 @@ export const router = createBrowserRouter([
       { path: "feed", element: <FeedPage /> },
       { path: "marketplace", element: <MarketplacePage /> },
       { path: "reels", element: <ReelsPage /> },
-      { path: "listings/:id", element: <ListingDetailPage /> },
+      { path: "listing/:id", element: <RefRoute kind="listing"><ListingDetailPage /></RefRoute> },
+      { path: "listings/:id", element: <RefRoute kind="listing"><ListingDetailPage /></RefRoute> },
       { path: "users/:id", element: <PublicProfilePage /> },
       { path: "merchants/:id", element: <MerchantProfilePage /> },
       { path: "login", element: <LoginPage /> },
@@ -69,15 +71,21 @@ export const router = createBrowserRouter([
           { path: "listings/new", element: <CreateListingPage /> },
           { path: "reels/new", element: <CreateReelPage /> },
           { path: "orders", element: <OrdersPage /> },
-          { path: "orders/:id", element: <OrderDetailPage /> },
+          { path: "order/:id", element: <RefRoute kind="order"><OrderDetailPage /></RefRoute> },
+          { path: "orders/:id", element: <RefRoute kind="order"><OrderDetailPage /></RefRoute> },
           { path: "wallet", element: <WalletPage /> },
           {
             path: "messages",
             element: <MessagesLayout />,
             children: [
               { index: true, element: <MessagesIndex /> },
-              { path: ":id", element: <ChatPage /> },
+              { path: ":id", element: <RefRoute kind="chat"><ChatPage /></RefRoute> },
             ],
+          },
+          {
+            path: "chat",
+            element: <MessagesLayout />,
+            children: [{ path: ":id", element: <RefRoute kind="chat"><ChatPage /></RefRoute> }],
           },
           { path: "notifications", element: <NotificationsPage /> },
           { path: "profile", element: <ProfilePage /> },

@@ -1,7 +1,9 @@
+import { listingPath, orderPath } from "@/lib/links";
+import { useRouteId } from "@/lib/routeRef";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ImagePlus, Mic, Send, Square, Tag } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
@@ -47,7 +49,7 @@ function ListingReferenceCard({
   return (
     <div className="min-w-64 max-w-sm overflow-hidden rounded-xl border border-border bg-panel text-foreground">
       {message.listing ? (
-        <Link to={`/listings/${message.listing}`} className="flex items-center gap-3 p-3">{listingContent}</Link>
+        <Link to={listingPath(message.listing)} className="flex items-center gap-3 p-3">{listingContent}</Link>
       ) : (
         <div className="flex items-center gap-3 p-3">{listingContent}</div>
       )}
@@ -70,8 +72,7 @@ function ListingReferenceCard({
 }
 
 export function ChatPage() {
-  const { id } = useParams();
-  const conversationId = Number(id);
+  const conversationId = useRouteId();
   const navigate = useNavigate();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -448,7 +449,7 @@ export function ChatPage() {
           onCheckout={(result) => {
             void refreshOffers();
             if (result.authorization_url) window.location.assign(result.authorization_url);
-            else navigate(`/orders/${result.order_id}`);
+            else navigate(orderPath(result.order_id));
           }}
         />
       )}

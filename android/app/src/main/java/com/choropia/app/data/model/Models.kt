@@ -80,6 +80,10 @@ data class Category(val id: Int, val name: String, val slug: String, val parent:
 data class Listing(
     val id: Int,
     val title: String,
+    /** Random code used in links instead of the sequential id. */
+    val public_id: String = "",
+    /** "skirt-k7f3q9x2ab": the listing's address on the website. */
+    val slug: String = "",
     val description: String = "",
     val price: String = "0",
     val quantity: Int = 1,
@@ -242,6 +246,7 @@ data class ListingSnapshot(
 @Serializable
 data class Conversation(
     val id: Int,
+    val public_id: String = "",
     val listing: Int? = null,
     val listing_title: String? = null,
     val buyer: Int? = null,
@@ -267,6 +272,7 @@ data class OrderStatusHistoryEntry(
 @Serializable
 data class Order(
     val id: Int,
+    val public_id: String = "",
     val listing: Int,
     val listing_title: String = "",
     val listing_cover_photo: String? = null,

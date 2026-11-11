@@ -291,16 +291,16 @@ class ReturnToAppTests(TestCase):
     def test_the_app_is_sent_back_to_a_page_that_opens_the_app(self):
         r, client = self.start(source="app")
         self.assertEqual(r.status_code, 200, r.content)
-        self.assertEqual(client.initialize_transaction.call_args.kwargs["callback_url"], f"https://choropia.test/pay/return/{self.order.pk}/")
+        self.assertEqual(client.initialize_transaction.call_args.kwargs["callback_url"], f"https://choropia.test/pay/return/{self.order.public_id}/")
 
     def test_the_website_still_returns_to_the_order_page(self):
         _, client = self.start()
-        self.assertEqual(client.initialize_transaction.call_args.kwargs["callback_url"], f"https://choropia.test/orders/{self.order.pk}")
+        self.assertEqual(client.initialize_transaction.call_args.kwargs["callback_url"], f"https://choropia.test/order/{self.order.public_id}")
 
     def test_switching_from_website_to_app_starts_a_fresh_checkout_that_returns_to_the_app(self):
         first, _ = self.start()
         _, client = self.start(source="app")
-        self.assertEqual(client.initialize_transaction.call_args.kwargs["callback_url"], f"https://choropia.test/pay/return/{self.order.pk}/")
+        self.assertEqual(client.initialize_transaction.call_args.kwargs["callback_url"], f"https://choropia.test/pay/return/{self.order.public_id}/")
         self.assertNotEqual(first.json()["reference"], Payment.objects.get(order=self.order).reference)
 
     def test_the_return_page_confirms_the_payment_and_offers_the_app(self):
@@ -309,7 +309,7 @@ class ReturnToAppTests(TestCase):
         verify = mock.Mock(return_value=charge(payment.reference, amount_kobo=int(Decimal(payment.amount) * 100)))
         with mock.patch("payments.services._paystack") as paystack:
             paystack.return_value.verify_transaction = verify
-            page = self.client.get(f"/pay/return/{self.order.pk}/?reference={payment.reference}")
+            page = self.client.get(f"/pay/return/{self.order.public_id}/?reference={payment.reference}")
         self.assertContains(page, "Payment received")
         self.assertContains(page, f"intent://order/{self.order.pk}#Intent;scheme=choropia")
         self.assertContains(page, "package=com.choropia.app")

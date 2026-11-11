@@ -1,3 +1,4 @@
+import { chatPath, orderPath } from "@/lib/links";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Gavel, Handshake, Mail, UserPlus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -17,8 +18,8 @@ const TYPE_ICONS: Record<AppNotification["notification_type"], LucideIcon> = {
 
 function targetHref(n: AppNotification): string | null {
   if (!n.target_object_id) return null;
-  if (n.target_type === "conversation") return `/messages/${n.target_object_id}`;
-  if (n.target_type === "order") return `/orders/${n.target_object_id}`;
+  if (n.target_type === "conversation") return chatPath(n.target_object_id);
+  if (n.target_type === "order") return orderPath(n.target_object_id);
   if (n.target_type === "merchant") return `/merchants/${n.target_object_id}`;
   return null;
 }

@@ -1,3 +1,4 @@
+import { listingPath } from "@/lib/links";
 import { useQuery } from "@tanstack/react-query";
 import { Store } from "lucide-react";
 import { useParams } from "react-router";
@@ -96,7 +97,7 @@ export function MerchantProfilePage() {
           </div>
         )}
         {listings.data?.map((item) => (
-          <Link key={item.id} to={`/listings/${item.id}`} className="panel overflow-hidden transition-shadow hover:shadow-lg">
+          <Link key={item.id} to={listingPath(item)} className="panel overflow-hidden transition-shadow hover:shadow-lg">
             <div className="grid aspect-square place-items-center bg-accent">
               {item.cover_photo ? <img src={item.cover_photo} alt="" className="h-full w-full object-cover" /> : <span className="text-xs text-muted-foreground">No photo</span>}
             </div>

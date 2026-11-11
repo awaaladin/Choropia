@@ -259,7 +259,7 @@ def _alert_drivers(delivery):
             f"Order #{delivery.order_id} needs a driver, but none of your drivers can take it right now. Add another driver.",
             target=delivery.order,
             subject=f"Order #{delivery.order_id}: add a driver",
-            link=f"/orders/{delivery.order_id}",
+            link=f"/order/{delivery.order.public_id}",
         )
         return
     for driver in drivers:
@@ -311,14 +311,14 @@ def accept_job(delivery_id, user):
         f"{driver.public_name} will deliver order #{order.id}. Hand the item to them when they arrive.",
         target=order,
         subject=f"Order #{order.id}: a driver accepted",
-        link=f"/orders/{order.id}",
+        link=f"/order/{order.public_id}",
     )
     _notify(
         order.buyer,
         f"{driver.public_name} will deliver your order #{order.id}. Have your handover code ready, and only share it once you hold the item.",
         target=order,
         subject=f"Order #{order.id}: a driver is on the job",
-        link=f"/orders/{order.id}",
+        link=f"/order/{order.public_id}",
     )
     return delivery
 
@@ -378,7 +378,7 @@ def _alert_drivers_excluding(delivery, excluded):
             f"Order #{delivery.order_id} needs a driver. Add another driver who can take it.",
             target=delivery.order,
             subject=f"Order #{delivery.order_id}: add a driver",
-            link=f"/orders/{delivery.order_id}",
+            link=f"/order/{delivery.order.public_id}",
         )
     for driver in drivers:
         DeliveryOffer.objects.update_or_create(delivery=delivery, driver=driver, defaults={"status": DeliveryOffer.Status.PENDING})
@@ -499,7 +499,7 @@ def nudge_stale_offers(now=None):
                 f"No driver has accepted order #{delivery.order_id} yet. Add another driver so it gets picked up.",
                 target=delivery.order,
                 subject=f"Order #{delivery.order_id}: still waiting for a driver",
-                link=f"/orders/{delivery.order_id}",
+                link=f"/order/{delivery.order.public_id}",
             )
             nudged.append(delivery.pk)
             from notifications import staff_alerts

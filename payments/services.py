@@ -76,9 +76,9 @@ def _initialize_paystack(payment):
         reference=payment.reference,
         # Server-chosen, never the client's: Paystack sends the buyer back to the order page.
         callback_url=(
-            f"{settings.CHOROPIA_SITE_URL.rstrip('/')}/pay/return/{order.id}/"
+            f"{settings.CHOROPIA_SITE_URL.rstrip('/')}/pay/return/{order.public_id}/"
             if payment.return_to_app
-            else f"{settings.CHOROPIA_SITE_URL.rstrip('/')}/orders/{order.id}"
+            else f"{settings.CHOROPIA_SITE_URL.rstrip('/')}/order/{order.public_id}"
         ),
         metadata=paystack_metadata(
             "ORDER",

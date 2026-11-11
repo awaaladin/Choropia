@@ -40,7 +40,13 @@ class SPAView(View):
                 "frontend/dist/index.html not found — run `npm run build` in frontend/ "
                 "(and commit the output; Vercel doesn't run the frontend build itself)."
             )
-        from .seo import listing_page_html
+        from .seo import listing_page_html, old_listing_redirect
+
+        new_path = old_listing_redirect(request.path)
+        if new_path:
+            from django.http import HttpResponsePermanentRedirect
+
+            return HttpResponsePermanentRedirect(new_path)
 
         response = HttpResponse(listing_page_html(html, request.path))
         response["Content-Security-Policy"] = CONTENT_SECURITY_POLICY

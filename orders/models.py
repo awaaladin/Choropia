@@ -3,6 +3,7 @@ from django.db import models, transaction
 from django.utils import timezone
 
 from common.models import TimeStampedModel
+from common.public_ids import new_public_id
 from listings.models import Listing
 
 from .state_machine import OrderStatus, validate_transition
@@ -35,6 +36,8 @@ class Order(TimeStampedModel):
     seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="sales")
 
     price = models.DecimalField(max_digits=12, decimal_places=2)
+    # Random code used in links instead of the sequential id (see common/public_ids.py).
+    public_id = models.CharField(max_length=10, unique=True, default=new_public_id, editable=False)
     status = models.CharField(max_length=20, choices=OrderStatus.CHOICES, default=OrderStatus.PENDING_PAYMENT)
 
     delivered_at = models.DateTimeField(null=True, blank=True)

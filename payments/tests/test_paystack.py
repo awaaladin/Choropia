@@ -49,7 +49,7 @@ class PaystackCheckoutTests(TestCase):
         self.assertEqual(payment.provider, Payment.Provider.PAYSTACK)
         self.assertEqual(payment.authorization_url, "https://checkout.paystack.com/abc")
         kwargs = client.initialize_transaction.call_args.kwargs
-        self.assertEqual(kwargs["callback_url"], f"https://choropia.test/orders/{order.id}")
+        self.assertEqual(kwargs["callback_url"], f"https://choropia.test/order/{order.public_id}")
         self.assertEqual(kwargs["metadata"]["app"], "CHOROPIA")
         self.assertEqual(kwargs["metadata"]["order_id"], order.id)
         self.assertEqual(kwargs["metadata"]["custom_fields"][1]["value"], f"Order #{order.id}: Laptop")

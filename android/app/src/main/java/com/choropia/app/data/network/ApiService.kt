@@ -361,6 +361,16 @@ interface ChoropiaApi {
     @GET("feed/")
     suspend fun feed(): PaginatedResponse<Listing>
 
+    /** Look up by the public code (or "title-slug-code") from a website link. */
+    @GET("listings/{ref}/")
+    suspend fun listingByRef(@Path("ref") ref: String): Listing
+
+    @GET("conversations/{ref}/")
+    suspend fun conversationByRef(@Path("ref") ref: String): Conversation
+
+    @GET("orders/{ref}/")
+    suspend fun orderByRef(@Path("ref") ref: String): Order
+
     @GET("listings/{id}/")
     suspend fun getListing(@Path("id") id: Int): Listing
 

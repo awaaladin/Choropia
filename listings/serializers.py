@@ -83,6 +83,8 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
         model = Listing
         fields = (
             "id",
+            "public_id",
+            "slug",
             "owner",
             "owner_id",
             "merchant",
@@ -114,7 +116,7 @@ class ListingSerializer(ListingEngagementMixin, serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = (
-            "id", "previous_price", "views_count", "sold_at", "market_visible_until",
+            "id", "public_id", "slug", "previous_price", "views_count", "sold_at", "market_visible_until",
             "created_at", "updated_at",
         )
 
@@ -191,6 +193,8 @@ class ListingListSerializer(ListingEngagementMixin, serializers.ModelSerializer)
         model = Listing
         fields = (
             "id",
+            "public_id",
+            "slug",
             "title",
             "price",
             "previous_price",

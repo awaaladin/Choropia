@@ -1,3 +1,4 @@
+import { orderPath } from "@/lib/links";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Ban, CircleAlert, CircleCheck, CircleX, Clock3, Hourglass, Loader2, RefreshCcw, Scale, Undo2 } from "lucide-react";
@@ -330,7 +331,7 @@ export function OfferCard({ offer, actions }: { offer: ChatOffer; actions: Offer
         )}
 
         {offer.order_id && !["pending", "payment_failed"].includes(state) && (
-          <Link to={`/orders/${offer.order_id}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-o-accent underline-offset-4 hover:underline">
+          <Link to={orderPath(offer.order_id)} className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-o-accent underline-offset-4 hover:underline">
             View order #{offer.order_id}
           </Link>
         )}
