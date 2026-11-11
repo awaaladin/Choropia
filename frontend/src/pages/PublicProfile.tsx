@@ -1,6 +1,7 @@
 import { listingPath, chatPath } from "@/lib/links";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { BadgeCheck, MessageCircle, PackageOpen, Star, UserRound } from "lucide-react";
+import { MessageCircle, PackageOpen, Star, UserRound } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
@@ -64,7 +65,7 @@ export function PublicProfilePage() {
         <div className="min-w-0 flex-1">
           <h1 className="flex items-center gap-2 font-display text-xl font-bold">
             {user.display_name}
-            {user.verified && <BadgeCheck size={18} className="text-primary" aria-label="Verified seller" />}
+            {user.verified && <VerifiedBadge size={22} title="Verified seller" />}
           </h1>
           <p className="text-sm text-muted-foreground">@{user.username}</p>
           <SellerRating userId={userId} className="mt-1" />

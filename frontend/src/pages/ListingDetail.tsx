@@ -1,6 +1,7 @@
 import { useRouteId } from "@/lib/routeRef";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Flag, Lock, ShieldCheck, Verified } from "lucide-react";
+import { ChevronRight, Flag, Lock, ShieldCheck } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
@@ -165,7 +166,7 @@ export function ListingDetailPage() {
               <div className="min-w-0">
                 <div className="flex items-center gap-1">
                   <span className="truncate font-semibold">{item.seller_name}</span>
-                  {item.merchant && <Verified size={15} className="shrink-0 text-primary" />}
+                  {item.merchant && <VerifiedBadge size={17} />}
                 </div>
                 <span className="text-xs text-muted-foreground">{item.merchant ? "Storefront" : "Individual seller"}</span>
                 <div><SellerRating userId={item.seller_id} /></div>

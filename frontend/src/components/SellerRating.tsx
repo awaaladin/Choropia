@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { BadgeCheck, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { api } from "@/lib/api";
 
 /** "4.7 (12 reviews)" with a Verified tick. Shows nothing for a seller who has not posted enough to be rated. */
@@ -25,7 +26,7 @@ export function SellerRating({ userId, className }: { userId: number | null | un
         ))}
       {data.verified && (
         <span className="inline-flex items-center gap-1 text-primary">
-          <BadgeCheck size={13} /> Verified seller
+          <VerifiedBadge size={15} /> Verified seller
         </span>
       )}
     </span>

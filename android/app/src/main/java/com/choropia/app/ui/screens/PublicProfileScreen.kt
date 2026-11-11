@@ -17,7 +17,6 @@ import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.StarBorder
 import com.choropia.app.ui.theme.WarnAmber
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -196,7 +195,7 @@ fun PublicProfileScreen(
                                     overflow = TextOverflow.Ellipsis,
                                 )
                                 if (profile?.verified == true) {
-                                    Icon(Icons.Outlined.VerifiedUser, "Verified seller", tint = MaterialTheme.colorScheme.primary)
+                                    com.choropia.app.ui.components.VerifiedBadge(size = 22.dp, description = "Verified seller")
                                 }
                             }
                             profile?.username?.takeIf { it.isNotBlank() }?.let {

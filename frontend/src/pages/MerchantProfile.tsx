@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Store } from "lucide-react";
 import { useParams } from "react-router";
 import { Link } from "@/components/AppLink";
+import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { FollowButton } from "@/components/FollowButton";
-import { Badge, EmptyState, ErrorState, Skeleton } from "@/components/ui";
+import { EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { api, rows } from "@/lib/api";
 import { naira } from "@/lib/utils";
 
@@ -67,7 +68,7 @@ export function MerchantProfilePage() {
               <div className="min-w-0 pb-1">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <h1 className="truncate font-display text-xl font-bold">{m.business_name}</h1>
-                  <Badge tone="primary">Verified</Badge>
+                  <VerifiedBadge size={22} />
                 </div>
                 <p className="text-sm text-muted-foreground">{m.location}</p>
               </div>
