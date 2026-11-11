@@ -672,3 +672,52 @@ def key_backup_recover(request):
     cache.delete(attempts_key)
     audit(request, "keys.recovered")
     return _key_page(request, revealed=key)
+
+
+# ---- inbox: what people send us (contact form, reports of listings, reviews) ------------------------------------------------
+@staff_required
+def inbox(request):
+    from moderation.models import ContactMessage, Report
+    from reviews.models import Review
+
+    return render(request, "staff/inbox.html", {
+        "nav": "inbox",
+        "messages_open": ContactMessage.objects.filter(handled=False).select_related("user")[:50],
+        "messages_done": ContactMessage.objects.filter(handled=True)[:10],
+        "reports_open": Report.objects.filter(status=Report.Status.PENDING).select_related("reporter", "content_type")[:50],
+        "reports_done": Report.objects.exclude(status=Report.Status.PENDING).select_related("reporter", "content_type")[:10],
+        "reviews": Review.objects.select_related("reviewer", "reviewee", "order__listing").order_by("-created_at")[:25],
+    })
+
+
+@staff_required
+@require_POST
+def contact_handled(request, pk):
+    from moderation.models import ContactMessage
+
+    message = get_object_or_404(ContactMessage, pk=pk)
+    message.handled = True
+    message.save(update_fields=["handled", "updated_at"])
+    audit(request, "contact.handled", f"message {pk}")
+    messages.success(request, "Marked as handled.")
+    return redirect("staff:inbox")
+
+
+@staff_required
+@require_POST
+def report_resolve(request, pk):
+    from moderation.models import Report
+
+    report = get_object_or_404(Report, pk=pk)
+    decision = request.POST.get("decision")
+    if decision not in ("reviewed", "actioned", "dismissed"):
+        messages.error(request, "Choose what to do with the report.")
+        return redirect("staff:inbox")
+    report.status = decision
+    report.resolution_note = (request.POST.get("note") or "")[:500]
+    report.reviewed_by = request.user
+    report.reviewed_at = timezone.now()
+    report.save(update_fields=["status", "resolution_note", "reviewed_by", "reviewed_at", "updated_at"])
+    audit(request, f"report.{decision}", f"report {pk}")
+    messages.success(request, "Report updated.")
+    return redirect("staff:inbox")

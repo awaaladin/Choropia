@@ -5,9 +5,10 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
+import { StarPicker } from "@/components/StarPicker";
 import { ErrorState, Modal, Skeleton, Textarea } from "@/components/ui";
 import { errorMessage } from "@/lib/actions";
-import { api, rows } from "@/lib/api";
+import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { STATUS_LABELS, naira, timeAgo } from "@/lib/utils";
 import { OrderDelivery } from "@/components/OrderDelivery";
@@ -126,15 +127,20 @@ export function OrderDetailPage() {
     onError: (err) => toast.error(errorMessage(err)),
   });
 
-  const otherPartyId = order.data && (user?.id === order.data.buyer ? order.data.seller : order.data.buyer);
-  const reviews = useQuery({
-    queryKey: ["reviews", otherPartyId],
-    queryFn: async () => rows(await api.listReviewsFor(otherPartyId!)),
-    enabled: !!otherPartyId && order.data?.status === "completed",
+  const [stars, setStars] = useState(0);
+  const reviewStatus = useQuery({
+    queryKey: ["order-review", orderId],
+    queryFn: () => api.reviewForOrder(orderId),
+    enabled: !!order.data && user?.id === order.data.buyer && ["confirmed", "completed"].includes(order.data.status),
   });
   const submitReview = useMutation({
     mutationFn: (payload: { rating: number; comment: string }) => api.createReview(orderId, payload.rating, payload.comment),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["reviews", otherPartyId] }),
+    onSuccess: () => {
+      toast.success("Thanks for your review");
+      queryClient.invalidateQueries({ queryKey: ["order-review", orderId] });
+      queryClient.invalidateQueries({ queryKey: ["review-summary"] });
+      queryClient.invalidateQueries({ queryKey: ["reviews"] });
+    },
     onError: (err) => toast.error(errorMessage(err)),
   });
 
@@ -156,7 +162,8 @@ export function OrderDetailPage() {
   const o = order.data!;
   const isBuyer = user?.id === o.buyer;
   const isSeller = user?.id === o.seller;
-  const myReview = reviews.data?.find((r) => r.order === o.id && r.reviewer === user?.id);
+  const myReview = reviewStatus.data?.review ?? null;
+  const canReview = !!reviewStatus.data?.can_review;
 
   const onSubmitDispute = (e: FormEvent) => {
     e.preventDefault();
@@ -164,8 +171,12 @@ export function OrderDetailPage() {
   };
   const onSubmitReview = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!stars) {
+      toast.error("Tap a star to rate.");
+      return;
+    }
     const form = new FormData(e.currentTarget);
-    submitReview.mutate({ rating: Number(form.get("rating")), comment: String(form.get("comment") ?? "") });
+    submitReview.mutate({ rating: stars, comment: String(form.get("comment") ?? "") });
   };
 
   return (
@@ -269,11 +280,11 @@ export function OrderDetailPage() {
           </div>
         )}
 
-        {o.status === "completed" && otherPartyId && (
+        {isBuyer && (myReview || canReview) && (
           <div className="mt-6">
             {myReview ? (
               <>
-                <h2 className="text-sm font-semibold">Your review</h2>
+                <h2 className="text-sm font-semibold">Your review of the seller</h2>
                 <p className="mt-1">
                   <Stars rating={myReview.rating} />
                 </p>
@@ -281,17 +292,10 @@ export function OrderDetailPage() {
               </>
             ) : (
               <>
-                <h2 className="text-sm font-semibold">Leave a review</h2>
-                <form onSubmit={onSubmitReview} className="mt-2 space-y-2">
-                  <select name="rating" defaultValue="5" className="w-full rounded-md border border-border bg-panel px-3 py-2 text-sm">
-                    {[5, 4, 3, 2, 1].map((n) => (
-                      <option key={n} value={n}>
-                        {"★".repeat(n)}
-                        {"☆".repeat(5 - n)}
-                      </option>
-                    ))}
-                  </select>
-                  <Textarea name="comment" rows={2} placeholder="How was this transaction?" />
+                <h2 className="text-sm font-semibold">How was the seller?</h2>
+                <form onSubmit={onSubmitReview} className="mt-2 space-y-3">
+                  <StarPicker value={stars} onChange={setStars} />
+                  <Textarea name="comment" rows={2} maxLength={500} placeholder="Tell others about it (optional)" />
                   <Button type="submit" variant="secondary" loading={submitReview.isPending}>
                     Submit review
                   </Button>

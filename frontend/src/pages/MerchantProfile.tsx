@@ -28,6 +28,11 @@ export function MerchantProfilePage() {
     queryFn: async () => rows(await api.listReviewsFor(merchant.data!.owner_id)),
     enabled: !!merchant.data,
   });
+  const summary = useQuery({
+    queryKey: ["review-summary", merchant.data?.owner_id],
+    queryFn: () => api.reviewSummary(merchant.data!.owner_id),
+    enabled: !!merchant.data,
+  });
 
   if (merchant.isPending) {
     return (
@@ -46,7 +51,8 @@ export function MerchantProfilePage() {
 
   const m = merchant.data!;
   const reviewList = reviews.data ?? [];
-  const avg = reviewList.length ? (reviewList.reduce((sum, r) => sum + r.rating, 0) / reviewList.length).toFixed(1) : null;
+  const rating = summary.data;
+  const avg = rating?.eligible && rating.average ? rating.average.toFixed(1) : null;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -82,7 +88,7 @@ export function MerchantProfilePage() {
             </div>
             <div>
               <span className="text-xs uppercase tracking-wider text-muted-foreground">Rating</span>
-              <p className="text-lg font-semibold">{avg ? `${avg}★ (${reviewList.length})` : "No reviews yet"}</p>
+              <p className="text-lg font-semibold">{avg ? `${avg}★ (${rating?.count})` : rating && !rating.eligible ? "Not rated yet" : "No reviews yet"}</p>
             </div>
           </div>
         </div>
@@ -111,10 +117,13 @@ export function MerchantProfilePage() {
 
       <h2 className="editorial-enter mb-2 text-sm font-semibold">Reviews</h2>
       <div className="panel editorial-enter p-4">
-        {reviewList.length === 0 && <p className="text-sm text-muted-foreground">No reviews yet.</p>}
+        {reviewList.length === 0 && <p className="text-sm text-muted-foreground">{rating && !rating.eligible ? "Reviews appear once a seller has posted a few listings." : "No reviews yet."}</p>}
         {reviewList.map((r) => (
           <div key={r.id} className="border-b border-border py-2 text-sm last:border-0">
-            <Stars rating={r.rating} />
+            <div className="flex items-center justify-between gap-2">
+              <Stars rating={r.rating} />
+              {r.reviewer_name && <span className="text-xs text-muted-foreground">{r.reviewer_name}</span>}
+            </div>
             {r.comment && <p className="text-muted-foreground">{r.comment}</p>}
           </div>
         ))}

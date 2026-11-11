@@ -1,0 +1,9 @@
+{% extends "emails/base.html" %}
+{% block preheader %}We got your message{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;">We got your message</h1>
+<p style="margin:0 0 16px 0;">Hi {{ name }},</p>
+<p style="margin:0 0 16px 0;">Thanks for writing to Choropia. A real person reads every message, and we will reply to this email address as soon as we can.</p>
+<p style="margin:0 0 6px 0;font-size:13px;color:#64748b;">What you sent:</p>
+<p style="margin:0;padding:12px 14px;background:#f1f4f9;border-radius:10px;white-space:pre-wrap;">{{ message }}</p>
+{% endblock %}

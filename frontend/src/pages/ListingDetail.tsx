@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { Link } from "@/components/AppLink";
 import { Button } from "@/components/Button";
+import { SellerRating } from "@/components/SellerRating";
 import { Avatar, Badge, ErrorState, Input, Modal, Skeleton, Textarea } from "@/components/ui";
 import { errorMessage, useEnsureLogin, useListingActions } from "@/lib/actions";
 import { api, rows } from "@/lib/api";
@@ -167,6 +168,7 @@ export function ListingDetailPage() {
                   {item.merchant && <Verified size={15} className="shrink-0 text-primary" />}
                 </div>
                 <span className="text-xs text-muted-foreground">{item.merchant ? "Storefront" : "Individual seller"}</span>
+                <div><SellerRating userId={item.seller_id} /></div>
               </div>
             </div>
             <Badge tone="success" className="shrink-0">

@@ -1,0 +1,46 @@
+{% extends "staff/base.html" %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+<div class="top"><div><h1>Inbox</h1><p class="sub">Messages from the Contact page, reports of listings, and the latest reviews. Each new one is also emailed to you straight away.</p></div></div>
+
+<div class="card" style="margin-bottom:14px">
+  <h2>Contact messages ({{ messages_open|length }} waiting)</h2>
+  <table><tbody>
+    {% for m in messages_open %}
+    <tr>
+      <td><strong>{{ m.name }}</strong> &lt;<a href="mailto:{{ m.email }}">{{ m.email }}</a>&gt;<div class="small">{{ m.get_topic_display }} · {{ m.created_at|date:"j M, H:i" }}{% if m.user %} · signed in{% endif %}</div>
+          <div style="white-space:pre-wrap;margin-top:6px">{{ m.message }}</div></td>
+      <td class="right"><form method="post" action="{% url 'staff:contact_handled' m.pk %}">{% csrf_token %}<button class="btn small ghost" type="submit">Done</button></form></td>
+    </tr>
+    {% empty %}<tr><td class="empty">Nothing waiting.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+
+<div class="card" style="margin-bottom:14px">
+  <h2>Reports ({{ reports_open|length }} waiting)</h2>
+  <table><tbody>
+    {% for r in reports_open %}
+    <tr>
+      <td>{{ r.content_type.model|title }} #{{ r.object_id }}<div class="small">by {{ r.reporter.email }} · {{ r.created_at|date:"j M, H:i" }}</div><div style="margin-top:6px">{{ r.reason }}</div></td>
+      <td class="right">
+        <form method="post" action="{% url 'staff:report_resolve' r.pk %}" style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">{% csrf_token %}
+          <button class="btn small ghost" name="decision" value="reviewed" type="submit">Looked at it</button>
+          <button class="btn small" name="decision" value="actioned" type="submit">Acted on it</button>
+          <button class="btn small ghost" name="decision" value="dismissed" type="submit">Dismiss</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}<tr><td class="empty">No open reports.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+
+<div class="card">
+  <h2>Latest reviews</h2>
+  <table><tbody>
+    {% for v in reviews %}
+    <tr><td>{{ v.rating }} / 5 for <a href="{% url 'staff:user_detail' v.reviewee_id %}">{{ v.reviewee.get_full_name|default:v.reviewee.email }}</a><div class="small">from {{ v.reviewer.get_full_name|default:v.reviewer.email }} · order #{{ v.order_id }} · {{ v.created_at|date:"j M, H:i" }}</div>
+        {% if v.comment %}<div style="margin-top:4px">{{ v.comment }}</div>{% endif %}</td></tr>
+    {% empty %}<tr><td class="empty">No reviews yet.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+{% endblock %}

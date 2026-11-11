@@ -242,6 +242,7 @@ REST_FRAMEWORK = {
         "guest-like-token": "20/hour",
         "orders": "30/hour",
         "reviews": "30/hour",
+        "contact": "5/hour",
         "reports": "20/hour",
         "merchant-apply": "5/day",
         "auth": "10/min",
@@ -417,6 +418,8 @@ EMAIL_TIMEOUT = env_int("EMAIL_TIMEOUT", 10)  # Vercel stops a function at 10 s;
 # Must be on a domain verified with the email provider, or it will refuse to send.
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "Choropia <no-reply@choropia.local>")
 # Who is emailed when something needs a person (new driver, dispute, money to hand over). Comma separated.
+# A seller can be reviewed only after posting at least this many listings (so one-off posters are not rated).
+REVIEW_MIN_LISTINGS = env_int("REVIEW_MIN_LISTINGS", 2)
 STAFF_ALERT_EMAILS = [e.strip() for e in env("STAFF_ALERT_EMAILS", "hiexecontact@gmail.com").split(",") if e.strip()]
 STAFF_ALERTS_ENABLED = env_bool("STAFF_ALERTS_ENABLED", True)
 SUPPORT_EMAIL = env("SUPPORT_EMAIL", "") or DEFAULT_FROM_EMAIL.rpartition("<")[2].rstrip(">").strip()

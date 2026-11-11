@@ -6,6 +6,30 @@ from django.db import models
 from common.models import TimeStampedModel
 
 
+class ContactMessage(TimeStampedModel):
+    """A message sent through the Contact page. Saved first so nothing is lost even if the email to staff fails."""
+
+    class Topic(models.TextChoices):
+        QUESTION = "question", "A question"
+        PROBLEM = "problem", "A problem or complaint"
+        REPORT = "report", "Reporting someone or something"
+        OTHER = "other", "Something else"
+
+    name = models.CharField(max_length=120)
+    email = models.EmailField()
+    topic = models.CharField(max_length=10, choices=Topic.choices, default=Topic.QUESTION)
+    message = models.TextField(max_length=3000)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    handled = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.get_topic_display()} from {self.email}"
+
+
 class Report(TimeStampedModel):
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"

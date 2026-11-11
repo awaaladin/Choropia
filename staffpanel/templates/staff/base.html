@@ -13,6 +13,7 @@
     <a class="nav {% if nav == 'people' %}on{% endif %}" href="{% url 'staff:user_list' %}">People</a>
     <a class="nav {% if nav == 'sellers' %}on{% endif %}" href="{% url 'staff:sellers' %}">Sellers</a>
     <a class="nav {% if nav == 'listings' %}on{% endif %}" href="{% url 'staff:listing_list' %}">Listings</a>
+    <a class="nav {% if nav == 'inbox' %}on{% endif %}" href="{% url 'staff:inbox' %}">Inbox</a>
     <a class="nav {% if nav == 'audit' %}on{% endif %}" href="{% url 'staff:audit' %}">Activity log</a>
     {% if request.user.is_superuser %}<a class="nav {% if nav == 'keys' %}on{% endif %}" href="{% url 'staff:key_backup' %}">Key backup</a>{% endif %}
     <div class="who">

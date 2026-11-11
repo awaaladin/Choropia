@@ -278,8 +278,24 @@ export interface Review {
   id: number;
   order: number;
   reviewer: number;
+  reviewer_name?: string;
   rating: number;
   comment: string;
+  created_at?: string;
+}
+
+/** A seller's public rating. `eligible` is false until they have posted enough listings to be rated. */
+export interface ReviewSummary {
+  eligible: boolean;
+  average: number | null;
+  count: number;
+  verified: boolean;
+}
+
+export interface OrderReviewStatus {
+  can_review: boolean;
+  reason: string;
+  review: Review | null;
 }
 
 export interface Reel {

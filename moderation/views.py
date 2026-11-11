@@ -21,6 +21,18 @@ class ReportViewSet(ScopedWritesMixin, mixins.CreateModelMixin, mixins.ListModel
             return Report.objects.all()
         return Report.objects.filter(reporter=user)
 
+    def perform_create(self, serializer):
+        report = serializer.save()
+        from notifications import staff_alerts
+
+        target = report.target
+        what = f"{report.content_type.model} #{report.object_id}" + (f" ({target.title})" if getattr(target, "title", None) else "")
+        staff_alerts.alert(
+            "New report to review", "Someone reported a listing",
+            [f"Reported: {what}.", f"Reason: {report.reason}", f"Reported by: {report.reporter.get_full_name() or report.reporter.email}."],
+            "/staff/inbox/",
+        )
+
     @action(detail=True, methods=["post"], permission_classes=[IsStaffOrModerator])
     def resolve(self, request, pk=None):
         report = self.get_object()

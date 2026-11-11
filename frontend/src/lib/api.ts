@@ -32,6 +32,8 @@ import type {
   User,
   WalletSummary,
   WalletTransaction,
+  ReviewSummary,
+  OrderReviewStatus,
 } from "./types";
 
 /**
@@ -388,6 +390,10 @@ export const api = {
 
   // --- reviews ---
   listReviewsFor: (userId: number) => request<Paginated<Review> | Review[]>(`/reviews/?user=${userId}`, { auth: false }),
+  reviewSummary: (userId: number) => request<ReviewSummary>(`/reviews/summary/?user=${userId}`, { auth: false }),
+  reviewForOrder: (orderId: number) => request<OrderReviewStatus>(`/reviews/for-order/?order=${orderId}`),
+  sendContact: (payload: { name: string; email: string; topic: string; message: string; website?: string }) =>
+    request<{ detail: string }>("/contact/", { method: "POST", body: payload, auth: false }),
   createReview: (orderId: number, rating: number, comment: string) =>
     request("/reviews/", { method: "POST", body: { order: orderId, rating, comment } }),
 
