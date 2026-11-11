@@ -386,6 +386,9 @@ export const api = {
   // --- merchants ---
   listMerchants: () => request<Paginated<Merchant> | Merchant[]>("/merchants/", { auth: false }),
   getMerchant: (id: number) => request<Merchant>(`/merchants/${id}/`, { auth: false }),
+  myStorefront: () => request<{ id: number; business_name: string; description: string; location: string }>("/merchants/mine/"),
+  updateMyStorefront: (payload: { business_name?: string; description?: string; location?: string }) =>
+    request<{ id: number; business_name: string; description: string; location: string }>("/merchants/mine/", { method: "PATCH", body: payload }),
   applyForMerchant: (payload: Record<string, string>) => request("/merchant-applications/", { method: "POST", body: payload }),
 
   // --- reviews ---

@@ -52,25 +52,118 @@ def _plain_text(html: str) -> str:
     return "\n".join(line for line in lines if line)
 
 
-def send_email(to: str, subject: str, template: str, context: dict | None = None) -> bool:
-    """Renders emails/<template>.html and sends it. Never raises."""
+URGENT_TEMPLATES = {"welcome", "verify_code", "password_reset"}  # codes that expire: they may use the whole limit
+
+
+def _limit() -> int:
+    return int(getattr(settings, "EMAIL_DAILY_LIMIT", 400))
+
+
+def sent_last_24h() -> int:
+    from datetime import timedelta
+
+    from .models import EmailSendLog
+
+    return EmailSendLog.objects.filter(sent_at__gte=timezone.now() - timedelta(hours=24)).count()
+
+
+def _has_room(urgent: bool) -> bool:
+    """Everyday emails stop at 85% of the limit so a code someone is waiting for can still go out."""
+    cap = _limit() if urgent else int(_limit() * 0.85)
+    return sent_last_24h() < cap
+
+
+def _is_limit_error(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return any(word in text for word in ("5.4.5", "daily user sending", "sending limit", "quota", "rate limit", "too many"))
+
+
+def _hold(to, subject, template, context, urgent) -> bool:
+    from .models import HeldEmail
+
+    try:
+        HeldEmail.objects.create(to=to, subject=" ".join(subject.split())[:300], template=template, context=_jsonable(context or {}), urgent=urgent)
+        logger.warning("Email limit reached: held the %s email for %s until there is room", template, _mask(to))
+        return True
+    except Exception:  # noqa: BLE001
+        logger.exception("Could not hold the %s email", template)
+        return False
+
+
+def _jsonable(value):
+    import json
+
+    return json.loads(json.dumps(value, default=str))
+
+
+def _deliver(to, subject, template, context) -> bool:
+    """One real send. Raises on failure."""
+    from .models import EmailSendLog
+
+    html = render_to_string(f"emails/{template}.html", {**_base_context(), **(context or {})})
+    message = EmailMultiAlternatives(
+        subject=" ".join(subject.split()),
+        body=_plain_text(html),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[to],
+    )
+    message.attach_alternative(html, "text/html")
+    message.send(fail_silently=False)
+    EmailSendLog.objects.create()
+    logger.info("Sent the %s email to %s", template, _mask(to))
+    return True
+
+
+def send_email(to: str, subject: str, template: str, context: dict | None = None, *, _from_hold: bool = False) -> bool:
+    """Renders emails/<template>.html and sends it. Never raises. When the daily sending limit is reached (or the mail
+    provider says so) the email is saved and sent later, in order, once there is room: nothing is lost."""
     if not to:
         return False
+    urgent = template in URGENT_TEMPLATES
     try:
-        html = render_to_string(f"emails/{template}.html", {**_base_context(), **(context or {})})
-        message = EmailMultiAlternatives(
-            subject=" ".join(subject.split()),
-            body=_plain_text(html),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[to],
-        )
-        message.attach_alternative(html, "text/html")
-        message.send(fail_silently=False)
-        logger.info("Sent the %s email to %s", template, _mask(to))
-        return True
-    except Exception:  # noqa: BLE001 - email trouble must never break the caller
+        if not _from_hold and not _has_room(urgent):
+            return _hold(to, subject, template, context, urgent)
+        _deliver(to, subject, template, context)
+    except Exception as exc:  # noqa: BLE001 - email trouble must never break the caller
         logger.exception("Could not send the %s email to %s", template, _mask(to))
+        if not _from_hold and _is_limit_error(exc):
+            return _hold(to, subject, template, context, urgent)
         return False
+    if not _from_hold:
+        flush_held(5)  # a little room may have opened: let a few held emails go
+    return True
+
+
+def held_count() -> int:
+    from .models import HeldEmail
+
+    return HeldEmail.objects.filter(sent_at__isnull=True).count()
+
+
+def flush_held(max_to_send: int = 50) -> int:
+    """Sends held emails, oldest first, while there is room under the limit. Returns how many went out."""
+    from .models import HeldEmail
+
+    sent = 0
+    try:
+        for held in HeldEmail.objects.filter(sent_at__isnull=True, attempts__lt=5).order_by("created_at")[:max_to_send]:
+            if not _has_room(held.urgent):
+                break
+            held.attempts += 1
+            try:
+                _deliver(held.to, held.subject, held.template, held.context)
+            except Exception as exc:  # noqa: BLE001
+                logger.exception("Could not send held %s email", held.template)
+                held.save(update_fields=["attempts"])
+                if _is_limit_error(exc):
+                    break
+                continue
+            held.sent_at = timezone.now()
+            held.save(update_fields=["attempts", "sent_at"])
+            sent += 1
+    except Exception:  # noqa: BLE001
+        logger.exception("Flushing held emails failed")
+    return sent
 
 
 def send_email_after_commit(to: str, subject: str, template: str, context: dict | None = None) -> None:
@@ -283,6 +376,16 @@ def send_congratulations(user, kind: str, **extra) -> None:
             "link": spec["link"],
             "closing": spec["closing"],
         },
+    )
+
+
+def send_storefront_renamed(user, old_name: str, new_name: str) -> None:
+    """Tells the owner their storefront name changed (so a hijacked account cannot rename quietly)."""
+    send_email_after_commit(
+        user.email,
+        f"Your Choropia storefront is now called {new_name}",
+        "storefront_renamed",
+        {"name": _display_name(user), "old_name": old_name, "new_name": new_name},
     )
 
 

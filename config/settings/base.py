@@ -425,6 +425,8 @@ STAFF_ALERTS_ENABLED = env_bool("STAFF_ALERTS_ENABLED", True)
 SUPPORT_EMAIL = env("SUPPORT_EMAIL", "") or DEFAULT_FROM_EMAIL.rpartition("<")[2].rstrip(">").strip()
 
 # Email one-time codes (accounts/otp.py)
+# Gmail allows about 500 a day; everyday emails pause at 85% of this and wait in HeldEmail until there is room.
+EMAIL_DAILY_LIMIT = env_int("EMAIL_DAILY_LIMIT", 400)
 EMAIL_OTP_MINUTES = env_int("EMAIL_OTP_MINUTES", 10)
 EMAIL_OTP_MAX_ATTEMPTS = env_int("EMAIL_OTP_MAX_ATTEMPTS", 5)
 EMAIL_OTP_RESEND_SECONDS = env_int("EMAIL_OTP_RESEND_SECONDS", 60)

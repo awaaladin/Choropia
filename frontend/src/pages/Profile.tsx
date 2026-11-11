@@ -23,6 +23,35 @@ function Section({ title, description, children }: { title: string; description?
   );
 }
 
+function StorefrontSection() {
+  const queryClient = useQueryClient();
+  const shop = useQuery({ queryKey: ["my-storefront"], queryFn: api.myStorefront, retry: false });
+  const save = useMutation({
+    mutationFn: (payload: { business_name: string; description: string; location: string }) => api.updateMyStorefront(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-storefront"] });
+      toast.success("Storefront updated. We emailed you a confirmation.");
+    },
+    onError: (err) => toast.error(errorMessage(err)),
+  });
+  if (!shop.data) return null;
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget);
+    save.mutate({ business_name: String(f.get("business_name")), description: String(f.get("description")), location: String(f.get("location")) });
+  };
+  return (
+    <Section title="Your storefront" description="Change your shop name, description or location. We email you whenever the name changes.">
+      <form key={shop.data.business_name + shop.data.description + shop.data.location} onSubmit={onSubmit} className="space-y-4">
+        <Field label="Storefront name"><Input name="business_name" defaultValue={shop.data.business_name} maxLength={150} required /></Field>
+        <Field label="Description"><Textarea name="description" defaultValue={shop.data.description} rows={3} /></Field>
+        <Field label="Location"><Input name="location" defaultValue={shop.data.location} /></Field>
+        <Button type="submit" loading={save.isPending}>Save storefront</Button>
+      </form>
+    </Section>
+  );
+}
+
 export function ProfilePage() {
   const queryClient = useQueryClient();
   const prefs = usePrefs();
@@ -186,6 +215,8 @@ export function ProfilePage() {
           )}
         </div>
       </Section>
+
+      <StorefrontSection />
 
       <Section title="Money and delivery" description="Where you get paid, and earning as a delivery driver.">
         <div className="flex flex-wrap gap-3">

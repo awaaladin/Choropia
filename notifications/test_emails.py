@@ -352,3 +352,51 @@ class EmailSettingsTests(TestCase):
                 else:
                     os.environ[k] = v
             importlib.reload(base)
+
+
+@override_settings(**SETTINGS, EMAIL_DAILY_LIMIT=10)
+class HeldEmailTests(TestCase):
+    def test_emails_over_the_limit_are_held_then_sent_in_order_when_room_opens(self):
+        from datetime import timedelta
+
+        from django.core import mail
+        from django.utils import timezone
+
+        from notifications.models import EmailSendLog, HeldEmail
+
+        for _ in range(8):  # 85% of 10 = 8: everyday mail is now full
+            EmailSendLog.objects.create()
+        mail.outbox.clear()
+        self.assertTrue(emails.send_email("a@example.com", "First", "order_update", {"headline": "h", "body": "b", "name": "A", "listing_title": "t", "order_id": 1, "order_ref": "x"}))
+        self.assertTrue(emails.send_email("b@example.com", "Second", "order_update", {"headline": "h", "body": "b", "name": "B", "listing_title": "t", "order_id": 2, "order_ref": "y"}))
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(HeldEmail.objects.filter(sent_at__isnull=True).count(), 2)
+        # a code someone is waiting for still goes out
+        emails.send_email("c@example.com", "Code", "verify_code", {"name": "C", "code": "123456", "minutes": 10})
+        self.assertEqual(len(mail.outbox), 1)
+        # a day later the log has aged out and the held ones flow, oldest first
+        EmailSendLog.objects.update(sent_at=timezone.now() - timedelta(hours=25))
+        self.assertEqual(emails.flush_held(), 2)
+        self.assertEqual([m.to[0] for m in mail.outbox[1:]], ["a@example.com", "b@example.com"])
+        self.assertEqual(emails.held_count(), 0)
+
+
+class StorefrontRenameTests(TestCase):
+    def test_owner_can_rename_and_gets_an_email(self):
+        from django.core import mail
+        from rest_framework.test import APIClient
+
+        from accounts.models import User
+        from merchants.models import Merchant
+
+        user = User.objects.create_user("o@example.com", "pw12345!", first_name="Ola")
+        Merchant.objects.create(user=user, business_name="Old Shop")
+        api = APIClient()
+        api.force_authenticate(user)
+        mail.outbox.clear()
+        with self.captureOnCommitCallbacks(execute=True):
+            r = api.patch("/api/v1/merchants/mine/", {"business_name": "  New   Shop "}, format="json")
+        self.assertEqual(r.status_code, 200, r.content)
+        self.assertEqual(r.json()["business_name"], "New Shop")
+        self.assertTrue(any("New Shop" in m.subject and "o@example.com" in m.to for m in mail.outbox))
+        self.assertEqual(APIClient().get("/api/v1/merchants/mine/").status_code, 401)

@@ -47,3 +47,28 @@ class DeviceToken(TimeStampedModel):
 
     def __str__(self):
         return f"DeviceToken<{self.platform}> of user {self.user_id}"
+
+
+class EmailSendLog(models.Model):
+    """One row per email actually sent, so we can tell how many went out in the last 24 hours."""
+
+    sent_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+
+class HeldEmail(models.Model):
+    """An email waiting for room under the daily sending limit. Saved in full, sent in order once the limit opens."""
+
+    to = models.EmailField()
+    subject = models.CharField(max_length=300)
+    template = models.CharField(max_length=80)
+    context = models.JSONField(default=dict, blank=True)
+    urgent = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"HeldEmail<{self.template}> {'sent' if self.sent_at else 'held'}"

@@ -67,3 +67,14 @@ class MerchantSerializer(serializers.ModelSerializer):
             "created_at",
         )
         read_only_fields = ("id", "status", "created_at")
+
+
+class MerchantEditSerializer(serializers.ModelSerializer):
+    business_name = serializers.CharField(max_length=150, min_length=2)
+
+    class Meta:
+        model = Merchant
+        fields = ("business_name", "description", "location")
+
+    def validate_business_name(self, value):
+        return " ".join(value.split())
