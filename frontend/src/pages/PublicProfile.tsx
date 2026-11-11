@@ -1,3 +1,4 @@
+import { listingPath, chatPath } from "@/lib/links";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { BadgeCheck, MessageCircle, PackageOpen, UserRound } from "lucide-react";
 import { useState } from "react";
@@ -35,7 +36,7 @@ export function PublicProfilePage() {
     }
     try {
       const conversation = await api.openConversation(userId);
-      navigate(`/messages/${conversation.id}`);
+      navigate(chatPath(conversation));
     } catch (error) {
       toast.error(errorMessage(error));
     }
@@ -118,7 +119,7 @@ export function PublicProfilePage() {
           {listingItems.length > 0 && (
             <div className="grid gap-3 sm:grid-cols-2">
               {listingItems.map((listing) => (
-                <Link key={listing.id} to={`/listings/${listing.id}`} className="panel overflow-hidden transition-colors hover:border-primary/50">
+                <Link key={listing.id} to={listingPath(listing)} className="panel overflow-hidden transition-colors hover:border-primary/50">
                   {listing.cover_photo ? (
                     <img src={listing.cover_photo} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
                   ) : (

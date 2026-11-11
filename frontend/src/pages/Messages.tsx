@@ -1,3 +1,4 @@
+import { chatPath } from "@/lib/links";
 import { useQuery } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { Outlet, useParams } from "react-router";
@@ -22,8 +23,8 @@ export function MessagesLayout() {
         {conversations.data?.map((c) => (
           <Link
             key={c.id}
-            to={`/messages/${c.id}`}
-            className={cn("flex items-center gap-3 p-4 transition-colors hover:bg-accent", Number(id) === c.id && "bg-accent")}
+            to={chatPath(c)}
+            className={cn("flex items-center gap-3 p-4 transition-colors hover:bg-accent", (id === c.public_id || Number(id) === c.id) && "bg-accent")}
           >
             <Avatar src={c.other_party_avatar} name={c.other_party_name} size={44} />
             <div className="min-w-0 flex-1">

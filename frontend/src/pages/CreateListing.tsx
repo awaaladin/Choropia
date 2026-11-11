@@ -1,3 +1,4 @@
+import { listingPath } from "@/lib/links";
 import { useQuery } from "@tanstack/react-query";
 import { ImagePlus, X } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -36,7 +37,7 @@ export function CreateListingPage() {
     try {
       const listing = await api.createListing(form);
       toast.success("Listing posted");
-      navigate(`/listings/${listing.id}`, { viewTransition: true });
+      navigate(listingPath(listing), { viewTransition: true });
     } catch (err) {
       toast.error(errorMessage(err));
     } finally {

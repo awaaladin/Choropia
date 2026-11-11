@@ -1,3 +1,4 @@
+import { useRouteId } from "@/lib/routeRef";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Flag, Lock, ShieldCheck, Verified } from "lucide-react";
 import { useState, type FormEvent } from "react";
@@ -10,11 +11,9 @@ import { api, rows } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { usePrefs } from "@/lib/prefs";
 import { naira, timeAgo } from "@/lib/utils";
-import { useParams } from "react-router";
 
 export function ListingDetailPage() {
-  const { id } = useParams();
-  const listingId = Number(id);
+  const listingId = useRouteId();
   const prefs = usePrefs();
   const { user, loggedIn } = useAuth();
   const ensureLogin = useEnsureLogin();

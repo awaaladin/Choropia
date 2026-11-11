@@ -52,6 +52,10 @@ export interface ListingPhoto {
 
 export interface Listing {
   id: number;
+  /** Random code used in links instead of the sequential id. */
+  public_id?: string;
+  /** "skirt-k7f3q9x2ab": the listing's address on the website. */
+  slug?: string;
   title: string;
   description?: string;
   price: string;
@@ -133,6 +137,8 @@ export interface OrderHistory {
 
 export interface Order {
   id: number;
+  /** Random code used in links instead of the sequential id. */
+  public_id?: string;
   listing: number;
   buyer: number;
   seller: number;
@@ -245,6 +251,8 @@ export interface HandoverCode {
 
 export interface Conversation {
   id: number;
+  /** Random code used in links instead of the sequential id. */
+  public_id?: string;
   listing: number | null;
   listing_title?: string;
   buyer?: number;

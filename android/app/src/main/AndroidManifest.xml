@@ -48,6 +48,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="choropia.vercel.app" />
                 <data android:pathPrefix="/listings/" />
+                <data android:pathPrefix="/listing/" />
+                <data android:pathPrefix="/chat/" />
+                <data android:pathPrefix="/order/" />
                 <data android:pathPrefix="/orders/" />
                 <data android:pathPrefix="/merchants/" />
                 <data android:pathPrefix="/messages/" />

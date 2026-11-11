@@ -1,3 +1,4 @@
+import { orderPath } from "@/lib/links";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDownLeft, ArrowUpRight, ExternalLink, Info, Lock, Wallet as WalletIcon } from "lucide-react";
 import { Link } from "@/components/AppLink";
@@ -76,7 +77,7 @@ export function WalletPage() {
               {tx.status === "paid_held" ? <Lock size={15} /> : tx.role === "selling" ? <ArrowUpRight size={15} /> : <ArrowDownLeft size={15} />}
             </span>
             <div className="min-w-0 flex-1">
-              <Link to={`/orders/${tx.order}`} className="truncate text-sm font-medium hover:text-primary">
+              <Link to={orderPath(tx.order)} className="truncate text-sm font-medium hover:text-primary">
                 {tx.listing_title || `Order #${tx.order}`}
               </Link>
               <p className="text-xs text-muted-foreground">

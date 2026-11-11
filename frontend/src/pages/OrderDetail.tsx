@@ -1,7 +1,8 @@
+import { useRouteId } from "@/lib/routeRef";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, CheckCircle2, Gavel, Lock, Package, ShieldCheck, Truck } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
-import { useParams, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
 import { ErrorState, Modal, Skeleton, Textarea } from "@/components/ui";
@@ -68,8 +69,7 @@ function Stars({ rating }: { rating: number }) {
 }
 
 export function OrderDetailPage() {
-  const { id } = useParams();
-  const orderId = Number(id);
+  const orderId = useRouteId();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [disputeOpen, setDisputeOpen] = useState(false);

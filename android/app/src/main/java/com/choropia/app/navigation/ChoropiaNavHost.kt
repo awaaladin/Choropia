@@ -324,6 +324,26 @@ fun ChoropiaNavHost(navController: NavHostController = rememberNavController()) 
                 })
             }
 
+            // --- website links that carry a public code instead of a number (old numeric links still use the routes below) ---
+            for ((kind, routeFor) in listOf<Pair<String, (Int) -> String>>(
+                "listing" to { id -> Routes.listing(id) },
+                "chat" to { id -> Routes.chat(id) },
+                "order" to { id -> Routes.order(id) },
+            )) {
+                composable(
+                    "open-$kind/{ref}",
+                    arguments = listOf(navArgument("ref") { type = NavType.StringType }),
+                    deepLinks = listOf(navDeepLink { uriPattern = "https://choropia.vercel.app/$kind/{ref}" }),
+                ) { entry ->
+                    val ref = entry.arguments?.getString("ref") ?: return@composable
+                    RefResolver(kind, ref) { id ->
+                        navController.navigate(routeFor(id)) {
+                            popUpTo("open-$kind/{ref}") { inclusive = true }
+                        }
+                    }
+                }
+            }
+
             // --- content ---
             composable(
                 Routes.LISTING,

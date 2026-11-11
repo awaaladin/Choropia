@@ -594,6 +594,15 @@ class ChoropiaRepository(
 
     suspend fun order(id: Int): Order = apiCall { api.getOrder(id) }
 
+    /** The internal id behind a code from a website link (/listing/…, /chat/…, /order/…). */
+    suspend fun resolveRef(kind: String, ref: String): Int = apiCall {
+        when (kind) {
+            "listing" -> api.listingByRef(ref).id
+            "chat" -> api.conversationByRef(ref).id
+            else -> api.orderByRef(ref).id
+        }
+    }
+
     suspend fun createOrder(listingId: Int): Order = apiCall { api.createOrder(CreateOrderRequest(listingId)) }
 
     suspend fun confirmReceipt(orderId: Int): Order = apiCall { api.confirmReceipt(orderId) }

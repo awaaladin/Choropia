@@ -1,3 +1,4 @@
+import { listingPath } from "@/lib/links";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PackagePlus, Pencil, Trash2, Truck } from "lucide-react";
 import { useState } from "react";
@@ -88,7 +89,7 @@ export function MyListingsPage() {
         <ul className="space-y-3">
           {shown.map((l) => (
             <li key={l.id} className="panel flex gap-4 p-4">
-              <Link to={`/listings/${l.id}`} className="shrink-0">
+              <Link to={listingPath(l)} className="shrink-0">
                 {l.cover_photo ? (
                   <img src={l.cover_photo} alt="" className="size-24 rounded-lg object-cover" />
                 ) : (
@@ -96,7 +97,7 @@ export function MyListingsPage() {
                 )}
               </Link>
               <div className="min-w-0 flex-1">
-                <Link to={`/listings/${l.id}`} className="block truncate font-semibold hover:underline">{l.title}</Link>
+                <Link to={listingPath(l)} className="block truncate font-semibold hover:underline">{l.title}</Link>
                 <p className="mt-0.5 font-mono text-sm">
                   {l.previous_price && Number(l.previous_price) !== Number(l.price) && <s className="mr-2 text-muted-foreground">{naira(l.previous_price)}</s>}
                   {naira(l.price)}

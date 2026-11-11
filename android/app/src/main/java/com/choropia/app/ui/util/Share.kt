@@ -7,7 +7,8 @@ import com.choropia.app.data.model.Listing
 
 /** Opens the Android share sheet with a link to the listing on the Choropia website. */
 fun shareListing(context: Context, listing: Listing) {
-    val link = "${BuildConfig.API_ORIGIN}/listings/${listing.id}"
+    // The coded address: never the sequential number (see common/public_ids.py on the server).
+    val link = if (listing.slug.isNotBlank()) "${BuildConfig.API_ORIGIN}/listing/${listing.slug}" else "${BuildConfig.API_ORIGIN}/listings/${listing.id}"
     val text = "${listing.title} - ${formatNaira(listing.price)} on Choropia\n$link"
     val send = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"

@@ -1,3 +1,4 @@
+import { listingPath } from "@/lib/links";
 import { useQuery } from "@tanstack/react-query";
 import { Bell, Home, MessageCircle, Package, ShieldCheck, ShoppingBag, Store, UserRound, type LucideIcon } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -182,7 +183,7 @@ export function FeedPage() {
             </div>
           )}
           {trending.map((item, i) => (
-            <Link key={item.id} to={`/listings/${item.id}`} className="flex items-center gap-3 border-t border-border px-4 py-3 text-sm transition-colors hover:bg-accent">
+            <Link key={item.id} to={listingPath(item)} className="flex items-center gap-3 border-t border-border px-4 py-3 text-sm transition-colors hover:bg-accent">
               <span className="text-xs text-muted-foreground">0{i + 1}</span>
               <span className="min-w-0 flex-1 truncate">{item.title}</span>
               <span className="text-xs text-muted-foreground">{naira(item.price)}</span>
