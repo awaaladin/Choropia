@@ -1,0 +1,49 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}{{ contact.name }}{% endblock %}
+{% block content %}
+<p class="small" style="margin:0 0 12px"><a href="{% url 'staff:inbox' %}{% if contact.handled %}?tab=decided{% endif %}">&larr; Back to the Inbox</a></p>
+
+<div class="thread-head">
+  <div class="avatar">{{ contact.name|initials }}</div>
+  <div style="min-width:0;flex:1">
+    <h1 style="font-size:22px">{{ contact.name }}</h1>
+    <div class="meta" style="display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--muted-fg);font-size:13px"><a href="mailto:{{ contact.email }}">{{ contact.email }}</a><span>{{ contact.get_topic_display }}</span>{% if contact.user %}<span>signed in as {{ contact.user.get_full_name|default:contact.user.email }}</span>{% endif %}</div>
+  </div>
+  <span class="pill {% if contact.handled %}good{% else %}warn{% endif %}">{% if contact.handled %}Answered or closed{% else %}Waiting{% endif %}</span>
+</div>
+
+<div class="thread">
+  <div class="bubble them">
+    <div class="bubble-meta"><strong>{{ contact.name }}</strong><span>{{ contact.created_at|date:"j M Y, H:i" }}</span></div>
+    <div class="bubble-text">{{ contact.message }}</div>
+  </div>
+  {% for r in replies %}
+  <div class="bubble us">
+    <div class="bubble-meta"><strong>{{ r.sent_by.get_full_name|default:r.sent_by.email|default:"Choropia" }}</strong><span>{{ r.created_at|date:"j M Y, H:i" }} · emailed</span></div>
+    <div class="bubble-text">{{ r.text }}</div>
+  </div>
+  {% endfor %}
+  {% if legacy %}
+  <div class="bubble us">
+    <div class="bubble-meta"><strong>{{ legacy.sent_by.get_full_name|default:legacy.sent_by.email|default:"Choropia" }}</strong><span>{{ legacy.created_at|date:"j M Y, H:i" }} · emailed</span></div>
+    <div class="bubble-text">{{ legacy.text }}</div>
+  </div>
+  {% endif %}
+</div>
+<p class="note-saved">If {{ contact.name|default:"they" }} answers your email, it arrives in the hiexecontact@gmail.com inbox, not here.</p>
+
+<form method="post" action="{% url 'staff:contact_reply' contact.pk %}" class="composer">{% csrf_token %}
+  <label for="reply" style="margin-top:0">{% if replies or legacy %}Reply again{% else %}Your reply{% endif %}</label>
+  <textarea id="reply" name="reply" rows="5" placeholder="Write a warm, clear answer. It is emailed to {{ contact.email }}." required></textarea>
+  <div class="actions"><button class="btn" type="submit">Send reply</button>
+  </div>
+</form>
+<div class="actions">
+  {% if contact.handled %}
+  <form method="post" action="{% url 'staff:contact_reopen' contact.pk %}">{% csrf_token %}<button class="btn ghost small" type="submit">Move back to Waiting</button></form>
+  {% else %}
+  <form method="post" action="{% url 'staff:contact_handled' contact.pk %}">{% csrf_token %}<button class="btn ghost small" type="submit">Close without replying</button></form>
+  {% endif %}
+</div>
+{% endblock %}

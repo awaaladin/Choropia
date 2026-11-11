@@ -1,80 +1,137 @@
 {% extends "staff/base.html" %}
+{% load staff_extras %}
 {% block title %}Inbox{% endblock %}
 {% block content %}
-<div class="top"><div><h1>Inbox</h1><p class="sub">Messages from the Contact page, reports of listings, and the latest reviews. Each new one is also emailed to you straight away.</p></div></div>
+<div class="top"><div><h1>Inbox</h1><p class="sub">Everything people send us, in one place. Each new item is also emailed to you. Nothing is ever lost: decided items stay in the Decided tab, where you can change your mind.</p></div></div>
 
-<div class="card" style="margin-bottom:14px">
-  <h2>Storefront applications ({{ applications_open|length }} waiting)</h2>
-  <table><tbody>
-    {% for a in applications_open %}
-    <tr>
-      <td><strong>{{ a.business_name }}</strong><div class="small">{{ a.applicant.get_full_name|default:a.applicant.email }} · {{ a.business_phone }} · {{ a.created_at|date:"j M, H:i" }}</div>
-          <div class="small">{{ a.business_address }}</div>
-          {% if a.business_description %}<div style="margin-top:6px;white-space:pre-wrap">{{ a.business_description }}</div>{% endif %}</td>
-      <td class="right">
-        <form method="post" action="{% url 'staff:storefront_decide' a.pk %}" style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;align-items:center">{% csrf_token %}
-          <input name="reason" placeholder="Reason, if rejecting" style="width:170px">
-          <button class="btn small" name="decision" value="approve" type="submit">Approve</button>
-          <button class="btn small ghost" name="decision" value="reject" type="submit">Reject</button>
-        </form>
-      </td>
-    </tr>
-    {% empty %}<tr><td class="empty">No applications waiting.</td></tr>{% endfor %}
-  </tbody></table>
+<div class="tabs">
+  <a class="{% if tab == 'waiting' %}on{% endif %}" href="{% url 'staff:inbox' %}">Waiting<span class="count">{{ waiting_count }}</span></a>
+  <a class="{% if tab == 'decided' %}on{% endif %}" href="{% url 'staff:inbox' %}?tab=decided">Decided<span class="count">{{ decided_count }}</span></a>
 </div>
 
-<div class="card" style="margin-bottom:14px">
-  <h2>Contact messages ({{ messages_open|length }} waiting)</h2>
-  <table><tbody>
-    {% for m in messages_open %}
-    <tr>
-      <td><strong>{{ m.name }}</strong> &lt;<a href="mailto:{{ m.email }}">{{ m.email }}</a>&gt;<div class="small">{{ m.get_topic_display }} · {{ m.created_at|date:"j M, H:i" }}{% if m.user %} · signed in{% endif %}</div>
-          <div style="white-space:pre-wrap;margin-top:6px">{{ m.message }}</div>
-          <form method="post" action="{% url 'staff:contact_reply' m.pk %}" style="margin-top:10px">{% csrf_token %}
-            <textarea name="reply" rows="3" placeholder="Write your reply. It is emailed to {{ m.email }}." style="width:100%" required></textarea>
-            <div style="margin-top:6px;display:flex;gap:8px"><button class="btn small" type="submit">Send reply</button></div>
-          </form></td>
-      <td class="right"><form method="post" action="{% url 'staff:contact_handled' m.pk %}">{% csrf_token %}<button class="btn small ghost" type="submit">Done, no reply</button></form></td>
-    </tr>
-    {% empty %}<tr><td class="empty">Nothing waiting.</td></tr>{% endfor %}
-  </tbody></table>
-  {% if messages_done %}
-  <h2 style="margin-top:18px">Recently answered</h2>
-  <table><tbody>
-    {% for m in messages_done %}
-    <tr><td><strong>{{ m.name }}</strong> &lt;{{ m.email }}&gt;<div class="small">{{ m.created_at|date:"j M, H:i" }}{% if m.replied_at %} · replied {{ m.replied_at|date:"j M, H:i" }}{% if m.replied_by %} by {{ m.replied_by.get_full_name|default:m.replied_by.email }}{% endif %}{% else %} · closed without a reply{% endif %}</div>
-        <div style="white-space:pre-wrap;margin-top:4px;color:var(--muted,#64748b)">{{ m.message }}</div>
-        {% if m.reply %}<div style="white-space:pre-wrap;margin-top:6px"><strong>Your reply:</strong> {{ m.reply }}</div>{% endif %}</td></tr>
-    {% endfor %}
-  </tbody></table>
-  {% endif %}
-</div>
+{% if tab == 'waiting' %}
 
-<div class="card" style="margin-bottom:14px">
-  <h2>Reports ({{ reports_open|length }} waiting)</h2>
-  <table><tbody>
-    {% for r in reports_open %}
-    <tr>
-      <td>{{ r.content_type.model|title }} #{{ r.object_id }}<div class="small">by {{ r.reporter.email }} · {{ r.created_at|date:"j M, H:i" }}</div><div style="margin-top:6px">{{ r.reason }}</div></td>
-      <td class="right">
-        <form method="post" action="{% url 'staff:report_resolve' r.pk %}" style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap">{% csrf_token %}
-          <button class="btn small ghost" name="decision" value="reviewed" type="submit">Looked at it</button>
-          <button class="btn small" name="decision" value="actioned" type="submit">Acted on it</button>
-          <button class="btn small ghost" name="decision" value="dismissed" type="submit">Dismiss</button>
-        </form>
-      </td>
-    </tr>
-    {% empty %}<tr><td class="empty">No open reports.</td></tr>{% endfor %}
-  </tbody></table>
-</div>
+<div class="section-title"><h2>Storefront applications</h2><span class="pill {% if apps_open %}warn{% else %}plain{% endif %}">{{ apps_open|length }} waiting</span></div>
+{% for a in apps_open %}
+<article class="item">
+  <div class="avatar shop">{{ a.business_name|initials }}</div>
+  <div>
+    <div class="item-head"><strong>{{ a.business_name }}</strong><span class="pill warn">Needs a decision</span></div>
+    <div class="meta"><span>{{ a.applicant.get_full_name|default:a.applicant.email }}</span><span>{{ a.created_at|date:"j M Y, H:i" }}</span></div>
+    <div class="chips"><span class="chip">{{ a.business_phone }}</span><span class="chip">{{ a.business_address }}</span></div>
+    {% if a.business_description %}<div class="quote"><small>What they sell</small>{{ a.business_description }}</div>{% endif %}
+    <div class="actions">
+      <form method="post" action="{% url 'staff:storefront_decide' a.pk %}">{% csrf_token %}<button class="btn good" name="decision" value="approve" type="submit">Approve and verify</button></form>
+    </div>
+    <details class="more"><summary>Reject with a reason…</summary>
+      <form method="post" action="{% url 'staff:storefront_decide' a.pk %}" class="panel-form">{% csrf_token %}
+        <label for="r{{ a.pk }}" style="margin-top:0">Reason (sent to the applicant)</label>
+        <input id="r{{ a.pk }}" type="text" name="reason" placeholder="For example: please add a clear shop address" maxlength="300">
+        <div class="actions"><button class="btn danger small" name="decision" value="reject" type="submit">Reject application</button></div>
+      </form>
+    </details>
+  </div>
+</article>
+{% empty %}<div class="empty-state"><strong>No applications waiting</strong>New shop-owner applications appear here.</div>{% endfor %}
 
-<div class="card">
-  <h2>Latest reviews</h2>
-  <table><tbody>
-    {% for v in reviews %}
-    <tr><td>{{ v.rating }} / 5 for <a href="{% url 'staff:user_detail' v.reviewee_id %}">{{ v.reviewee.get_full_name|default:v.reviewee.email }}</a><div class="small">from {{ v.reviewer.get_full_name|default:v.reviewer.email }} · order #{{ v.order_id }} · {{ v.created_at|date:"j M, H:i" }}</div>
-        {% if v.comment %}<div style="margin-top:4px">{{ v.comment }}</div>{% endif %}</td></tr>
-    {% empty %}<tr><td class="empty">No reviews yet.</td></tr>{% endfor %}
-  </tbody></table>
+<div class="section-title"><h2>Contact messages</h2><span class="pill {% if messages_open %}warn{% else %}plain{% endif %}">{{ messages_open|length }} waiting</span></div>
+{% if messages_open %}
+<div class="mail-list">
+  {% for m in messages_open %}
+  <a class="mail-row unread" href="{% url 'staff:contact_detail' m.pk %}">
+    <div class="avatar">{{ m.name|initials }}</div>
+    <div class="mail-main"><div class="mail-top"><strong>{{ m.name }}</strong><span class="pill plain">{{ m.get_topic_display }}</span>{% if m.user %}<span class="pill good">Signed in</span>{% endif %}</div>
+      <div class="mail-preview">{{ m.message|truncatechars:110 }}</div></div>
+    <div class="mail-time">{{ m.created_at|date:"j M, H:i" }}</div>
+  </a>
+  {% endfor %}
 </div>
+{% else %}<div class="empty-state"><strong>You are all caught up</strong>Messages from the Contact page appear here. Tap one to open the conversation.</div>{% endif %}
+
+<div class="section-title"><h2>Reports</h2><span class="pill {% if reports_open %}warn{% else %}plain{% endif %}">{{ reports_open|length }} waiting</span></div>
+{% for r in reports_open %}
+<article class="item">
+  <div class="avatar flag">!</div>
+  <div>
+    <div class="item-head"><strong>{{ r.content_type.model|title }} #{{ r.object_id }}</strong><span class="pill warn">To review</span></div>
+    <div class="meta"><span>Reported by {{ r.reporter.email }}</span><span>{{ r.created_at|date:"j M Y, H:i" }}</span></div>
+    <div class="quote"><small>Reason</small>{{ r.reason }}</div>
+    <form method="post" action="{% url 'staff:report_resolve' r.pk %}" class="actions">{% csrf_token %}
+      <button class="btn small" name="decision" value="actioned" type="submit">Acted on it</button>
+      <button class="btn ghost small" name="decision" value="reviewed" type="submit">Looked, no action</button>
+      <button class="btn ghost small" name="decision" value="dismissed" type="submit">Dismiss</button>
+    </form>
+  </div>
+</article>
+{% empty %}<div class="empty-state"><strong>No open reports</strong>Reports of listings appear here.</div>{% endfor %}
+
+<div class="section-title"><h2>Latest reviews</h2></div>
+{% for v in reviews %}
+<article class="item">
+  <div class="avatar">{{ v.reviewer.get_full_name|default:v.reviewer.email|initials }}</div>
+  <div>
+    <div class="item-head"><strong>{{ v.rating }} / 5</strong><span class="pill {% if v.rating >= 4 %}good{% elif v.rating == 3 %}warn{% else %}bad{% endif %}">for {{ v.reviewee.get_full_name|default:v.reviewee.email }}</span></div>
+    <div class="meta"><span>from {{ v.reviewer.get_full_name|default:v.reviewer.email }}</span><span>order #{{ v.order_id }}</span><span>{{ v.created_at|date:"j M Y, H:i" }}</span></div>
+    {% if v.comment %}<div class="quote">{{ v.comment }}</div>{% endif %}
+  </div>
+</article>
+{% empty %}<div class="empty-state"><strong>No reviews yet</strong>Buyer reviews of sellers appear here.</div>{% endfor %}
+
+{% else %}
+
+<div class="section-title"><h2>Storefront decisions</h2></div>
+{% for a in apps_done %}
+<article class="item">
+  <div class="avatar shop">{{ a.business_name|initials }}</div>
+  <div>
+    <div class="item-head"><strong>{{ a.business_name }}</strong><span class="pill {{ a.status|pill }}">{{ a.status|label }}</span></div>
+    <div class="meta"><span>{{ a.applicant.get_full_name|default:a.applicant.email }}</span><span>decided {{ a.reviewed_at|date:"j M Y, H:i" }}{% if a.reviewed_by %} by {{ a.reviewed_by.get_full_name|default:a.reviewed_by.email }}{% endif %}</span></div>
+    {% if a.rejection_reason %}<div class="quote"><small>Reason given</small>{{ a.rejection_reason }}</div>{% endif %}
+    {% if a.status == 'approved' %}
+    <details class="more"><summary>Change my mind: withdraw approval…</summary>
+      <form method="post" action="{% url 'staff:storefront_decide' a.pk %}" class="panel-form">{% csrf_token %}
+        <label for="w{{ a.pk }}" style="margin-top:0">Reason (sent to them)</label>
+        <input id="w{{ a.pk }}" type="text" name="reason" placeholder="Why the approval is being withdrawn" maxlength="300">
+        <div class="actions"><button class="btn danger small" name="decision" value="reject" type="submit">Withdraw approval</button></div>
+      </form>
+    </details>
+    {% else %}
+    <form method="post" action="{% url 'staff:storefront_decide' a.pk %}" class="actions">{% csrf_token %}<button class="btn good small" name="decision" value="approve" type="submit">Approve instead</button></form>
+    {% endif %}
+  </div>
+</article>
+{% empty %}<div class="empty-state"><strong>No decisions yet</strong>Approved and rejected applications are kept here.</div>{% endfor %}
+
+<div class="section-title"><h2>Contact messages</h2></div>
+{% if messages_done %}
+<div class="mail-list">
+  {% for m in messages_done %}
+  <a class="mail-row" href="{% url 'staff:contact_detail' m.pk %}">
+    <div class="avatar">{{ m.name|initials }}</div>
+    <div class="mail-main"><div class="mail-top"><strong>{{ m.name }}</strong><span class="pill {% if m.replied_at %}good{% else %}plain{% endif %}">{% if m.replied_at %}Replied{% else %}Closed{% endif %}</span><span class="pill plain">{{ m.get_topic_display }}</span></div>
+      <div class="mail-preview">{% if m.reply %}You: {{ m.reply|truncatechars:90 }}{% else %}{{ m.message|truncatechars:110 }}{% endif %}</div></div>
+    <div class="mail-time">{{ m.updated_at|date:"j M, H:i" }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}<div class="empty-state"><strong>Nothing here yet</strong>Messages you reply to or close are kept here.</div>{% endif %}
+
+<div class="section-title"><h2>Report decisions</h2></div>
+{% for r in reports_done %}
+<article class="item">
+  <div class="avatar flag">!</div>
+  <div>
+    <div class="item-head"><strong>{{ r.content_type.model|title }} #{{ r.object_id }}</strong><span class="pill {{ r.status|pill }}">{{ r.status|label }}</span></div>
+    <div class="meta"><span>Reported by {{ r.reporter.email }}</span>{% if r.reviewed_at %}<span>decided {{ r.reviewed_at|date:"j M Y, H:i" }}{% if r.reviewed_by %} by {{ r.reviewed_by.get_full_name|default:r.reviewed_by.email }}{% endif %}</span>{% endif %}</div>
+    <div class="quote"><small>Reason</small>{{ r.reason }}</div>
+    <form method="post" action="{% url 'staff:report_resolve' r.pk %}" class="actions">{% csrf_token %}
+      <button class="btn small" name="decision" value="actioned" type="submit">Acted on it</button>
+      <button class="btn ghost small" name="decision" value="dismissed" type="submit">Dismiss</button>
+      <button class="btn ghost small" name="decision" value="pending" type="submit">Move back to Waiting</button>
+    </form>
+  </div>
+</article>
+{% empty %}<div class="empty-state"><strong>Nothing here yet</strong>Decided reports are kept here.</div>{% endfor %}
+
+{% endif %}
 {% endblock %}

@@ -12,6 +12,7 @@ from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -674,20 +675,26 @@ def key_backup_recover(request):
     return _key_page(request, revealed=key)
 
 
-# ---- inbox: what people send us (contact form, reports of listings, reviews) ------------------------------------------------
+# ---- inbox: what people send us (contact form, reports of listings, storefront applications, reviews) -------------------------
 @staff_required
 def inbox(request):
     from merchants.models import MerchantApplication
     from moderation.models import ContactMessage, Report
     from reviews.models import Review
 
+    tab = "decided" if request.GET.get("tab") == "decided" else "waiting"
+    pending_apps = MerchantApplication.objects.filter(status=MerchantApplication.Status.PENDING).select_related("applicant")
+    decided_apps = MerchantApplication.objects.exclude(status=MerchantApplication.Status.PENDING).select_related("applicant", "reviewed_by").order_by("-reviewed_at")
+    open_messages = ContactMessage.objects.filter(handled=False).select_related("user").prefetch_related("replies")
+    done_messages = ContactMessage.objects.filter(handled=True).select_related("replied_by").prefetch_related("replies").order_by("-updated_at")
+    open_reports = Report.objects.filter(status=Report.Status.PENDING).select_related("reporter", "content_type")
+    done_reports = Report.objects.exclude(status=Report.Status.PENDING).select_related("reporter", "content_type", "reviewed_by").order_by("-reviewed_at")
     return render(request, "staff/inbox.html", {
-        "nav": "inbox",
-        "applications_open": MerchantApplication.objects.filter(status=MerchantApplication.Status.PENDING).select_related("applicant")[:50],
-        "messages_open": ContactMessage.objects.filter(handled=False).select_related("user")[:50],
-        "messages_done": ContactMessage.objects.filter(handled=True).select_related("replied_by")[:10],
-        "reports_open": Report.objects.filter(status=Report.Status.PENDING).select_related("reporter", "content_type")[:50],
-        "reports_done": Report.objects.exclude(status=Report.Status.PENDING).select_related("reporter", "content_type")[:10],
+        "nav": "inbox", "tab": tab,
+        "waiting_count": pending_apps.count() + open_messages.count() + open_reports.count(),
+        "decided_count": decided_apps.count() + done_messages.count() + done_reports.count(),
+        "apps_open": pending_apps[:50], "messages_open": open_messages[:50], "reports_open": open_reports[:50],
+        "apps_done": decided_apps[:100], "messages_done": done_messages[:100], "reports_done": done_reports[:100],
         "reviews": Review.objects.select_related("reviewer", "reviewee", "order__listing").order_by("-created_at")[:25],
     })
 
@@ -701,7 +708,7 @@ def contact_handled(request, pk):
     message.handled = True
     message.save(update_fields=["handled", "updated_at"])
     audit(request, "contact.handled", f"message {pk}")
-    messages.success(request, "Marked as handled.")
+    messages.success(request, "Closed. It is kept in the Decided tab.")
     return redirect("staff:inbox")
 
 
@@ -712,16 +719,24 @@ def report_resolve(request, pk):
 
     report = get_object_or_404(Report, pk=pk)
     decision = request.POST.get("decision")
-    if decision not in ("reviewed", "actioned", "dismissed"):
+    if decision not in ("reviewed", "actioned", "dismissed", "pending"):
         messages.error(request, "Choose what to do with the report.")
         return redirect("staff:inbox")
+    if decision == "pending":  # changed your mind: back to the waiting list
+        report.status = decision
+        report.reviewed_by = None
+        report.reviewed_at = None
+        report.save(update_fields=["status", "reviewed_by", "reviewed_at", "updated_at"])
+        audit(request, "report.reopened", f"report {pk}")
+        messages.success(request, "Report moved back to Waiting.")
+        return redirect(f"{reverse('staff:inbox')}?tab=decided")
     report.status = decision
     report.resolution_note = (request.POST.get("note") or "")[:500]
     report.reviewed_by = request.user
     report.reviewed_at = timezone.now()
     report.save(update_fields=["status", "resolution_note", "reviewed_by", "reviewed_at", "updated_at"])
     audit(request, f"report.{decision}", f"report {pk}")
-    messages.success(request, "Report updated.")
+    messages.success(request, "Report updated. You can change it any time from the Decided tab.")
     return redirect("staff:inbox")
 
 
@@ -735,7 +750,7 @@ def contact_reply(request, pk):
     text = (request.POST.get("reply") or "").strip()
     if len(text) < 2:
         messages.error(request, "Write your reply first.")
-        return redirect("staff:inbox")
+        return redirect("staff:contact_detail", pk=pk)
     sent = emails.send_email(
         contact.email,
         "Re: your message to Choropia",
@@ -744,7 +759,10 @@ def contact_reply(request, pk):
     )
     if not sent:
         messages.error(request, "The email could not be sent, so nothing was marked as answered. Please try again in a minute.")
-        return redirect("staff:inbox")
+        return redirect("staff:contact_detail", pk=pk)
+    from moderation.models import ContactReply
+
+    ContactReply.objects.create(message=contact, text=text, sent_by=request.user)
     contact.reply = text
     contact.replied_at = timezone.now()
     contact.replied_by = request.user
@@ -752,24 +770,35 @@ def contact_reply(request, pk):
     contact.save(update_fields=["reply", "replied_at", "replied_by", "handled", "updated_at"])
     audit(request, "contact.replied", f"message {pk}", contact.email)
     messages.success(request, f"Reply sent to {contact.email}.")
-    return redirect("staff:inbox")
+    return redirect("staff:contact_detail", pk=pk)
 
 
 @staff_required
 @require_POST
 def storefront_decide(request, pk):
-    """Approve or reject a shop-owner application. Approving opens their storefront and marks them as a verified seller."""
-    from merchants.models import MerchantApplication
+    """Approve or reject a shop-owner application, and change your mind later: a rejected one can be approved, and an approved
+    one can be revoked (the storefront is suspended and the verified tick removed)."""
+    from merchants.models import Merchant, MerchantApplication
 
     application = get_object_or_404(MerchantApplication, pk=pk)
-    if application.status != MerchantApplication.Status.PENDING:
-        messages.error(request, "That application was already decided.")
-        return redirect("staff:inbox")
     person = application.applicant
     decision = request.POST.get("decision")
+    reason = (request.POST.get("reason") or "").strip()[:300]
+    profile = person.profile
+    back = f"{reverse('staff:inbox')}?tab=decided" if application.status != MerchantApplication.Status.PENDING else reverse("staff:inbox")
+
     if decision == "approve":
+        if application.status == MerchantApplication.Status.APPROVED and getattr(person, "merchant", None) and person.merchant.status == Merchant.Status.ACTIVE:
+            messages.info(request, "That storefront is already approved.")
+            return redirect(back)
+        if application.status != MerchantApplication.Status.PENDING:
+            application.status = MerchantApplication.Status.PENDING  # let approve() run again for a reversed decision
+            application.save(update_fields=["status", "updated_at"])
         application.approve(reviewer=request.user)
-        profile = person.profile
+        merchant = Merchant.objects.filter(user=person).first()
+        if merchant and merchant.status != Merchant.Status.ACTIVE:
+            merchant.status = Merchant.Status.ACTIVE
+            merchant.save(update_fields=["status", "updated_at"])
         profile.seller_verified = True
         profile.seller_verified_at = timezone.now()
         profile.save(update_fields=["seller_verified", "seller_verified_at", "updated_at"])
@@ -781,15 +810,49 @@ def storefront_decide(request, pk):
         )
         messages.success(request, f"{application.business_name} approved and marked as a verified seller.")
     elif decision == "reject":
-        reason = (request.POST.get("reason") or "").strip()[:300]
+        was_approved = application.status == MerchantApplication.Status.APPROVED
         application.reject(reviewer=request.user, reason=reason)
-        audit(request, "storefront.reject", f"application {pk}", application.business_name)
+        merchant = Merchant.objects.filter(user=person).first()
+        if merchant:
+            merchant.status = Merchant.Status.SUSPENDED
+            merchant.save(update_fields=["status", "updated_at"])
+        if was_approved:
+            profile.seller_verified = False
+            profile.save(update_fields=["seller_verified", "updated_at"])
+        audit(request, "storefront.revoke" if was_approved else "storefront.reject", f"application {pk}", application.business_name)
         emails.send_email(
-            person.email, "About your Choropia storefront application", "dispatch_notice",
-            {"name": person.first_name or "there", "headline": "We could not approve your storefront yet",
+            person.email, "About your Choropia storefront", "dispatch_notice",
+            {"name": person.first_name or "there", "headline": "Your storefront was not approved" if not was_approved else "Your storefront approval was withdrawn",
              "body": (reason or "Your application was not approved this time.") + " You are welcome to apply again.", "link": "/merchants/apply"},
         )
-        messages.success(request, "Application rejected and the applicant was told.")
+        messages.success(request, "Storefront approval withdrawn and the applicant was told." if was_approved else "Application rejected and the applicant was told.")
     else:
         messages.error(request, "Choose approve or reject.")
-    return redirect("staff:inbox")
+        return redirect(back)
+    return redirect(f"{reverse('staff:inbox')}?tab=decided")
+
+
+@staff_required
+@require_POST
+def contact_reopen(request, pk):
+    from moderation.models import ContactMessage
+
+    message = get_object_or_404(ContactMessage, pk=pk)
+    message.handled = False
+    message.save(update_fields=["handled", "updated_at"])
+    audit(request, "contact.reopened", f"message {pk}")
+    messages.success(request, "Moved back to Waiting. The whole conversation is kept.")
+    return redirect("staff:contact_detail", pk=pk)
+
+
+@staff_required
+def contact_detail(request, pk):
+    """The whole conversation with one person, like opening an email thread."""
+    from moderation.models import ContactMessage
+
+    contact = get_object_or_404(ContactMessage.objects.select_related("user"), pk=pk)
+    replies = list(contact.replies.select_related("sent_by"))
+    legacy = None
+    if not replies and contact.reply:  # answered before conversations were kept as a list
+        legacy = {"text": contact.reply, "created_at": contact.replied_at, "sent_by": contact.replied_by}
+    return render(request, "staff/contact_detail.html", {"nav": "inbox", "contact": contact, "replies": replies, "legacy": legacy})

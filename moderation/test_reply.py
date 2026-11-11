@@ -38,5 +38,42 @@ class ContactReplyTests(TestCase):
         self.client.post(f"/staff/inbox/contact/{self.msg.pk}/reply/", {"reply": "  "})
         self.msg.refresh_from_db()
         self.assertFalse(self.msg.handled)
-        page = self.client.get("/staff/inbox/")
+        page = self.client.get(f"/staff/inbox/contact/{self.msg.pk}/")
         self.assertContains(page, "Send reply")
+
+    def test_a_replied_message_can_be_reopened_and_keeps_its_history(self):
+        self.client.post(f"/staff/inbox/contact/{self.msg.pk}/reply/", {"reply": "Not yet."})
+        self.client.post(f"/staff/inbox/contact/{self.msg.pk}/reopen/")
+        self.msg.refresh_from_db()
+        self.assertFalse(self.msg.handled)
+        self.assertEqual(self.msg.reply, "Not yet.")
+        self.assertContains(self.client.get("/staff/inbox/"), "Are you in Aba?")
+        self.assertEqual(self.msg.replies.count(), 1)
+
+    def test_a_report_decision_can_be_changed_back_to_waiting(self):
+        from django.contrib.contenttypes.models import ContentType
+
+        from listings.models import Category, Listing
+        from moderation.models import Report
+
+        seller = User.objects.create_user("s@example.com", "pw12345!")
+        listing = Listing.objects.create(owner=seller, category=Category.objects.create(name="Gadgets"), title="Phone", price="5.00")
+        report = Report.objects.create(reporter=seller, content_type=ContentType.objects.get_for_model(Listing), object_id=listing.pk, reason="Scam")
+        self.client.post(f"/staff/inbox/reports/{report.pk}/resolve/", {"decision": "dismissed"})
+        report.refresh_from_db()
+        self.assertEqual(report.status, "dismissed")
+        self.client.post(f"/staff/inbox/reports/{report.pk}/resolve/", {"decision": "pending"})
+        report.refresh_from_db()
+        self.assertEqual((report.status, report.reviewed_by), ("pending", None))
+
+    def test_the_conversation_page_shows_the_whole_thread_and_keeps_every_reply(self):
+        self.client.post(f"/staff/inbox/contact/{self.msg.pk}/reply/", {"reply": "First answer."})
+        self.client.post(f"/staff/inbox/contact/{self.msg.pk}/reply/", {"reply": "Second answer."})
+        page = self.client.get(f"/staff/inbox/contact/{self.msg.pk}/")
+        self.assertContains(page, "Are you in Aba?")
+        self.assertContains(page, "First answer.")
+        self.assertContains(page, "Second answer.")
+        self.assertEqual(self.msg.replies.count(), 2)
+
+    def test_inbox_rows_link_to_the_conversation(self):
+        self.assertContains(self.client.get("/staff/inbox/"), f"/staff/inbox/contact/{self.msg.pk}/")

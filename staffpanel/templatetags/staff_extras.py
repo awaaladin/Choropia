@@ -26,5 +26,11 @@ def pill(status):
 
 
 @register.filter
+def initials(value):
+    parts = [p for p in str(value or "").replace("@", " ").replace(".", " ").split() if p]
+    return ("".join(p[0] for p in parts[:2]) or "?").upper()
+
+
+@register.filter
 def label(status):
     return str(status).replace("_", " ").capitalize()

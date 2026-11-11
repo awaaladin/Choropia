@@ -34,6 +34,20 @@ class ContactMessage(TimeStampedModel):
         return f"{self.get_topic_display()} from {self.email}"
 
 
+class ContactReply(TimeStampedModel):
+    """One answer we emailed to a contact message. A message can have several: together they are the conversation."""
+
+    message = models.ForeignKey(ContactMessage, on_delete=models.CASCADE, related_name="replies")
+    text = models.TextField()
+    sent_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Reply to message {self.message_id}"
+
+
 class Report(TimeStampedModel):
     class Status(models.TextChoices):
         PENDING = "pending", "Pending"
