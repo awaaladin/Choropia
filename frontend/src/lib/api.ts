@@ -473,6 +473,7 @@ export const api = {
   createReelComment: (reelId: number, body: string) => request<ReelComment>("/reel-comments/", { method: "POST", body: { reel: reelId, body } }),
 
   // --- wallet ---
+  escrowMilestone: () => request<{ milestone: number; label: string }>("/escrow/milestone/", { auth: false }),
   getWalletSummary: () => request<WalletSummary>("/wallet/summary/"),
   listWalletTransactions: () => request<Paginated<WalletTransaction> | WalletTransaction[]>("/wallet/transactions/"),
 };

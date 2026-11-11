@@ -36,6 +36,7 @@ export function FeedPage() {
     queryFn: async () => rows(loggedIn ? await api.getFeed() : await api.listListings()),
   });
   const orders = useQuery({ queryKey: ["orders"], queryFn: async () => rows(await api.listOrders()), enabled: loggedIn });
+  const milestone = useQuery({ queryKey: ["escrow-milestone"], queryFn: api.escrowMilestone, staleTime: 10 * 60_000 });
   const merchants = useQuery({ queryKey: ["merchants"], queryFn: async () => rows(await api.listMerchants()) });
 
   const listings = feed.data ?? [];
@@ -47,8 +48,6 @@ export function FeedPage() {
 
   const myBuying = (orders.data ?? []).filter((o) => o.buyer === user?.id);
   const inProgress = myBuying.filter((o) => IN_PROGRESS.includes(o.status)).length;
-  const heldOrders = myBuying.filter((o) => ESCROW_HELD.includes(o.status));
-  const heldTotal = heldOrders.reduce((sum, o) => sum + Number(o.price), 0);
 
   return (
     <div className="grid grid-cols-1 gap-5 md:grid-cols-[210px_minmax(0,1fr)] xl:grid-cols-[220px_minmax(0,1fr)_290px]">
@@ -201,16 +200,11 @@ export function FeedPage() {
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">Funds stay protected until you confirm delivery.</p>
             </div>
           </div>
-          {loggedIn && (
-            <>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-accent">
-                <div className="h-full bg-success transition-[width] duration-700" style={{ width: `${myBuying.length ? Math.min(100, (heldOrders.length / myBuying.length) * 100) : 0}%` }} />
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {heldOrders.length} order{heldOrders.length === 1 ? "" : "s"} protected · {naira(heldTotal)} held
-              </p>
-            </>
-          )}
+          {milestone.data?.milestone ? (
+            <p className="mt-3 text-sm font-semibold text-success">
+              {milestone.data.label}+ <span className="font-normal text-muted-foreground">protected through Choropia escrow</span>
+            </p>
+          ) : null}
         </section>
 
         <section className="panel editorial-enter p-4" style={prefs.stagger(3)}>

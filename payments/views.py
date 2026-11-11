@@ -146,6 +146,18 @@ class PaystackWebhookView(APIView):
         return JsonResponse({"received": True})
 
 
+class EscrowMilestoneView(APIView):
+    """Public: the round milestone of money protected through Choropia escrow (see payments/milestones.py)."""
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        from . import milestones
+
+        return Response(milestones.current())
+
+
 class WalletSummaryView(APIView):
     """Real numbers only — no "available balance" fiction. Gaxtron has no payout endpoint, so
     "released" here means Choropia has approved the seller to be paid, not that crypto has

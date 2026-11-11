@@ -13,6 +13,7 @@ from .views import (
     InitializePaymentView,
     PaystackWebhookView,
     VerifyPaymentView,
+    EscrowMilestoneView,
     WalletSummaryView,
     WalletTransactionsView,
 )
@@ -28,6 +29,7 @@ urlpatterns = [
     path("payouts/account/", PayoutAccountView.as_view(), name="payout-account"),
     path("payouts/", MyPayoutsView.as_view(), name="payouts"),
     path("internal/jobs/run/", RunScheduledJobsView.as_view(), name="run-scheduled-jobs"),
+    path("escrow/milestone/", EscrowMilestoneView.as_view(), name="escrow-milestone"),
     path("wallet/summary/", WalletSummaryView.as_view(), name="wallet-summary"),
     path("wallet/transactions/", WalletTransactionsView.as_view(), name="wallet-transactions"),
 ]
