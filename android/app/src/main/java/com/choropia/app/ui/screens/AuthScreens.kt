@@ -289,7 +289,7 @@ fun LoginScreen(onLoggedIn: () -> Unit, onRegister: () -> Unit, onForgot: () -> 
                 QuietButton("Forgot password?", onForgot)
             }
             PrimaryButton("Log in", { focus.clearFocus(); vm.login(identifier, password, onLoggedIn) }, enabled = !vm.busy)
-            GoogleSignInButton(vm, onLoggedIn)
+            GoogleSignInButton(vm, onDone = onLoggedIn)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                 Text("New to Choropia?", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 QuietButton("Create an account", onRegister)
