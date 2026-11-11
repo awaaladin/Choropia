@@ -1,0 +1,45 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}{{ a.business_name }}{% endblock %}
+{% block content %}
+<p class="small" style="margin:0 0 12px"><a href="{% url 'staff:inbox' %}{% if a.status != 'pending' %}?tab=decided{% endif %}">&larr; Back to the Inbox</a></p>
+<div class="thread-head">
+  <div class="avatar shop">{{ a.business_name|initials }}</div>
+  <div style="min-width:0;flex:1"><h1 style="font-size:22px">{{ a.business_name }}</h1><div class="small">Applied {{ a.created_at|date:"j M Y, H:i" }}</div></div>
+  <span class="pill {{ a.status|pill }}">{{ a.status|label }}</span>
+</div>
+
+<div class="card">
+  <h2>The application</h2>
+  <div class="facts">
+    <div class="fact"><small>Applicant</small><a href="{% url 'staff:user_detail' a.applicant_id %}">{{ a.applicant.get_full_name|default:a.applicant.email }}</a><div class="small">{{ a.applicant.email }}</div></div>
+    <div class="fact"><small>Business phone</small>{{ a.business_phone }}</div>
+    <div class="fact"><small>Address</small>{{ a.business_address }}</div>
+    <div class="fact"><small>Listings posted</small>{{ listing_count }}</div>
+  </div>
+  <div class="quote"><small>What they sell</small>{{ a.business_description|default:"(nothing written)" }}</div>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <h2>Decision</h2>
+  {% if a.status == 'pending' %}
+  <p class="small">Nobody has decided yet.</p>
+  {% else %}
+  <p>{{ a.status|label }}{% if a.reviewed_at %} on {{ a.reviewed_at|date:"j M Y, H:i" }}{% endif %}{% if a.reviewed_by %} by {{ a.reviewed_by.get_full_name|default:a.reviewed_by.email }}{% endif %}.</p>
+  {% if a.rejection_reason %}<div class="quote"><small>Reason given</small>{{ a.rejection_reason }}</div>{% endif %}
+  {% if merchant %}<p class="small">Storefront: {{ merchant.get_status_display }}. Verified seller: {% if a.applicant.profile.seller_verified %}yes{% else %}no{% endif %}.</p>{% endif %}
+  {% endif %}
+  <div class="actions">
+    {% if a.status != 'approved' %}<form method="post" action="{% url 'staff:storefront_decide' a.pk %}">{% csrf_token %}<button class="btn good" name="decision" value="approve" type="submit">{% if a.status == 'rejected' %}Approve instead{% else %}Approve and verify{% endif %}</button></form>{% endif %}
+  </div>
+  {% if a.status != 'rejected' %}
+  <details class="more"><summary>{% if a.status == 'approved' %}Change my mind: withdraw approval…{% else %}Reject with a reason…{% endif %}</summary>
+    <form method="post" action="{% url 'staff:storefront_decide' a.pk %}" class="panel-form">{% csrf_token %}
+      <label for="why" style="margin-top:0">Reason (sent to the applicant)</label>
+      <input id="why" type="text" name="reason" placeholder="Tell them why" maxlength="300">
+      <div class="actions"><button class="btn danger small" name="decision" value="reject" type="submit">{% if a.status == 'approved' %}Withdraw approval{% else %}Reject application{% endif %}</button></div>
+    </form>
+  </details>
+  {% endif %}
+</div>
+{% endblock %}

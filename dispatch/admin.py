@@ -93,11 +93,7 @@ class DriverProfileAdmin(admin.ModelAdmin):
             ok.append(driver.pk)
         done = self._review(request, queryset.filter(pk__in=ok), DriverProfile.Status.APPROVED)
         for driver in queryset.filter(pk__in=ok):
-            emails.send_dispatch_notice(
-                driver.user, "You are approved as a Choropia driver", "You are approved",
-                "Your documents have been checked. Add the routes you serve and your prices, and sellers can start choosing you.",
-                "/driver",
-            )
+            emails.send_congratulations(driver.user, "driver")
         self.message_user(request, f"{done} driver(s) approved.")
 
     @admin.action(description="Reject selected drivers")

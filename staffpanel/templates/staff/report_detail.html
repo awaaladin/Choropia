@@ -1,0 +1,34 @@
+{% extends "staff/base.html" %}
+{% load staff_extras %}
+{% block title %}Report #{{ r.pk }}{% endblock %}
+{% block content %}
+<p class="small" style="margin:0 0 12px"><a href="{% url 'staff:inbox' %}{% if r.status != 'pending' %}?tab=decided{% endif %}">&larr; Back to the Inbox</a></p>
+<div class="thread-head">
+  <div class="avatar flag">!</div>
+  <div style="min-width:0;flex:1"><h1 style="font-size:22px">{{ r.content_type.model|title }} #{{ r.object_id }}</h1><div class="small">Reported {{ r.created_at|date:"j M Y, H:i" }} by {{ r.reporter.email }}</div></div>
+  <span class="pill {{ r.status|pill }}">{{ r.status|label }}</span>
+</div>
+
+<div class="card">
+  <h2>What was reported</h2>
+  {% if target %}
+  <div class="facts">
+    <div class="fact"><small>Listing</small><strong>{{ target.title }}</strong><div class="small">₦{{ target.price }} &middot; {{ target.get_status_display }}</div></div>
+    {% if seller %}<div class="fact"><small>Seller</small><a href="{% url 'staff:user_detail' seller.pk %}">{{ seller.get_full_name|default:seller.email }}</a></div>{% endif %}
+  </div>
+  {% if target.description %}<div class="quote"><small>Description</small>{{ target.description|truncatechars:400 }}</div>{% endif %}
+  {% else %}<p class="small">This item no longer exists.</p>{% endif %}
+  <div class="quote"><small>Reason given</small>{{ r.reason }}</div>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <h2>Decision</h2>
+  {% if r.reviewed_at %}<p>{{ r.status|label }} on {{ r.reviewed_at|date:"j M Y, H:i" }}{% if r.reviewed_by %} by {{ r.reviewed_by.get_full_name|default:r.reviewed_by.email }}{% endif %}.</p>{% else %}<p class="small">Nobody has decided yet.</p>{% endif %}
+  <form method="post" action="{% url 'staff:report_resolve' r.pk %}" class="actions">{% csrf_token %}
+    <button class="btn small" name="decision" value="actioned" type="submit">Acted on it</button>
+    <button class="btn ghost small" name="decision" value="reviewed" type="submit">Looked, no action</button>
+    <button class="btn ghost small" name="decision" value="dismissed" type="submit">Dismiss</button>
+    {% if r.status != 'pending' %}<button class="btn ghost small" name="decision" value="pending" type="submit">Move back to Waiting</button>{% endif %}
+  </form>
+</div>
+{% endblock %}

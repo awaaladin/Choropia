@@ -379,11 +379,10 @@ def driver_decide(request, pk):
     note = (request.POST.get("note") or "").strip()[:300]
     if decision == "approve":
         if not _docs_complete(driver):
-            messages.error(request, "All four documents must be uploaded before approving.")
+            messages.error(request, "At least two documents must be uploaded before approving.")
             return redirect("staff:driver_detail", pk=pk)
         status, text, note = DriverProfile.Status.APPROVED, "approved", ""
-        emails.send_dispatch_notice(driver.user, "You are approved as a Choropia driver", "You are approved",
-                                    "Your documents have been checked. Add the routes you serve and your prices, and sellers can start choosing you.", "/driver")
+        emails.send_congratulations(driver.user, "driver")
     elif decision == "reject":
         status, text = DriverProfile.Status.REJECTED, "rejected"
         note = note or "We could not verify your documents. Please re-upload clear photos and apply again."
@@ -453,6 +452,8 @@ def user_verify_seller(request, pk):
     profile.seller_verified_at = timezone.now() if profile.seller_verified else None
     profile.save(update_fields=["seller_verified", "seller_verified_at", "updated_at"])
     audit(request, "seller.verify" if profile.seller_verified else "seller.unverify", f"user {person.pk}", person.email)
+    if profile.seller_verified:
+        emails.send_congratulations(person, "seller")
     messages.success(request, f"{person.email} is {'now a verified seller' if profile.seller_verified else 'no longer a verified seller'}.")
     return redirect("staff:user_detail", pk=pk)
 
@@ -799,15 +800,7 @@ def storefront_decide(request, pk):
         if merchant and merchant.status != Merchant.Status.ACTIVE:
             merchant.status = Merchant.Status.ACTIVE
             merchant.save(update_fields=["status", "updated_at"])
-        profile.seller_verified = True
-        profile.seller_verified_at = timezone.now()
-        profile.save(update_fields=["seller_verified", "seller_verified_at", "updated_at"])
         audit(request, "storefront.approve", f"application {pk}", application.business_name)
-        emails.send_email(
-            person.email, "Your Choropia storefront is approved", "dispatch_notice",
-            {"name": person.first_name or "there", "headline": "Your storefront is approved",
-             "body": f"{application.business_name} is now a verified storefront on Choropia. You can post listings under it and buyers will see the verified badge.", "link": "/my-listings"},
-        )
         messages.success(request, f"{application.business_name} approved and marked as a verified seller.")
     elif decision == "reject":
         was_approved = application.status == MerchantApplication.Status.APPROVED
@@ -856,3 +849,26 @@ def contact_detail(request, pk):
     if not replies and contact.reply:  # answered before conversations were kept as a list
         legacy = {"text": contact.reply, "created_at": contact.replied_at, "sent_by": contact.replied_by}
     return render(request, "staff/contact_detail.html", {"nav": "inbox", "contact": contact, "replies": replies, "legacy": legacy})
+
+
+@staff_required
+def storefront_detail(request, pk):
+    """A storefront application in full: who applied, what they said, what was decided, and buttons to change it."""
+    from merchants.models import Merchant, MerchantApplication
+
+    application = get_object_or_404(MerchantApplication.objects.select_related("applicant", "applicant__profile", "reviewed_by"), pk=pk)
+    return render(request, "staff/storefront_detail.html", {
+        "nav": "inbox", "a": application, "merchant": Merchant.objects.filter(user=application.applicant).first(),
+        "listing_count": Listing.objects.filter(owner=application.applicant).exclude(status=Listing.Status.REMOVED).count(),
+    })
+
+
+@staff_required
+def report_detail(request, pk):
+    """A report in full, with a link to what was reported and buttons to decide or change the decision."""
+    from moderation.models import Report
+
+    report = get_object_or_404(Report.objects.select_related("reporter", "content_type", "reviewed_by"), pk=pk)
+    target = report.target
+    seller = getattr(target, "owner", None)
+    return render(request, "staff/report_detail.html", {"nav": "inbox", "r": report, "target": target, "seller": seller})

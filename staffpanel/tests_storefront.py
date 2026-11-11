@@ -19,7 +19,8 @@ class StorefrontDecisionTests(TestCase):
 
     def test_approving_opens_the_storefront_verifies_the_seller_and_emails_them(self):
         mail.outbox.clear()
-        self.client.post(f"/staff/inbox/storefronts/{self.app.pk}/decide/", {"decision": "approve"})
+        with self.captureOnCommitCallbacks(execute=True):
+            self.client.post(f"/staff/inbox/storefronts/{self.app.pk}/decide/", {"decision": "approve"})
         self.app.refresh_from_db()
         self.assertEqual(self.app.status, "approved")
         self.assertTrue(Merchant.objects.filter(user=self.owner).exists())

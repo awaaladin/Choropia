@@ -42,6 +42,7 @@ class MerchantApplication(TimeStampedModel):
         self.reviewed_by = reviewer
         self.reviewed_at = timezone.now()
         self.save(update_fields=["status", "reviewed_by", "reviewed_at"])
+        self._verify_and_congratulate()
 
         merchant, _ = Merchant.objects.get_or_create(
             user=self.applicant,
@@ -53,6 +54,19 @@ class MerchantApplication(TimeStampedModel):
             },
         )
         return merchant
+
+    def _verify_and_congratulate(self):
+        """An approved storefront gets the verified badge, and its owner a congratulations email."""
+        from django.utils import timezone
+
+        from notifications import emails
+
+        profile = self.applicant.profile
+        if not profile.seller_verified:
+            profile.seller_verified = True
+            profile.seller_verified_at = timezone.now()
+            profile.save(update_fields=["seller_verified", "seller_verified_at", "updated_at"])
+        emails.send_congratulations(self.applicant, "storefront", business=self.business_name)
 
     def reject(self, reviewer, reason=""):
         from django.utils import timezone

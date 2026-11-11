@@ -16,7 +16,7 @@
 <article class="item">
   <div class="avatar shop">{{ a.business_name|initials }}</div>
   <div>
-    <div class="item-head"><strong>{{ a.business_name }}</strong><span class="pill warn">Needs a decision</span></div>
+    <div class="item-head"><a class="item-link" href="{% url 'staff:storefront_detail' a.pk %}"><strong>{{ a.business_name }}</strong></a><span class="pill warn">Needs a decision</span><a class="small" href="{% url 'staff:storefront_detail' a.pk %}">Open &rarr;</a></div>
     <div class="meta"><span>{{ a.applicant.get_full_name|default:a.applicant.email }}</span><span>{{ a.created_at|date:"j M Y, H:i" }}</span></div>
     <div class="chips"><span class="chip">{{ a.business_phone }}</span><span class="chip">{{ a.business_address }}</span></div>
     {% if a.business_description %}<div class="quote"><small>What they sell</small>{{ a.business_description }}</div>{% endif %}
@@ -53,7 +53,7 @@
 <article class="item">
   <div class="avatar flag">!</div>
   <div>
-    <div class="item-head"><strong>{{ r.content_type.model|title }} #{{ r.object_id }}</strong><span class="pill warn">To review</span></div>
+    <div class="item-head"><a class="item-link" href="{% url 'staff:report_detail' r.pk %}"><strong>{{ r.content_type.model|title }} #{{ r.object_id }}</strong></a><span class="pill warn">To review</span><a class="small" href="{% url 'staff:report_detail' r.pk %}">Open &rarr;</a></div>
     <div class="meta"><span>Reported by {{ r.reporter.email }}</span><span>{{ r.created_at|date:"j M Y, H:i" }}</span></div>
     <div class="quote"><small>Reason</small>{{ r.reason }}</div>
     <form method="post" action="{% url 'staff:report_resolve' r.pk %}" class="actions">{% csrf_token %}
@@ -84,7 +84,7 @@
 <article class="item">
   <div class="avatar shop">{{ a.business_name|initials }}</div>
   <div>
-    <div class="item-head"><strong>{{ a.business_name }}</strong><span class="pill {{ a.status|pill }}">{{ a.status|label }}</span></div>
+    <div class="item-head"><a class="item-link" href="{% url 'staff:storefront_detail' a.pk %}"><strong>{{ a.business_name }}</strong></a><span class="pill {{ a.status|pill }}">{{ a.status|label }}</span><a class="small" href="{% url 'staff:storefront_detail' a.pk %}">Open &rarr;</a></div>
     <div class="meta"><span>{{ a.applicant.get_full_name|default:a.applicant.email }}</span><span>decided {{ a.reviewed_at|date:"j M Y, H:i" }}{% if a.reviewed_by %} by {{ a.reviewed_by.get_full_name|default:a.reviewed_by.email }}{% endif %}</span></div>
     {% if a.rejection_reason %}<div class="quote"><small>Reason given</small>{{ a.rejection_reason }}</div>{% endif %}
     {% if a.status == 'approved' %}
@@ -121,7 +121,7 @@
 <article class="item">
   <div class="avatar flag">!</div>
   <div>
-    <div class="item-head"><strong>{{ r.content_type.model|title }} #{{ r.object_id }}</strong><span class="pill {{ r.status|pill }}">{{ r.status|label }}</span></div>
+    <div class="item-head"><a class="item-link" href="{% url 'staff:report_detail' r.pk %}"><strong>{{ r.content_type.model|title }} #{{ r.object_id }}</strong></a><span class="pill {{ r.status|pill }}">{{ r.status|label }}</span><a class="small" href="{% url 'staff:report_detail' r.pk %}">Open &rarr;</a></div>
     <div class="meta"><span>Reported by {{ r.reporter.email }}</span>{% if r.reviewed_at %}<span>decided {{ r.reviewed_at|date:"j M Y, H:i" }}{% if r.reviewed_by %} by {{ r.reviewed_by.get_full_name|default:r.reviewed_by.email }}{% endif %}</span>{% endif %}</div>
     <div class="quote"><small>Reason</small>{{ r.reason }}</div>
     <form method="post" action="{% url 'staff:report_resolve' r.pk %}" class="actions">{% csrf_token %}

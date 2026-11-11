@@ -216,6 +216,76 @@ def send_payout_needs_account(payout) -> None:
 # --- dispatch (drivers) ---------------------------------------------------------------------
 
 
+CONGRATULATIONS = {
+    "storefront": {
+        "subject": "Congratulations! Your Choropia storefront is approved and verified",
+        "eyebrow": "Storefront approved",
+        "headline": "{business} is now verified",
+        "intro": "We checked your application and we are delighted to welcome {business} to Choropia as a verified storefront. Your shop is ready for buyers.",
+        "perks": [
+            "The Choropia verified badge next to your name on every listing and on your profile",
+            "A lower Choropia fee on your sales (the verified rate)",
+            "Your own storefront page that buyers can follow",
+            "Buyers see that real people checked your shop, so they trust you faster",
+        ],
+        "cta": "Post your first listing",
+        "link": "/listings/new",
+        "closing": "Keep your photos clear and your replies quick. Buyers who get fast answers come back.",
+    },
+    "driver": {
+        "subject": "Congratulations! You are approved as a Choropia driver",
+        "eyebrow": "Driver approved",
+        "headline": "You are approved to deliver",
+        "intro": "Your documents have been checked and you are now an approved Choropia driver. Sellers and buyers can choose you for deliveries.",
+        "perks": [
+            "Add the areas you serve and set your own prices for each route",
+            "Get alerted when a delivery near you is paid for, first to accept gets the job",
+            "Get paid for every delivery once the buyer confirms it",
+            "Your photo proof and the buyer's handover code keep every delivery safe for you",
+        ],
+        "cta": "Set up my routes",
+        "link": "/driver",
+        "closing": "The more areas you cover and the faster you reply, the more jobs you will get.",
+    },
+    "seller": {
+        "subject": "Congratulations! You are a verified Choropia seller",
+        "eyebrow": "Verified seller",
+        "headline": "You are now a verified seller",
+        "intro": "The Choropia team has verified your account, so buyers will see that you are a trusted seller.",
+        "perks": [
+            "The Choropia verified badge next to your name on every listing and on your profile",
+            "A lower Choropia fee on your sales (the verified rate)",
+            "More trust from buyers, which means more sales",
+        ],
+        "cta": "Go to my listings",
+        "link": "/my-listings",
+        "closing": "Keep delivering great experiences. Honest reviews from buyers will build your reputation even more.",
+    },
+}
+
+
+def send_congratulations(user, kind: str, **extra) -> None:
+    """A warm, designed "you were approved" email with the Choropia verified badge. kind: storefront, driver or seller.
+    Sent after commit; a mail problem never fails the approval."""
+    spec = CONGRATULATIONS[kind]
+    fill = {"business": extra.get("business") or "Your shop", **extra}
+    send_email_after_commit(
+        user.email,
+        spec["subject"],
+        "congratulations",
+        {
+            "name": _display_name(user),
+            "eyebrow": spec["eyebrow"],
+            "headline": spec["headline"].format(**fill),
+            "intro": spec["intro"].format(**fill),
+            "perks": spec["perks"],
+            "cta": spec["cta"],
+            "link": spec["link"],
+            "closing": spec["closing"],
+        },
+    )
+
+
 def send_dispatch_notice(user, subject: str, headline: str, body: str, link: str = "") -> None:
     """One plain notice about delivery: a job alert, an approval, a reminder. Sent after commit."""
     send_email_after_commit(

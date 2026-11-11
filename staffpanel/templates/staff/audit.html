@@ -1,17 +1,25 @@
 {% extends "staff/base.html" %}
+{% load staff_extras %}
 {% block title %}Activity log{% endblock %}
 {% block content %}
-<div class="top"><div><h1>Activity log</h1><p class="sub">Everything staff did with money or private data. It cannot be edited here. Latest 200.</p></div></div>
+<div class="top"><div><h1>Activity log</h1><p class="sub">Everything staff did with money or private data. It cannot be edited here. Latest 200. Tap a row to open the item it was about.</p></div></div>
 <div class="card">
 {% if entries %}
 <table>
   <thead><tr><th>When</th><th>Who</th><th>What</th><th>About</th><th>Detail</th></tr></thead>
   <tbody>
   {% for e in entries %}
-  <tr><td class="small">{{ e.at|date:"j M Y, H:i" }}</td><td>{{ e.staff.get_full_name|default:"(removed)" }}</td><td><strong>{{ e.action }}</strong></td><td>{{ e.target }}</td><td class="small">{{ e.detail }}</td></tr>
+  {% with url=e.target|audit_url %}
+  <tr {% if url %}class="clickable" data-href="{{ url }}" title="Open"{% endif %}><td class="small">{{ e.at|date:"j M Y, H:i" }}</td><td>{{ e.staff.get_full_name|default:"(removed)" }}</td><td><strong>{{ e.action }}</strong></td><td>{% if url %}<a href="{{ url }}">{{ e.target }} &rarr;</a>{% else %}{{ e.target }}{% endif %}</td><td class="small">{{ e.detail }}</td></tr>
+  {% endwith %}
   {% endfor %}
   </tbody>
 </table>
 {% else %}<div class="empty">Nothing yet.</div>{% endif %}
 </div>
+<script>
+document.querySelectorAll("tr.clickable").forEach(function (row) {
+  row.addEventListener("click", function (e) { if (e.target.tagName !== "A") window.location = row.dataset.href; });
+});
+</script>
 {% endblock %}
