@@ -1,3 +1,4 @@
+from common.public_ids import PublicIdLookupMixin
 import logging
 
 from django.contrib.auth import get_user_model
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConversationViewSet(
+    PublicIdLookupMixin,
     mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     serializer_class = ConversationSerializer

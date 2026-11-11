@@ -107,6 +107,7 @@ class ConversationSerializer(serializers.ModelSerializer):
         model = Conversation
         fields = (
             "id",
+            "public_id",
             "listing",
             "listing_title",
             "buyer",
@@ -120,7 +121,7 @@ class ConversationSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "seller", "order", "orders", "created_at", "updated_at")
+        read_only_fields = ("id", "public_id", "seller", "order", "orders", "created_at", "updated_at")
 
     def get_last_message(self, obj):
         message = obj.messages.last()

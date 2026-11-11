@@ -3,6 +3,7 @@ from django.db import models, transaction
 from django.db.models import Q
 
 from common.models import TimeStampedModel
+from common.public_ids import new_public_id
 from listings.models import Listing
 
 from .fields import EncryptedTextField
@@ -22,6 +23,8 @@ class Conversation(TimeStampedModel):
         "orders.Order", on_delete=models.SET_NULL, null=True, blank=True, related_name="conversation"
     )
     orders = models.ManyToManyField("orders.Order", blank=True, related_name="chat_conversations")
+    # Random code used in links instead of the sequential id (see common/public_ids.py).
+    public_id = models.CharField(max_length=10, unique=True, default=new_public_id, editable=False)
     user_low = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="direct_threads_low"
     )

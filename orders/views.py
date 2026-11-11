@@ -1,3 +1,4 @@
+from common.public_ids import PublicIdLookupMixin
 from django.db import transaction
 from django.db.models import Q
 from rest_framework import mixins, permissions, viewsets
@@ -19,6 +20,7 @@ from .state_machine import InvalidOrderTransition, OrderStatus
 
 
 class OrderViewSet(
+    PublicIdLookupMixin,
     mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
     permission_classes = [permissions.IsAuthenticated, IsOrderParticipant]

@@ -127,7 +127,7 @@ def send_payment_received(payment) -> None:
     """Receipt to the buyer, and a "dispatch it" notice to the seller."""
     order = payment.order
     title = order.listing.title
-    common = {"order_id": order.id, "listing_title": title, "amount": naira(payment.amount), "reference": payment.reference}
+    common = {"order_id": order.id, "order_ref": order.public_id, "listing_title": title, "amount": naira(payment.amount), "reference": payment.reference}
     send_email_after_commit(
         order.buyer.email,
         f"Payment received for order #{order.id}",
@@ -173,6 +173,7 @@ def send_order_update(order, to_status: str, recipient, actor=None) -> None:
             "headline": headline,
             "body": body,
             "order_id": order.id,
+            "order_ref": order.public_id,
             "listing_title": order.listing.title,
             "status": to_status.replace("_", " "),
         },
@@ -191,6 +192,7 @@ def send_payout_sent(payout) -> None:
         {
             "name": _display_name(seller),
             "order_id": payout.payment.order_id,
+            "order_ref": payout.payment.order.public_id,
             "gross": naira(payout.gross_amount),
             "commission": naira(payout.commission_amount),
             "rate": f"{payout.commission_rate.normalize():f}",
@@ -207,7 +209,7 @@ def send_payout_needs_account(payout) -> None:
         seller.email,
         "Add your bank account to receive your money",
         "payout_needs_account",
-        {"name": _display_name(seller), "order_id": payout.payment.order_id, "net": naira(payout.net_amount)},
+        {"name": _display_name(seller), "order_id": payout.payment.order_id, "order_ref": payout.payment.order.public_id, "net": naira(payout.net_amount)},
     )
 
 

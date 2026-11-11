@@ -26,6 +26,7 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = (
             "id",
+            "public_id",
             "listing",
             "listing_title",
             "listing_cover_photo",
@@ -45,6 +46,7 @@ class OrderSerializer(serializers.ModelSerializer):
         )
         read_only_fields = (
             "id",
+            "public_id",
             "buyer",
             "seller",
             "price",
