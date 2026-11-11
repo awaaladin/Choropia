@@ -26,6 +26,8 @@ SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+# Django defaults to "same-origin", which cuts the Google sign-in popup off from the page and leaves it blank.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
 
