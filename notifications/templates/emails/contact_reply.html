@@ -1,0 +1,10 @@
+{% extends "emails/base.html" %}
+{% block preheader %}A reply from the Choropia team{% endblock %}
+{% block content %}
+<h1 style="margin:0 0 12px 0;font-size:22px;line-height:1.3;">A reply from Choropia</h1>
+<p style="margin:0 0 16px 0;">Hi {{ name }},</p>
+<p style="margin:0 0 20px 0;white-space:pre-wrap;">{{ reply }}</p>
+<p style="margin:0 0 6px 0;font-size:13px;color:#64748b;">Your message to us:</p>
+<p style="margin:0 0 16px 0;padding:12px 14px;background:#f1f4f9;border-radius:10px;white-space:pre-wrap;color:#475569;">{{ original }}</p>
+<p style="margin:0;font-size:13px;color:#64748b;">You can reply to this email and it will reach us.</p>
+{% endblock %}

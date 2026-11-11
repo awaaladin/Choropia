@@ -37,8 +37,8 @@ class MerchantApplicationViewSet(ScopedWritesMixin,
             "New storefront application", "Someone applied for a storefront",
             [f"Business: {application.business_name}",
              f"Applicant: {application.applicant.get_full_name()} ({application.applicant.email})",
-             "Review it in the Django admin (Merchant applications)."],
-            "/admin/merchants/merchantapplication/",
+             "Open the staff panel Inbox to approve or reject it."],
+            "/staff/inbox/",
         )
 
     @action(detail=True, methods=["post"], permission_classes=[IsStaffOrModerator])

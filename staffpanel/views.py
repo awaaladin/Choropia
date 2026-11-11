@@ -677,13 +677,15 @@ def key_backup_recover(request):
 # ---- inbox: what people send us (contact form, reports of listings, reviews) ------------------------------------------------
 @staff_required
 def inbox(request):
+    from merchants.models import MerchantApplication
     from moderation.models import ContactMessage, Report
     from reviews.models import Review
 
     return render(request, "staff/inbox.html", {
         "nav": "inbox",
+        "applications_open": MerchantApplication.objects.filter(status=MerchantApplication.Status.PENDING).select_related("applicant")[:50],
         "messages_open": ContactMessage.objects.filter(handled=False).select_related("user")[:50],
-        "messages_done": ContactMessage.objects.filter(handled=True)[:10],
+        "messages_done": ContactMessage.objects.filter(handled=True).select_related("replied_by")[:10],
         "reports_open": Report.objects.filter(status=Report.Status.PENDING).select_related("reporter", "content_type")[:50],
         "reports_done": Report.objects.exclude(status=Report.Status.PENDING).select_related("reporter", "content_type")[:10],
         "reviews": Review.objects.select_related("reviewer", "reviewee", "order__listing").order_by("-created_at")[:25],
@@ -720,4 +722,74 @@ def report_resolve(request, pk):
     report.save(update_fields=["status", "resolution_note", "reviewed_by", "reviewed_at", "updated_at"])
     audit(request, f"report.{decision}", f"report {pk}")
     messages.success(request, "Report updated.")
+    return redirect("staff:inbox")
+
+
+@staff_required
+@require_POST
+def contact_reply(request, pk):
+    """Answers a contact message by email. It is only marked as answered when the mail server accepted the email."""
+    from moderation.models import ContactMessage
+
+    contact = get_object_or_404(ContactMessage, pk=pk)
+    text = (request.POST.get("reply") or "").strip()
+    if len(text) < 2:
+        messages.error(request, "Write your reply first.")
+        return redirect("staff:inbox")
+    sent = emails.send_email(
+        contact.email,
+        "Re: your message to Choropia",
+        "contact_reply",
+        {"name": contact.name.split(" ")[0] or "there", "reply": text, "original": contact.message},
+    )
+    if not sent:
+        messages.error(request, "The email could not be sent, so nothing was marked as answered. Please try again in a minute.")
+        return redirect("staff:inbox")
+    contact.reply = text
+    contact.replied_at = timezone.now()
+    contact.replied_by = request.user
+    contact.handled = True
+    contact.save(update_fields=["reply", "replied_at", "replied_by", "handled", "updated_at"])
+    audit(request, "contact.replied", f"message {pk}", contact.email)
+    messages.success(request, f"Reply sent to {contact.email}.")
+    return redirect("staff:inbox")
+
+
+@staff_required
+@require_POST
+def storefront_decide(request, pk):
+    """Approve or reject a shop-owner application. Approving opens their storefront and marks them as a verified seller."""
+    from merchants.models import MerchantApplication
+
+    application = get_object_or_404(MerchantApplication, pk=pk)
+    if application.status != MerchantApplication.Status.PENDING:
+        messages.error(request, "That application was already decided.")
+        return redirect("staff:inbox")
+    person = application.applicant
+    decision = request.POST.get("decision")
+    if decision == "approve":
+        application.approve(reviewer=request.user)
+        profile = person.profile
+        profile.seller_verified = True
+        profile.seller_verified_at = timezone.now()
+        profile.save(update_fields=["seller_verified", "seller_verified_at", "updated_at"])
+        audit(request, "storefront.approve", f"application {pk}", application.business_name)
+        emails.send_email(
+            person.email, "Your Choropia storefront is approved", "dispatch_notice",
+            {"name": person.first_name or "there", "headline": "Your storefront is approved",
+             "body": f"{application.business_name} is now a verified storefront on Choropia. You can post listings under it and buyers will see the verified badge.", "link": "/my-listings"},
+        )
+        messages.success(request, f"{application.business_name} approved and marked as a verified seller.")
+    elif decision == "reject":
+        reason = (request.POST.get("reason") or "").strip()[:300]
+        application.reject(reviewer=request.user, reason=reason)
+        audit(request, "storefront.reject", f"application {pk}", application.business_name)
+        emails.send_email(
+            person.email, "About your Choropia storefront application", "dispatch_notice",
+            {"name": person.first_name or "there", "headline": "We could not approve your storefront yet",
+             "body": (reason or "Your application was not approved this time.") + " You are welcome to apply again.", "link": "/merchants/apply"},
+        )
+        messages.success(request, "Application rejected and the applicant was told.")
+    else:
+        messages.error(request, "Choose approve or reject.")
     return redirect("staff:inbox")

@@ -4,16 +4,50 @@
 <div class="top"><div><h1>Inbox</h1><p class="sub">Messages from the Contact page, reports of listings, and the latest reviews. Each new one is also emailed to you straight away.</p></div></div>
 
 <div class="card" style="margin-bottom:14px">
+  <h2>Storefront applications ({{ applications_open|length }} waiting)</h2>
+  <table><tbody>
+    {% for a in applications_open %}
+    <tr>
+      <td><strong>{{ a.business_name }}</strong><div class="small">{{ a.applicant.get_full_name|default:a.applicant.email }} · {{ a.business_phone }} · {{ a.created_at|date:"j M, H:i" }}</div>
+          <div class="small">{{ a.business_address }}</div>
+          {% if a.business_description %}<div style="margin-top:6px;white-space:pre-wrap">{{ a.business_description }}</div>{% endif %}</td>
+      <td class="right">
+        <form method="post" action="{% url 'staff:storefront_decide' a.pk %}" style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;align-items:center">{% csrf_token %}
+          <input name="reason" placeholder="Reason, if rejecting" style="width:170px">
+          <button class="btn small" name="decision" value="approve" type="submit">Approve</button>
+          <button class="btn small ghost" name="decision" value="reject" type="submit">Reject</button>
+        </form>
+      </td>
+    </tr>
+    {% empty %}<tr><td class="empty">No applications waiting.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+
+<div class="card" style="margin-bottom:14px">
   <h2>Contact messages ({{ messages_open|length }} waiting)</h2>
   <table><tbody>
     {% for m in messages_open %}
     <tr>
       <td><strong>{{ m.name }}</strong> &lt;<a href="mailto:{{ m.email }}">{{ m.email }}</a>&gt;<div class="small">{{ m.get_topic_display }} · {{ m.created_at|date:"j M, H:i" }}{% if m.user %} · signed in{% endif %}</div>
-          <div style="white-space:pre-wrap;margin-top:6px">{{ m.message }}</div></td>
-      <td class="right"><form method="post" action="{% url 'staff:contact_handled' m.pk %}">{% csrf_token %}<button class="btn small ghost" type="submit">Done</button></form></td>
+          <div style="white-space:pre-wrap;margin-top:6px">{{ m.message }}</div>
+          <form method="post" action="{% url 'staff:contact_reply' m.pk %}" style="margin-top:10px">{% csrf_token %}
+            <textarea name="reply" rows="3" placeholder="Write your reply. It is emailed to {{ m.email }}." style="width:100%" required></textarea>
+            <div style="margin-top:6px;display:flex;gap:8px"><button class="btn small" type="submit">Send reply</button></div>
+          </form></td>
+      <td class="right"><form method="post" action="{% url 'staff:contact_handled' m.pk %}">{% csrf_token %}<button class="btn small ghost" type="submit">Done, no reply</button></form></td>
     </tr>
     {% empty %}<tr><td class="empty">Nothing waiting.</td></tr>{% endfor %}
   </tbody></table>
+  {% if messages_done %}
+  <h2 style="margin-top:18px">Recently answered</h2>
+  <table><tbody>
+    {% for m in messages_done %}
+    <tr><td><strong>{{ m.name }}</strong> &lt;{{ m.email }}&gt;<div class="small">{{ m.created_at|date:"j M, H:i" }}{% if m.replied_at %} · replied {{ m.replied_at|date:"j M, H:i" }}{% if m.replied_by %} by {{ m.replied_by.get_full_name|default:m.replied_by.email }}{% endif %}{% else %} · closed without a reply{% endif %}</div>
+        <div style="white-space:pre-wrap;margin-top:4px;color:var(--muted,#64748b)">{{ m.message }}</div>
+        {% if m.reply %}<div style="white-space:pre-wrap;margin-top:6px"><strong>Your reply:</strong> {{ m.reply }}</div>{% endif %}</td></tr>
+    {% endfor %}
+  </tbody></table>
+  {% endif %}
 </div>
 
 <div class="card" style="margin-bottom:14px">

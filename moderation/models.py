@@ -22,6 +22,10 @@ class ContactMessage(TimeStampedModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     handled = models.BooleanField(default=False)
+    # Our answer, sent from the staff Inbox by email.
+    reply = models.TextField(blank=True)
+    replied_at = models.DateTimeField(null=True, blank=True)
+    replied_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
 
     class Meta:
         ordering = ["-created_at"]
