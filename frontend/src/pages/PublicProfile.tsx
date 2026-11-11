@@ -1,9 +1,10 @@
 import { listingPath, chatPath } from "@/lib/links";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { BadgeCheck, MessageCircle, PackageOpen, UserRound } from "lucide-react";
+import { BadgeCheck, MessageCircle, PackageOpen, Star, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
+import { SellerRating } from "@/components/SellerRating";
 import { Avatar, ErrorState, Skeleton } from "@/components/ui";
 import { Button } from "@/components/Button";
 import { api, rows } from "@/lib/api";
@@ -17,9 +18,15 @@ export function PublicProfilePage() {
   const userId = Number(id);
   const navigate = useNavigate();
   const { loggedIn, user: signedInUser } = useAuth();
-  const [tab, setTab] = useState<"listings" | "about">("listings");
+  const [tab, setTab] = useState<"listings" | "reviews" | "about">("listings");
   const validUserId = Number.isSafeInteger(userId) && userId > 0;
   const profile = useQuery({ queryKey: ["public-profile", userId], queryFn: () => api.publicProfile(userId), enabled: validUserId });
+  const summary = useQuery({ queryKey: ["review-summary", userId], queryFn: () => api.reviewSummary(userId), enabled: validUserId, staleTime: 5 * 60_000 });
+  const reviews = useQuery({
+    queryKey: ["reviews", userId],
+    queryFn: async () => rows(await api.listReviewsFor(userId)),
+    enabled: validUserId && tab === "reviews" && !!summary.data?.eligible,
+  });
   const listings = useInfiniteQuery({
     queryKey: ["public-profile-listings", userId],
     initialPageParam: 1,
@@ -60,6 +67,7 @@ export function PublicProfilePage() {
             {user.verified && <BadgeCheck size={18} className="text-primary" aria-label="Verified seller" />}
           </h1>
           <p className="text-sm text-muted-foreground">@{user.username}</p>
+          <SellerRating userId={userId} className="mt-1" />
           {user.bio && <p className="mt-2 text-sm">{user.bio}</p>}
         </div>
         {signedInUser?.id !== user.id && (
@@ -78,6 +86,14 @@ export function PublicProfilePage() {
         </button>
         <button
           type="button"
+          onClick={() => setTab("reviews")}
+          aria-current={tab === "reviews" ? "page" : undefined}
+          className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold ${tab === "reviews" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+        >
+          <Star size={16} /> Reviews{summary.data?.eligible && summary.data.count > 0 ? ` (${summary.data.count})` : ""}
+        </button>
+        <button
+          type="button"
           onClick={() => setTab("about")}
           aria-current={tab === "about" ? "page" : undefined}
           className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold ${tab === "about" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}
@@ -86,7 +102,34 @@ export function PublicProfilePage() {
         </button>
       </nav>
 
-      {tab === "about" ? (
+      {tab === "reviews" ? (
+        <section className="panel p-5" aria-label={`Reviews of ${user.display_name}`}>
+          {summary.data && !summary.data.eligible && (
+            <p className="text-sm text-muted-foreground">Reviews appear once a seller has posted a few listings and completed a sale.</p>
+          )}
+          {summary.data?.eligible && (
+            <div className="mb-4 flex items-baseline gap-3">
+              <span className="font-display text-3xl font-bold">{summary.data.average ? summary.data.average.toFixed(1) : "-"}</span>
+              <span className="text-sm text-muted-foreground">
+                {summary.data.count} review{summary.data.count === 1 ? "" : "s"}
+              </span>
+            </div>
+          )}
+          {summary.data?.eligible && reviews.isSuccess && (reviews.data ?? []).length === 0 && <p className="text-sm text-muted-foreground">No reviews yet.</p>}
+          {(reviews.data ?? []).map((r) => (
+            <div key={r.id} className="border-t border-border py-3 text-sm first:border-0">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-primary">
+                  {"★".repeat(r.rating)}
+                  <span className="text-border">{"★".repeat(5 - r.rating)}</span>
+                </span>
+                <span className="text-xs text-muted-foreground">{r.reviewer_name}</span>
+              </div>
+              {r.comment && <p className="mt-1 text-muted-foreground">{r.comment}</p>}
+            </div>
+          ))}
+        </section>
+      ) : tab === "about" ? (
         <section className="panel space-y-5 p-5" aria-labelledby="about-heading">
           <h2 id="about-heading" className="font-display text-lg font-bold">About {user.display_name}</h2>
           <p className="text-sm text-muted-foreground">{user.bio || "This member hasn’t added a bio yet."}</p>
