@@ -31,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -181,7 +182,16 @@ fun MerchantProfileScreen(
                                 Text(merchant.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             if (session.user.value?.id != merchant.owner_id) {
-                                if (state.following) {
+                                // Right after following, the button stays blue with a tick for a moment, then goes back to white.
+                                var justFollowed by remember { mutableStateOf(false) }
+                                var firstLook by remember { mutableStateOf(true) }
+                                LaunchedEffect(state.following) {
+                                    if (firstLook) { firstLook = false; return@LaunchedEffect }
+                                    if (state.following) { justFollowed = true; kotlinx.coroutines.delay(2500); justFollowed = false } else justFollowed = false
+                                }
+                                if (state.following && justFollowed) {
+                                    PrimaryButton("Following ✓", { vm.toggleFollow(onNeedsLogin) })
+                                } else if (state.following) {
                                     SecondaryButton("Following", { vm.toggleFollow(onNeedsLogin) })
                                 } else {
                                     PrimaryButton("Follow storefront", { vm.toggleFollow(onNeedsLogin) })

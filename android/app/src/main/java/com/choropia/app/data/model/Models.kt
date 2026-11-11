@@ -253,6 +253,8 @@ data class Conversation(
     val seller: Int? = null,
     val other_party_name: String? = null,
     val other_party_avatar: String? = null,
+    val other_party_last_seen: String? = null,
+    val other_party_online: Boolean = false,
     val order: Int? = null,
     val orders: List<Int> = emptyList(),
     val last_message: Message? = null,

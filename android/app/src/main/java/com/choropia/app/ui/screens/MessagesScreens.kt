@@ -303,6 +303,7 @@ class ChatViewModel(
 
     /** Called on a timer by the screen; failures are silent (a flaky network shouldn't nag). */
     suspend fun poll() {
+        runCatching { repo.conversation(conversationId) }.onSuccess { c -> _state.update { it.copy(conversation = c) } }
         runCatching { repo.messages(conversationId) }.onSuccess { latest ->
             if (latest != server) {
                 server = latest
@@ -518,6 +519,14 @@ fun ChatScreen(
             Avatar(c?.other_party_name ?: "Member", c?.other_party_avatar, size = 40.dp)
             Column(Modifier.padding(start = 10.dp)) {
                 Text(c?.other_party_name ?: "Conversation", style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val status = if (c?.other_party_online == true) "online" else c?.other_party_last_seen?.let { "last seen " + shortDateTime(it) }
+                if (status != null) {
+                    Text(
+                        status,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (c?.other_party_online == true) androidx.compose.ui.graphics.Color(0xFF12A58A) else MaterialTheme.colorScheme.outline,
+                    )
+                }
                 if (!c?.listing_title.isNullOrBlank()) {
                     Text(
                         c?.listing_title.orEmpty(),
@@ -565,6 +574,7 @@ fun ChatScreen(
                         Bubble(
                             message,
                             mine,
+                            state.conversation?.other_party_last_seen,
                             { draft = it },
                             onOpenListing,
                             offerActions,
@@ -745,6 +755,7 @@ private fun VoiceNote(url: String?, durationSeconds: Int?, tint: androidx.compos
 private fun Bubble(
     message: Message,
     mine: Boolean,
+    otherLastSeen: String?,
     onQuickReply: (String) -> Unit,
     onOpenListing: (Int) -> Unit,
     offerActions: com.choropia.app.ui.offers.OfferCardActions,
@@ -810,12 +821,23 @@ private fun Bubble(
                     )
                 }
             }
-            Text(
-                if (pendingSend) "Sending…" else shortDateTime(message.created_at),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-            )
+            val seen = message.read_at != null
+            val delivered = !otherLastSeen.isNullOrBlank() && !message.created_at.isNullOrBlank() && otherLastSeen >= message.created_at
+            val ticks = if (!mine || message.is_deleted || message.type != "text" || pendingSend) "" else if (seen || delivered) "  ✓✓" else "  ✓"
+            Row(Modifier.padding(horizontal = 6.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    if (pendingSend) "Sending…" else shortDateTime(message.created_at),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline,
+                )
+                if (ticks.isNotEmpty()) {
+                    Text(
+                        ticks,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (seen) androidx.compose.ui.graphics.Color(0xFF0EA5E9) else MaterialTheme.colorScheme.outline,
+                    )
+                }
+            }
         }
         // WhatsApp-style options on any message: Copy text for everyone, Delete for everyone on your own.
         if (message.type == "text" && !message.is_deleted && !pendingSend && (message.body.isNotBlank() || mine)) {
