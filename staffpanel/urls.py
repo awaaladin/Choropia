@@ -16,6 +16,7 @@ urlpatterns = [
     path("payouts/<int:pk>/retry/", views.payout_retry, name="payout_retry"),
     path("money/", views.money, name="money"),
     path("money/payouts.csv", views.payouts_csv, name="payouts_csv"),
+    path("analytics/", views.analytics, name="analytics"),
     path("deals/", views.deals, name="deals"),
     path("sellers/", views.sellers, name="sellers"),
     path("sellers/add/", views.seller_add, name="seller_add"),

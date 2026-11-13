@@ -255,6 +255,7 @@ REST_FRAMEWORK = {
         "handover-code": "30/hour",
         "pin": "20/hour",
         "offers": "60/hour",
+        "analytics": "90/min",
     },
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }

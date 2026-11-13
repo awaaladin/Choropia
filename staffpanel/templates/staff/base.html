@@ -5,6 +5,7 @@
   <aside class="side">
     <div class="brand"><img src="/logo.png" alt="">Choropia</div>
     <a class="nav {% if nav == 'dashboard' %}on{% endif %}" href="{% url 'staff:dashboard' %}">Overview</a>
+    <a class="nav {% if nav == 'analytics' %}on{% endif %}" href="{% url 'staff:analytics' %}">Analytics</a>
     <a class="nav {% if nav == 'deals' %}on{% endif %}" href="{% url 'staff:deals' %}">Deals</a>
     <a class="nav {% if nav == 'payouts' %}on{% endif %}" href="{% url 'staff:payout_list' %}">Payouts</a>
     <a class="nav {% if nav == 'money' %}on{% endif %}" href="{% url 'staff:money' %}">Money</a>

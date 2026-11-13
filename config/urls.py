@@ -23,6 +23,7 @@ import reviews.urls
 import social.urls
 import legal.views
 import staffpanel.urls
+from staffpanel.collect import CollectView
 from common import app_download
 from payments.return_page import payment_return
 from payments.webhook_router import PaystackRouterView
@@ -50,6 +51,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # The branded staff panel (money, disputes, drivers, people). The Django admin above stays for deep edits.
     path("staff/", include("staffpanel.urls")),
+    path("api/v1/analytics/hit/", CollectView.as_view(), name="analytics-hit"),
     path("api/v1/", include(api_v1_patterns)),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

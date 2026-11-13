@@ -872,3 +872,6 @@ def report_detail(request, pk):
     target = report.target
     seller = getattr(target, "owner", None)
     return render(request, "staff/report_detail.html", {"nav": "inbox", "r": report, "target": target, "seller": seller})
+
+
+from .analytics_view import analytics  # noqa: E402,F401  (the Analytics page lives in its own file)

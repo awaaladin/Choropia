@@ -65,3 +65,18 @@ class KeyBackup(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class PageView(models.Model):
+    """One page the website showed to someone. No IP address and no account is stored: a random id kept in the visitor's own
+    browser tells repeat visitors apart, and the staff Analytics page counts from these rows."""
+
+    path = models.CharField(max_length=200, db_index=True)
+    visitor = models.CharField(max_length=40, db_index=True)
+    referrer = models.CharField(max_length=120, blank=True)
+    device = models.CharField(max_length=10, blank=True)  # phone, tablet, desktop
+    country = models.CharField(max_length=2, blank=True)
+    at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-at"]

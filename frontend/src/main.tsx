@@ -3,10 +3,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
 import { AppBoot } from "@/components/AppBoot";
+import { startAnalytics } from "@/lib/analytics";
 import { AuthProvider } from "@/lib/auth";
 import { PrefsProvider } from "@/lib/prefs";
 import { router } from "./router";
 import "./styles.css";
+
+startAnalytics(router);
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
