@@ -32,3 +32,12 @@ class AnalyticsTests(TestCase):
             self.assertEqual(page.status_code, 200)
         self.assertContains(page, "/feed")
         self.assertContains(page, "<svg")
+
+
+class RefreshTests(TestCase):
+    def test_refreshing_the_same_page_is_not_counted_twice(self):
+        body = {"path": "/feed", "vid": "abcdef123456", "w": 390}
+        for _ in range(3):
+            self.client.post("/api/v1/analytics/hit/", body, content_type="application/json", **UA)
+        self.client.post("/api/v1/analytics/hit/", {**body, "path": "/marketplace"}, content_type="application/json", **UA)
+        self.assertEqual(PageView.objects.count(), 2)

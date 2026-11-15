@@ -25,24 +25,28 @@
 .range a.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 </style>
 
-<div class="top"><div><h1>Analytics</h1><p class="sub">Real visits to the Choropia website, counted by the site itself. No IP addresses or names are stored.{% if counting_since %} Counting since {{ counting_since|date:"j M Y, H:i" }}.{% endif %}</p></div>
+<div id="analytics-live">
+<div class="top"><div><h1>Analytics</h1><p class="sub">Real visits to the Choropia website. Logged-out visitors count too. No IP addresses or names are stored.{% if counting_since %} Counting since {{ counting_since|date:"j M Y, H:i" }}.{% endif %}</p>
+  <p class="small"><span class="live-dot"></span><span id="stamp">Live: updates by itself every 10 seconds</span></p></div>
   <div class="range"><a class="{% if days == 7 %}on{% endif %}" href="?days=7">7 days</a><a class="{% if days == 30 %}on{% endif %}" href="?days=30">30 days</a><a class="{% if days == 90 %}on{% endif %}" href="?days=90">90 days</a></div></div>
 
 <div class="stat-row">
-  <div class="stat"><small>Online now</small><strong><span class="live-dot"></span>{{ live }}</strong><span>active in the last 5 minutes</span></div>
-  <div class="stat"><small>Visitors today</small><strong>{{ today_visitors }}</strong><span>different people</span></div>
-  <div class="stat"><small>Visitors, {{ days }} days</small><strong>{{ visitors }}</strong><span>{{ returning_pct }}% came back on another day</span></div>
-  <div class="stat"><small>Page views</small><strong>{{ views }}</strong><span>{{ per_visitor }} pages per visitor</span></div>
-  <div class="stat"><small>New accounts</small><strong>{{ signups }}</strong><span>signed up in {{ days }} days</span></div>
+  <div class="stat"><small>On the site now</small><strong>{{ live }}</strong><span>people who opened a page in the last 5 minutes</span></div>
+  <div class="stat"><small>People today</small><strong>{{ today_visitors }}</strong><span>different people who visited today. Refreshing does not add to this.</span></div>
+  <div class="stat"><small>People, last {{ days }} days</small><strong>{{ visitors }}</strong><span>different people (browsers) who visited. Each person is counted once, however often they come.</span></div>
+  <div class="stat"><small>Pages opened</small><strong>{{ views }}</strong><span>pages they looked at, about {{ per_visitor }} each. The same page opened again within 30 minutes is not counted twice.</span></div>
+  <div class="stat"><small>New accounts</small><strong>{{ signups }}</strong><span>people who created an account in the last {{ days }} days</span></div>
 </div>
+<p class="small">"A person" means one phone or computer browser. If someone uses two devices they show as two people, and a person who clears their browser data shows as new.</p>
 
 {% if not has_data %}
 <div class="empty-state"><strong>No visits recorded yet</strong>Counting has just started. Open the website in another tab, then refresh this page to see the first numbers.</div>
 {% endif %}
 
 <div class="card chart">
-  <h2>Visitors and page views, per day</h2>
-  <div class="legend">{% for l in chart.lines %}<span><i style="background:{{ l.color }}"></i>{{ l.name }}</span>{% endfor %}</div>
+  <h2>People and pages opened, day by day</h2>
+  <p class="small">Each dot is one day. Blue = how many different people visited that day. Green = how many pages they opened in total. Hover a dot for the exact number.</p>
+  <div class="legend">{% for l in chart.lines %}<span><i style="background:{{ l.color }}"></i>{% if l.name == "Visitors" %}People{% else %}Pages opened{% endif %}</span>{% endfor %}</div>
   <svg viewBox="0 0 {{ chart.width }} {{ chart.height }}" role="img" aria-label="Visitors and page views per day">
     {% for g in chart.grid %}<line x1="{{ chart.left }}" x2="{{ chart.right }}" y1="{{ g.y }}" y2="{{ g.y }}" stroke="currentColor" stroke-opacity=".12"/><text x="32" y="{{ g.y }}" text-anchor="end" dominant-baseline="middle">{{ g.label }}</text>{% endfor %}
     {% for t in chart.ticks %}<text x="{{ t.x }}" y="{{ chart.height }}" dy="-6" text-anchor="middle">{{ t.label }}</text>{% endfor %}
@@ -52,7 +56,8 @@
 
 <div class="grid2">
   <div class="card chart">
-    <h2>New accounts, per day</h2>
+    <h2>New accounts, day by day</h2>
+    <p class="small">How many people created an account each day.</p>
     <svg viewBox="0 0 {{ signup_chart.width }} {{ signup_chart.height }}" role="img" aria-label="New accounts per day">
       {% for g in signup_chart.grid %}<line x1="{{ signup_chart.left }}" x2="{{ signup_chart.right }}" y1="{{ g.y }}" y2="{{ g.y }}" stroke="currentColor" stroke-opacity=".12"/><text x="32" y="{{ g.y }}" text-anchor="end" dominant-baseline="middle">{{ g.label }}</text>{% endfor %}
       {% for t in signup_chart.ticks %}<text x="{{ t.x }}" y="{{ signup_chart.height }}" dy="-6" text-anchor="middle">{{ t.label }}</text>{% endfor %}
@@ -61,7 +66,7 @@
   </div>
   <div class="card">
     <h2>Last 24 hours</h2>
-    <p class="small">Page views per hour (busiest hour: {{ hour_peak }}).</p>
+    <p class="small">Pages opened in each hour. The tallest bar is the busiest hour ({{ hour_peak }} pages). Hover a bar for the hour.</p>
     <div class="hours">{% for h in hour_rows %}<div style="height:{{ h.pct }}%" title="{{ h.label }}: {{ h.n }} views"></div>{% endfor %}</div>
     <div class="hours-x"><span>{{ hour_rows.0.label }}</span><span>{{ hour_rows.12.label }}</span><span>now</span></div>
   </div>
@@ -82,4 +87,22 @@
     {% for p in countries %}<div class="row"><span class="name">{{ p.name }}</span><span class="small">{{ p.n }} views &middot; {{ p.people }} people</span><div class="track"><div class="fill" style="width:{{ p.pct }}%"></div></div></div>{% empty %}<p class="small">Nothing yet.</p>{% endfor %}
   </div>
 </div>
+</div>
+<script>
+(function () {
+  function stamp() { var el = document.getElementById("stamp"); if (el) el.textContent = "Live: updated " + new Date().toLocaleTimeString() + ", refreshes by itself every 10 seconds"; }
+  async function refresh() {
+    if (document.hidden) return;
+    try {
+      var r = await fetch(location.href, { credentials: "same-origin", cache: "no-store" });
+      if (!r.ok) return;
+      var doc = new DOMParser().parseFromString(await r.text(), "text/html");
+      var fresh = doc.getElementById("analytics-live"), cur = document.getElementById("analytics-live");
+      if (fresh && cur) { cur.innerHTML = fresh.innerHTML; stamp(); }
+    } catch (e) { /* offline: try again next time */ }
+  }
+  setInterval(refresh, 10000);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) refresh(); });
+})();
+</script>
 {% endblock %}

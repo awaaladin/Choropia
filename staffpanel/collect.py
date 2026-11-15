@@ -1,8 +1,10 @@
 """Receives a page view from the website. Anonymous, cheap, and never able to break a page."""
 import re
+from datetime import timedelta
 from urllib.parse import urlparse
 
 from django.conf import settings
+from django.utils import timezone
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -40,6 +42,10 @@ class CollectView(APIView):
         if not path.startswith("/") or path.startswith("/staff") or not VISITOR.match(visitor) or BOT.search(agent):
             return Response(status=204)
         try:
+            clean = path.split("?")[0].split("#")[0]
+            # Refreshing, or going back to the same page, is the same person: not counted again for 30 minutes.
+            if PageView.objects.filter(visitor=visitor, path=clean, at__gte=timezone.now() - timedelta(minutes=30)).exists():
+                return Response(status=204)
             PageView.objects.create(
                 path=path.split("?")[0].split("#")[0],
                 visitor=visitor,

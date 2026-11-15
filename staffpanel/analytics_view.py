@@ -40,7 +40,12 @@ def line_chart(labels, series, width=760, height=240):
 
     grid = [{"y": round(y(peak * k / 4), 1), "label": int(peak * k / 4)} for k in range(5)]
     step = max(1, len(labels) // 6)
-    ticks = [{"x": round(x(i), 1), "label": labels[i]} for i in range(0, len(labels), step)]
+    picks = list(range(0, len(labels), step))
+    if picks and len(labels) - 1 - picks[-1] < step / 2:
+        picks[-1] = len(labels) - 1  # always label the newest day
+    elif picks and picks[-1] != len(labels) - 1:
+        picks.append(len(labels) - 1)
+    ticks = [{"x": round(x(i), 1), "label": labels[i]} for i in picks]
     lines = []
     for s in series:
         points = [(round(x(i), 1), round(y(v), 1)) for i, v in enumerate(s["values"])]
